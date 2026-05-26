@@ -1,0 +1,179 @@
+# =========================================================
+# NAB Preg AI — Full Stack AI Healthcare Platform
+# =========================================================
+
+# =========================================================
+# NODE / NEXT.JS
+# =========================================================
+node_modules/
+.next/
+out/
+dist/
+build/
+
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Next.js cache
+.next/cache/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vercel
+.vercel/
+
+# Build cache
+*.tsbuildinfo
+
+# =========================================================
+# ENVIRONMENT FILES
+# =========================================================
+.env
+.env.local
+.env.development.local
+.env.production.local
+.env.test.local
+
+frontend/.env
+backend/.env
+
+*.env
+
+# =========================================================
+# PYTHON
+# =========================================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Python packages
+*.egg
+*.egg-info/
+.eggs/
+
+# Python cache/tools
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+backend/.venv/
+backend/__pycache__/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# UV
+.python-version
+
+# =========================================================
+# DATABASE
+# =========================================================
+*.db
+*.sqlite
+*.sqlite3
+
+# PostgreSQL dumps
+*.sql
+
+# Redis dump
+dump.rdb
+
+# =========================================================
+# AI / ML
+# =========================================================
+
+# Model files
+*.pkl
+*.joblib
+*.onnx
+*.h5
+*.pt
+*.pth
+*.ckpt
+
+# Large datasets
+datasets/raw/
+datasets/processed/
+datasets/temp/
+
+# Vector databases
+chroma/
+faiss_index/
+
+# ML experiment tracking
+mlruns/
+
+# =========================================================
+# OCR / FILE UPLOADS
+# =========================================================
+uploads/
+temp/
+tmp/
+
+# OCR extracted outputs
+ocr_output/
+
+# =========================================================
+# DOCKER
+# =========================================================
+docker-data/
+*.tar
+
+# =========================================================
+# LOGS
+# =========================================================
+logs/
+*.log
+
+# =========================================================
+# TESTS / COVERAGE
+# =========================================================
+coverage/
+.cache/
+
+# =========================================================
+# IDE / EDITOR
+# =========================================================
+.vscode/
+.idea/
+
+*.swp
+*.swo
+
+# Cursor / AI Editors
+.cursor/
+.cursorrules.bak
+
+# =========================================================
+# OS FILES
+# =========================================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# =========================================================
+# MONITORING / ANALYTICS
+# =========================================================
+.monitoring/
+grafana-data/
+
+# =========================================================
+# MISC
+# =========================================================
+*.bak
+*.tmp
+*.temp
