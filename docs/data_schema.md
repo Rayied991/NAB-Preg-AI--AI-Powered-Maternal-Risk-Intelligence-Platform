@@ -1,109 +1,147 @@
--- Enable the vector extension
-CREATE EXTENSION IF NOT EXISTS vector;
--- USERS TABLE
-CREATE TABLE users (
-    id UUID PRIMARY KEY,
-    full_name VARCHAR(100),
-    email VARCHAR(120) UNIQUE,
-    password_hash TEXT,
-    role VARCHAR(50),
-    phone VARCHAR(20),
-    village VARCHAR(100),
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
-    is_deleted BOOLEAN DEFAULT FALSE
-);
--- PATIENTS TABLE
-CREATE TABLE patients (
-    id UUID PRIMARY KEY,
-    patient_code VARCHAR(50) UNIQUE,
-    full_name VARCHAR(100),
-    age INT,
-    trimester INT,
-    pregnancy_week INT,
-    village VARCHAR(100),
-    latitude FLOAT,
-    longitude FLOAT,
-    blood_group VARCHAR(10),
-    contact_number VARCHAR(20),
-    emergency_contact VARCHAR(20),
-    created_by UUID REFERENCES users(id),
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
-    is_deleted BOOLEAN DEFAULT FALSE
-);
--- HEALTH RECORDS TABLE
-CREATE TABLE health_records (
-    id UUID PRIMARY KEY,
-    patient_id UUID REFERENCES patients(id),
-    systolic_bp FLOAT,
-    diastolic_bp FLOAT,
-    hemoglobin FLOAT,
-    blood_sugar FLOAT,
-    heart_rate FLOAT,
-    body_temperature FLOAT,
-    weight FLOAT,
-    symptoms TEXT,
-    source_type VARCHAR(50),
-    recorded_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
-);
--- PREDICTIONS TABLE
-CREATE TABLE predictions (
-    id UUID PRIMARY KEY,
-    patient_id UUID REFERENCES patients(id),
-    anemia_risk VARCHAR(20),
-    hypertension_risk VARCHAR(20),
-    overall_risk VARCHAR(20),
-    confidence_score FLOAT,
-    model_version VARCHAR(50),
-    ai_summary TEXT,
-    recommendation TEXT,
-    predicted_at TIMESTAMP DEFAULT NOW()
-);
--- ALERTS TABLE
-CREATE TABLE alerts (
-    id UUID PRIMARY KEY,
-    patient_id UUID REFERENCES patients(id),
-    severity VARCHAR(20),
-    alert_message TEXT,
-    status VARCHAR(20),
-    resolved_by UUID REFERENCES users(id),
-    triggered_at TIMESTAMP DEFAULT NOW()
-);
--- OCR REPORTS TABLE
-CREATE TABLE ocr_reports (
-    id UUID PRIMARY KEY,
-    patient_id UUID REFERENCES patients(id),
-    report_url TEXT,
-    extracted_text TEXT,
-    parsed_json JSONB,
-    uploaded_at TIMESTAMP DEFAULT NOW()
-);
--- NUTRITION RECOMMENDATIONS TABLE
-CREATE TABLE nutrition_recommendations (
-    id UUID PRIMARY KEY,
-    patient_id UUID REFERENCES patients(id),
-    recommendation TEXT,
-    language VARCHAR(20),
-    generated_at TIMESTAMP DEFAULT NOW()
-);
--- VILLAGE ANALYTICS TABLE
-CREATE TABLE village_analytics (
-    id UUID PRIMARY KEY,
-    village_name VARCHAR(100),
-    high_risk_cases INT,
-    medium_risk_cases INT,
-    low_risk_cases INT,
-    anemia_cases INT,
-    hypertension_cases INT,
-    updated_at TIMESTAMP DEFAULT NOW()
-);
--- VECTOR DATABASE TABLE
-CREATE TABLE healthcare_embeddings (
-    id UUID PRIMARY KEY,
-    content TEXT,
-    source VARCHAR(255),
-    embedding VECTOR(1536),
-    created_at TIMESTAMP DEFAULT NOW()
-);
+## Table `alerts`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `patient_id` | `uuid` |  Nullable |
+| `severity` | `varchar` |  Nullable |
+| `alert_message` | `text` |  Nullable |
+| `status` | `varchar` |  Nullable |
+| `resolved_by` | `uuid` |  Nullable |
+| `triggered_at` | `timestamp` |  Nullable |
+
+## Table `health_records`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `patient_id` | `uuid` |  Nullable |
+| `systolic_bp` | `float8` |  Nullable |
+| `diastolic_bp` | `float8` |  Nullable |
+| `hemoglobin` | `float8` |  Nullable |
+| `blood_sugar` | `float8` |  Nullable |
+| `heart_rate` | `float8` |  Nullable |
+| `body_temperature` | `float8` |  Nullable |
+| `weight` | `float8` |  Nullable |
+| `symptoms` | `text` |  Nullable |
+| `source_type` | `varchar` |  Nullable |
+| `recorded_at` | `timestamp` |  Nullable |
+| `updated_at` | `timestamp` |  Nullable |
+| `bmi` | `float8` |  Nullable |
+| `meals_per_day` | `int4` |  Nullable |
+| `veg_freq` | `int4` |  Nullable |
+
+## Table `healthcare_embeddings`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `content` | `text` |  Nullable |
+| `source` | `varchar` |  Nullable |
+| `embedding` | `vector` |  Nullable |
+| `created_at` | `timestamp` |  Nullable |
+
+## Table `nutrition_recommendations`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `patient_id` | `uuid` |  Nullable |
+| `recommendation` | `text` |  Nullable |
+| `language` | `varchar` |  Nullable |
+| `generated_at` | `timestamp` |  Nullable |
+
+## Table `ocr_reports`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `patient_id` | `uuid` |  Nullable |
+| `report_url` | `text` |  Nullable |
+| `extracted_text` | `text` |  Nullable |
+| `parsed_json` | `jsonb` |  Nullable |
+| `uploaded_at` | `timestamp` |  Nullable |
+
+## Table `patients`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `patient_code` | `varchar` |  Nullable Unique |
+| `full_name` | `varchar` |  Nullable |
+| `age` | `int4` |  Nullable |
+| `trimester` | `int4` |  Nullable |
+| `pregnancy_week` | `int4` |  Nullable |
+| `village` | `varchar` |  Nullable |
+| `latitude` | `float8` |  Nullable |
+| `longitude` | `float8` |  Nullable |
+| `blood_group` | `varchar` |  Nullable |
+| `contact_number` | `varchar` |  Nullable |
+| `emergency_contact` | `varchar` |  Nullable |
+| `created_by` | `uuid` |  Nullable |
+| `created_at` | `timestamp` |  Nullable |
+| `updated_at` | `timestamp` |  Nullable |
+| `is_deleted` | `bool` |  Nullable |
+| `height_cm` | `float8` |  Nullable |
+
+## Table `predictions`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `patient_id` | `uuid` |  Nullable |
+| `anemia_risk` | `varchar` |  Nullable |
+| `hypertension_risk` | `varchar` |  Nullable |
+| `overall_risk` | `varchar` |  Nullable |
+| `confidence_score` | `float8` |  Nullable |
+| `model_version` | `varchar` |  Nullable |
+| `ai_summary` | `text` |  Nullable |
+| `recommendation` | `text` |  Nullable |
+| `predicted_at` | `timestamp` |  Nullable |
+
+## Table `users`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `full_name` | `varchar` |  Nullable |
+| `email` | `varchar` |  Nullable Unique |
+| `password_hash` | `text` |  Nullable |
+| `role` | `varchar` |  Nullable |
+| `phone` | `varchar` |  Nullable |
+| `village` | `varchar` |  Nullable |
+| `created_at` | `timestamp` |  Nullable |
+| `updated_at` | `timestamp` |  Nullable |
+| `is_deleted` | `bool` |  Nullable |
+
+## Table `village_analytics`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `village_name` | `varchar` |  Nullable |
+| `high_risk_cases` | `int4` |  Nullable |
+| `medium_risk_cases` | `int4` |  Nullable |
+| `low_risk_cases` | `int4` |  Nullable |
+| `anemia_cases` | `int4` |  Nullable |
+| `hypertension_cases` | `int4` |  Nullable |
+| `updated_at` | `timestamp` |  Nullable |
+
