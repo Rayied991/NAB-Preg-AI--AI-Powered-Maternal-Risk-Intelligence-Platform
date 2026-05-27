@@ -184,7 +184,7 @@ sequenceDiagram
   The `patients` table stores `height_cm` persistently.
 * **Dynamic Calculations & Inputs:**
   When a midwife or patient uploads new metrics (e.g., weight, systolic BP, diastolic BP) to the `health_records` table, the backend calculates the BMI dynamically:
-  $$\text{BMI} = \frac{\text{weight}}{\left(\frac{\text{height\_cm}}{100}\right)^2}$$
+  **BMI = weight / (height_cm / 100)²**
   The BMI, along with `meals_per_day` and `veg_freq`, is written directly into `health_records`.
 * **Output Matrix Mapping:**
   Following model inference, the predictions map back to the database tables:
