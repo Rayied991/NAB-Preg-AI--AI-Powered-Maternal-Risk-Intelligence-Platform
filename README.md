@@ -23,6 +23,28 @@ Pregnant women in rural and underserved communities often lack access to continu
 
 ---
 
+
+## AI Inference Pipeline
+ 
+```
+Patient Input
+      ↓
+Preprocessing
+      ↓
+XGBoost MultiOutput Model
+      ↓
+Risk Predictions
+      ↓
+Rule Engine
+      ↓
+Reasons + Recommendations
+      ↓
+Final AI Response
+```
+ 
+---
+
+
 ## Tech Stack
 
 | Layer | Technologies |
@@ -63,8 +85,6 @@ nab-preg-ai/
 │       ├── patients/
 │       └── upload/
 │
-├── infra/                # Docker Compose, Nginx, Redis, Postgres, Airflow, monitoring
-├── shared/               # Shared TypeScript types and constants
 ├── tests/                # API, AI, OCR, frontend, and integration tests
 ├── scripts/              # Seed data, load embeddings, bootstrap
 └── docs/                 # Architecture, API contracts, data schema, deployment guides
@@ -123,9 +143,22 @@ npm run dev
 
 The dashboard will be available at `http://localhost:3000`.
 
-
-
 ---
+
+### 5. AI Engine Setup
+ 
+```bash
+cd ai_engine
+ 
+# Create and activate virtual environment
+uv venv
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # macOS/Linux
+ 
+# Install dependencies
+uv pip install -r requirements.txt
+```
+
 
 ## AI Agents
 
@@ -180,6 +213,13 @@ pytest tests/integration/
 
 This project is licensed under the MIT License. See [`LICENSE`](LICENSE) for details.
 
+---
+
+## Acknowledgements
+ 
+- **WHO & UNICEF** — for publicly available maternal health guidelines and datasets that informed our risk models
+- **Open-source community** — [XGBoost](https://github.com/dmlc/xgboost), [FastAPI](https://fastapi.tiangolo.com/), [Next.js](https://nextjs.org/), and [LangChain](https://github.com/langchain-ai/langchain) for the foundational tools powering this platform
+- **Healthcare workers in rural communities** — whose challenges inspired this project and whose feedback continues to shape it
 ---
 
 *Built to reduce preventable maternal deaths through accessible AI-powered healthcare.*
