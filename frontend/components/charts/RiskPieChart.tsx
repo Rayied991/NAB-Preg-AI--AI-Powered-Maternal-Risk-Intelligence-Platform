@@ -1,5 +1,16 @@
 "use client";
 
+/**
+ * RiskPieChart Component
+ * 
+ * Group Project Documentation:
+ * Refactored chart container and styles to support theme switching:
+ * 1. Card container changed from static `bg-zinc-900 border-zinc-800` to `bg-card border-border-custom shadow-premium`.
+ * 2. Swapped text header from `text-white` to `text-text-primary`.
+ * 3. Styled the Recharts `<Tooltip>` element contentStyle dynamically using custom CSS properties
+ *    (`var(--bg-card)`, `var(--border-color)`, `var(--text-main)`) so that it automatically updates colors in light/dark modes.
+ */
+
 import {
     Cell,
     Pie,
@@ -22,9 +33,9 @@ const COLORS = [
 
 export default function RiskPieChart() {
   return (
-    <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
+    <div className="bg-card rounded-2xl p-6 border border-border-custom shadow-premium transition-all duration-300">
 
-      <h2 className="text-xl font-semibold text-white mb-6">
+      <h2 className="text-xl font-semibold text-text-primary mb-6 transition-colors duration-300">
         Maternal Risk Distribution
       </h2>
 
@@ -48,7 +59,17 @@ export default function RiskPieChart() {
               ))}
             </Pie>
 
-            <Tooltip />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "var(--bg-card)",
+                borderColor: "var(--border-color)",
+                borderRadius: "12px",
+                color: "var(--text-main)",
+              }}
+              itemStyle={{
+                color: "var(--text-main)",
+              }}
+            />
 
           </PieChart>
         </ResponsiveContainer>

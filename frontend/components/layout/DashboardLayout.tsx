@@ -7,11 +7,19 @@ interface DashboardLayoutProps {
   children: ReactNode;
 }
 
+/**
+ * DashboardLayout Component
+ * 
+ * Group Project Documentation:
+ * Refactored static dark theme styles (`bg-black`, `text-white`) to semantic theme-aware Tailwind classes:
+ * - `bg-background` matches the active background (light grey for light mode / pure black for dark mode).
+ * - `text-text-primary` maps to the high-contrast main typography color.
+ */
 const DashboardLayout = ({
   children,
 }: DashboardLayoutProps) => {
   return (
-    <div className="flex min-h-screen bg-black text-white">
+    <div className="flex min-h-screen bg-background text-text-primary">
 
       {/* Sidebar */}
       <Sidebar />

@@ -2,6 +2,18 @@ import RiskCard from "@/components/cards/RiskCard";
 import RiskPieChart from "@/components/charts/RiskPieChart";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 
+/**
+ * DashboardPage Component
+ * 
+ * Group Project Documentation:
+ * Refactored layout colors to use semantic theme properties:
+ * 1. Swapped panels (`Recent Alerts`, `AI Insights`) from `bg-zinc-900 border-zinc-800` to `bg-card border-border-custom shadow-premium`.
+ * 2. Alert boxes changed from `bg-zinc-950` to `bg-panel border border-border-custom` for high contrast in light mode.
+ * 3. Standard text mapped: headers to `text-text-primary`, descriptions/metadata to `text-text-muted`, insights to `text-text-secondary`.
+ * 4. Alert levels customized with light/dark variants:
+ *    - High risk: `text-red-600 dark:text-red-400`
+ *    - Medium risk: `text-amber-600 dark:text-yellow-300`
+ */
 export default function DashboardPage() {
   return (
     <DashboardLayout>
@@ -32,30 +44,30 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
 
   {/* Recent Alerts */}
-  <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+  <div className="bg-card border border-border-custom rounded-2xl p-6 shadow-premium transition-colors duration-300">
 
-    <h2 className="text-xl font-semibold text-white mb-4">
+    <h2 className="text-xl font-semibold text-text-primary mb-4 transition-colors duration-300">
       Recent Alerts
     </h2>
 
     <div className="space-y-4">
 
-      <div className="p-4 bg-zinc-950 rounded-xl">
-        <p className="text-red-400 font-medium">
+      <div className="p-4 bg-panel border border-border-custom rounded-xl transition-all duration-300">
+        <p className="text-red-600 dark:text-red-400 font-semibold transition-colors duration-300">
           High BP Detected
         </p>
 
-        <p className="text-zinc-400 text-sm mt-1">
+        <p className="text-text-muted text-sm mt-1 transition-colors duration-300">
           Ayesha Rahman • Dhaka Rural
         </p>
       </div>
 
-      <div className="p-4 bg-zinc-950 rounded-xl">
-        <p className="text-yellow-300 font-medium">
+      <div className="p-4 bg-panel border border-border-custom rounded-xl transition-all duration-300">
+        <p className="text-amber-600 dark:text-yellow-300 font-semibold transition-colors duration-300">
           Low Hemoglobin
         </p>
 
-        <p className="text-zinc-400 text-sm mt-1">
+        <p className="text-text-muted text-sm mt-1 transition-colors duration-300">
           Fatema Noor • Khulna
         </p>
       </div>
@@ -64,13 +76,13 @@ export default function DashboardPage() {
   </div>
 
   {/* AI Summary */}
-  <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+  <div className="bg-card border border-border-custom rounded-2xl p-6 shadow-premium transition-colors duration-300">
 
-    <h2 className="text-xl font-semibold text-white mb-4">
+    <h2 className="text-xl font-semibold text-text-primary mb-4 transition-colors duration-300">
       AI Insights
     </h2>
 
-    <div className="space-y-4 text-zinc-300">
+    <div className="space-y-4 text-text-secondary transition-colors duration-300">
 
       <p>
         • 18% increase in hypertension risk cases this week.

@@ -1,5 +1,17 @@
 "use client";
 
+/**
+ * Sidebar Component
+ * 
+ * Group Project Documentation:
+ * Converted hardcoded color schemes to support dynamic theme properties:
+ * - Aside panel swapped from `bg-zinc-950` to `bg-panel` and `border-zinc-800` to `border-border-custom`.
+ * - Sidebar branding text mapped to `text-text-primary` and subtitle to `text-text-muted`.
+ * - Navigation links now transition dynamically:
+ *   - Active links: `bg-item-active text-text-primary`
+ *   - Inactive links: `text-text-secondary hover:bg-item-hover hover:text-text-primary`
+ */
+
 import {
     BarChart3,
     Bell,
@@ -42,15 +54,15 @@ const menuItems = [
 export default function Sidebar() {
     const pathname = usePathname();
   return (
-    <aside className="w-64 min-h-screen bg-zinc-950 border-r border-zinc-800 p-6">
+    <aside className="w-64 min-h-screen bg-panel border-r border-border-custom p-6 transition-colors duration-300">
 
       {/* Logo */}
       <div className="mb-10">
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-2xl font-bold text-text-primary transition-colors duration-300">
           NAB Preg AI
         </h1>
 
-        <p className="text-sm text-zinc-400 mt-1">
+        <p className="text-sm text-text-muted mt-1 transition-colors duration-300">
           Maternal Risk Platform
         </p>
       </div>
@@ -68,16 +80,17 @@ export default function Sidebar() {
                 flex items-center gap-3
                 p-3 rounded-xl
                 transition-all
+                duration-300
                 ${
                     pathname === item.href
-                    ? "bg-zinc-800 text-white"
-                    : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                    ? "bg-item-active text-text-primary font-semibold shadow-sm"
+                    : "text-text-secondary hover:bg-item-hover hover:text-text-primary"
                 }
                 `}
             >
-              <Icon size={20} />
+              <Icon size={20} className="transition-colors duration-300" />
 
-              <span>{item.name}</span>
+              <span className="transition-colors duration-300">{item.name}</span>
             </Link>
           );
         })}

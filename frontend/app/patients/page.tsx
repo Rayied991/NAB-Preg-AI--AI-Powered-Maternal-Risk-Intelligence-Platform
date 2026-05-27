@@ -1,5 +1,19 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 
+/**
+ * PatientsPage Component
+ * 
+ * Group Project Documentation:
+ * 1. Swapped layout structures from zinc-900/950 to semantic `bg-card`, `bg-header-bg`, and `border-border-custom`.
+ * 2. Explicitly added `text-white` to the "+ Add Patient" blue button so it retains legibility in light mode.
+ * 3. Rewrote the risk badge class resolver:
+ *    - Expanded the matching to check if the risk description starts with or contains 'high', 'medium', or 'low'.
+ *    - Stylized the badges with soft background tints and high-contrast text in light mode, and transparent fallback glow in dark mode:
+ *      - High: `text-red-700 bg-red-50 dark:bg-red-500/20 dark:text-red-400`
+ *      - Medium: `text-amber-700 bg-amber-50 dark:bg-yellow-500/20 dark:text-yellow-300`
+ *      - Low: `text-green-700 bg-green-50 dark:bg-green-500/20 dark:text-green-400`
+ */
+
 const patients = [
   {
     id: 1,
@@ -31,19 +45,20 @@ export default function PatientsPage() {
       <div className="flex items-center justify-between mb-8">
 
         <div>
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-3xl font-bold text-text-primary transition-colors duration-300">
             Patients
           </h1>
 
-          <p className="text-zinc-400 mt-1">
+          <p className="text-text-muted mt-1 transition-colors duration-300">
             Maternal healthcare monitoring
           </p>
         </div>
 
         <button className="
           bg-blue-600 hover:bg-blue-700
+          text-white
           px-5 py-3 rounded-xl
-          font-medium transition-all
+          font-medium transition-all duration-300 cursor-pointer shadow-sm active:scale-95
         ">
           + Add Patient
         </button>
@@ -51,15 +66,18 @@ export default function PatientsPage() {
 
       {/* Patients Table */}
       <div className="
-        bg-zinc-900
+        bg-card
         rounded-2xl
-        border border-zinc-800
+        border border-border-custom
+        shadow-premium
         overflow-hidden
+        transition-all
+        duration-300
       ">
 
         <table className="w-full">
 
-          <thead className="bg-zinc-950 text-zinc-400">
+          <thead className="bg-header-bg text-text-muted border-b border-border-custom transition-colors duration-300">
             <tr>
               <th className="text-left p-4">Patient</th>
               <th className="text-left p-4">Village</th>
@@ -69,41 +87,47 @@ export default function PatientsPage() {
           </thead>
 
           <tbody>
-            {patients.map((patient) => (
-              <tr
-                key={patient.id}
-                className="border-t border-zinc-800"
-              >
-                <td className="p-4 text-white">
-                  {patient.name}
-                </td>
+            {patients.map((patient) => {
+              const riskLower = patient.risk.toLowerCase();
+              const isHigh = riskLower.includes("high");
+              const isMedium = riskLower.includes("medium");
 
-                <td className="p-4 text-zinc-300">
-                  {patient.village}
-                </td>
+              return (
+                <tr
+                  key={patient.id}
+                  className="border-t border-border-custom transition-colors duration-300"
+                >
+                  <td className="p-4 text-text-primary font-medium transition-colors duration-300">
+                    {patient.name}
+                  </td>
 
-                <td className="p-4 text-zinc-300">
-                  {patient.trimester}
-                </td>
+                  <td className="p-4 text-text-secondary transition-colors duration-300">
+                    {patient.village}
+                  </td>
 
-                <td className="p-4">
-                  <span
-                    className={`
-                      px-3 py-1 rounded-full text-sm font-medium
-                      ${
-                        patient.risk === "High"
-                          ? "bg-red-500/20 text-red-400"
-                          : patient.risk === "Medium"
-                          ? "bg-yellow-500/20 text-yellow-300"
-                          : "bg-green-500/20 text-green-400"
-                      }
-                    `}
-                  >
-                    {patient.risk}
-                  </span>
-                </td>
-              </tr>
-            ))}
+                  <td className="p-4 text-text-secondary transition-colors duration-300">
+                    {patient.trimester}
+                  </td>
+
+                  <td className="p-4">
+                    <span
+                      className={`
+                        px-3 py-1 rounded-full text-sm font-semibold transition-all duration-300
+                        ${
+                          isHigh
+                            ? "bg-red-50 text-red-700 dark:bg-red-500/20 dark:text-red-400"
+                            : isMedium
+                            ? "bg-amber-50 text-amber-700 dark:bg-yellow-500/20 dark:text-yellow-300"
+                            : "bg-green-50 text-green-700 dark:bg-green-500/20 dark:text-green-400"
+                        }
+                      `}
+                    >
+                      {patient.risk}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
 
         </table>
