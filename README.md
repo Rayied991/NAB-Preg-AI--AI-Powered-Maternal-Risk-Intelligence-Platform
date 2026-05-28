@@ -14,15 +14,20 @@ Pregnant women in rural and underserved communities often lack access to continu
 
 ## What It Does
 
-- **Risk Prediction** — AI models flag high-risk pregnancies early using structured health data and OCR-extracted lab reports
-- **Early Detection** — Identifies signs of anemia, hypertension, and other complications before they escalate
-- **Healthcare Recommendations** — AI agents provide personalized nutrition and care guidance
-- **Real-Time Monitoring** — Streaming alerts notify healthcare workers of critical changes
-- **Village-Level Analytics** — Aggregate insights to support community health planning
-- **Multilingual Support** — Prompts and outputs designed for diverse language contexts
+- **AI Risk API** — FastAPI backend serving real-time maternal risk predictions
+- **Interactive Dashboard** — Modern healthcare analytics dashboard built with Next.js
+- **Supabase Integration** — Cloud PostgreSQL storage for patients, alerts, predictions, and reports
 
 ---
 
+## AI Engine Features
+
+- Maternal risk prediction using XGBoost MultiOutputClassifier
+- Confidence scoring system
+- AI-generated healthcare recommendations
+- Rule-based clinical reasoning
+- Risk explanation engine
+- Structured AI reporting
 
 ## AI Inference Pipeline
  
@@ -53,6 +58,9 @@ Final AI Response
 | **AI Engine** | Custom ML models, RAG pipeline, multi-agent system |
 | **OCR** | Automated extraction from medical reports |
 | **Frontend** | Next.js, TypeScript |
+| **Database** | Supabase PostgreSQL |
+| **Charts & Visualization** | Recharts |
+| **Styling** | Tailwind CSS |
 
 ---
 
