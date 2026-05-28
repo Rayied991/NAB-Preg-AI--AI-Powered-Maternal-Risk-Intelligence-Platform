@@ -1,5 +1,6 @@
-from src.predictor import predict_maternal_risk
-from report import print_risk_report
+from ai_engine.src.predictor import (
+    predict_maternal_risk
+)
 
 sample_payload = {
     "age": 29,
@@ -16,4 +17,4 @@ sample_payload = {
 
 result = predict_maternal_risk(sample_payload)
 
-print_risk_report(result)
+print(result)

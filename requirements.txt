@@ -1,0 +1,30 @@
+# =========================
+# BACKEND
+# =========================
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+pydantic
+python-dotenv
+alembic
+pytest
+black
+isort
+python-multipart
+passlib[bcrypt]
+python-jose[cryptography]
+
+# =========================
+# AI / ML
+# =========================
+pandas
+numpy
+scikit-learn 
+joblib
+xgboost
+lightgbm
+jupyter
+matplotlib
+seaborn
+rich

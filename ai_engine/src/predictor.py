@@ -1,10 +1,7 @@
-from src.preprocessing import preprocess_input
-from src.inference import run_prediction
-from src.risk_rules import generate_risk_reason
-from src.recommendation_engine import (
-    generate_recommendation
-)
-
+from ai_engine.src.preprocessing import preprocess_input
+from ai_engine.src.inference import run_prediction
+from ai_engine.src.risk_rules import generate_risk_reason
+from ai_engine.src.recommendation_engine import generate_recommendation
 
 def predict_maternal_risk(payload):
 
