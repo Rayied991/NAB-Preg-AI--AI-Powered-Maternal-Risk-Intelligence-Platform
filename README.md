@@ -14,12 +14,8 @@ Pregnant women in rural and underserved communities often lack access to continu
 
 ## What It Does
 
-- **OCR Report Upload** — Upload JPG, PNG, or PDF medical reports; the system automatically extracts hemoglobin, blood pressure, blood sugar, heart rate, and other vitals
-- **AI Risk Prediction** — Real-time maternal risk scoring (HIGH / MEDIUM / LOW) with confidence scores powered by XGBoost
-- **Clinical Findings** — Automated rule-based clinical reasoning flags abnormal values with explanations
-- **AI Recommendations** — Structured, actionable healthcare recommendations generated per patient
-- **AI Summary** — Plain-language risk summaries for healthcare workers
-- **Interactive Dashboard** — Modern analytics dashboard built with Next.js and Recharts
+- **AI Risk API** — FastAPI backend serving real-time maternal risk predictions
+- **Interactive Dashboard** — Modern healthcare analytics dashboard built with Next.js
 - **Supabase Integration** — Cloud PostgreSQL storage for patients, alerts, predictions, and reports
 
 ---
@@ -33,45 +29,38 @@ Pregnant women in rural and underserved communities often lack access to continu
 - Risk explanation engine
 - Structured AI reporting
 
----
-
-## Full Request Flow
-
+## AI Inference Pipeline
+ 
 ```
-Frontend Upload Page
-        ↓
-OCR Extraction (Tesseract / PIL)
-        ↓
-prediction.service.ts
-        ↓
-FastAPI /api/predict
-        ↓
-AI Engine
-        ↓
+Patient Input
+      ↓
+Preprocessing
+      ↓
 XGBoost MultiOutput Model
-        ↓
-Rule Engine → Reasons + Recommendations
-        ↓
-Frontend receives:
-  • overall_risk (HIGH / MEDIUM / LOW)
-  • confidence_score
-  • ai_recommendations[]
-  • ai_summary
-  • clinical_findings[]
+      ↓
+Risk Predictions
+      ↓
+Rule Engine
+      ↓
+Reasons + Recommendations
+      ↓
+Final AI Response
 ```
-
+ 
 ---
+
 
 ## Tech Stack
 
 | Layer | Technologies |
 |---|---|
 | **Backend** | Python, FastAPI, PostgreSQL, Redis |
-| **AI Engine** | XGBoost, RAG pipeline, multi-agent system |
-| **OCR** | Tesseract, PIL, automated extraction from medical reports |
-| **Frontend** | Next.js, TypeScript, Tailwind CSS |
+| **AI Engine** | Custom ML models, RAG pipeline, multi-agent system |
+| **OCR** | Automated extraction from medical reports |
+| **Frontend** | Next.js, TypeScript |
 | **Database** | Supabase PostgreSQL |
 | **Charts & Visualization** | Recharts |
+| **Styling** | Tailwind CSS |
 
 ---
 
@@ -102,7 +91,7 @@ nab-preg-ai/
 │       ├── analytics/
 │       ├── alerts/
 │       ├── patients/
-│       └── upload/       # OCR upload + AI prediction result page
+│       └── upload/
 │
 ├── tests/                # API, AI, OCR, frontend, and integration tests
 ├── scripts/              # Seed data, load embeddings, bootstrap
@@ -150,7 +139,7 @@ uv pip install -r requirements.txt
 uv run uvicorn app.main:app --reload
 ```
 
-API available at `http://localhost:8000`.
+The API will be available at `http://localhost:8000`.
 
 ### 4. Frontend Setup
 
@@ -160,23 +149,24 @@ npm install
 npm run dev
 ```
 
-Dashboard available at `http://localhost:3000`.
+The dashboard will be available at `http://localhost:3000`.
+
+---
 
 ### 5. AI Engine Setup
-
+ 
 ```bash
 cd ai_engine
-
+ 
 # Create and activate virtual environment
 uv venv
 .venv\Scripts\activate          # Windows
 # source .venv/bin/activate     # macOS/Linux
-
+ 
 # Install dependencies
 uv pip install -r requirements.txt
 ```
 
----
 
 ## AI Agents
 
@@ -186,20 +176,6 @@ uv pip install -r requirements.txt
 | `alert_agent` | Real-time risk escalation and healthcare worker notifications |
 | `risk_explainer_agent` | Plain-language explanations of predicted risks |
 | `village_analytics_agent` | Community-level health trend analysis |
-
----
-
-## API Endpoints
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/predict` | Submit patient data, receive full risk prediction |
-| `POST` | `/api/ocr` | Upload medical report image, extract vitals |
-| `GET` | `/api/patients` | List all patients |
-| `GET` | `/api/alerts` | Fetch active risk alerts |
-| `GET` | `/api/analytics` | Aggregate health analytics |
-
-Full endpoint reference: [`docs/api_contracts.md`](docs/api_contracts.md)
 
 ---
 
@@ -248,11 +224,10 @@ This project is licensed under the MIT License. See [`LICENSE`](LICENSE) for det
 ---
 
 ## Acknowledgements
-
+ 
 - **WHO & UNICEF** — for publicly available maternal health guidelines and datasets that informed our risk models
 - **Open-source community** — [XGBoost](https://github.com/dmlc/xgboost), [FastAPI](https://fastapi.tiangolo.com/), [Next.js](https://nextjs.org/), and [LangChain](https://github.com/langchain-ai/langchain) for the foundational tools powering this platform
 - **Healthcare workers in rural communities** — whose challenges inspired this project and whose feedback continues to shape it
-
 ---
 
 *Built to reduce preventable maternal deaths through accessible AI-powered healthcare.*
