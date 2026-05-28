@@ -1,6 +1,9 @@
 # =========================
+
 # BACKEND
+
 # =========================
+
 fastapi
 uvicorn
 sqlalchemy
@@ -14,13 +17,17 @@ isort
 python-multipart
 passlib[bcrypt]
 python-jose[cryptography]
+supabase
 
 # =========================
+
 # AI / ML
+
 # =========================
+
 pandas
 numpy
-scikit-learn 
+scikit-learn
 joblib
 xgboost
 lightgbm
@@ -28,3 +35,12 @@ jupyter
 matplotlib
 seaborn
 rich
+
+# =========================
+
+# OCR
+
+# =========================
+
+pytesseract
+pillow
