@@ -15,8 +15,39 @@
  */
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
-
+import { predictRisk } from "@/services/prediction.service";
+import { useState } from "react";
 export default function UploadPage() {
+  const sampleData = {
+  age: 29,
+  hemoglobin: 8.2,
+  systolic_bp: 150,
+  diastolic_bp: 95,
+  blood_sugar: 132,
+  heart_rate: 110,
+  weight: 65,
+  height_cm: 160,
+  meals_per_day: 2,
+  veg_freq: 1,
+};
+  
+  type PredictionResponse = {
+  patient_status: {
+    overall_risk: string;
+    anemia_risk: string;
+    hypertension_risk: string;
+    confidence_score: number;
+  };
+  clinical_findings: string[];
+  ai_recommendations: string[];
+  ai_summary: string;
+};
+
+const [prediction, setPrediction] =
+  useState<PredictionResponse | null>(null);
+
+  const [loading, setLoading] = useState(false);
+const [error, setError] = useState("");
   return (
     <DashboardLayout>
 
@@ -153,55 +184,125 @@ export default function UploadPage() {
         transition-all
         duration-300
       ">
-
+        {/* header row */}
+    {/* Header row */}
         <div className="flex items-center justify-between">
-
           <div>
             <h2 className="text-xl font-semibold text-text-primary transition-colors duration-300">
               AI Prediction Result
             </h2>
-
             <p className="text-text-muted mt-1 transition-colors duration-300">
               Maternal risk intelligence analysis
             </p>
           </div>
 
-          <span className="
-            bg-red-50 text-red-700 dark:bg-red-500/20 dark:text-red-400
-            px-4 py-2 rounded-full
-            font-semibold text-sm transition-all duration-300
-          ">
-            HIGH RISK
+          <span
+            className={`
+              px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300
+              ${
+                prediction?.patient_status?.overall_risk === "HIGH"
+                  ? "bg-red-50 text-red-700 dark:bg-red-500/20 dark:text-red-400"
+                  : prediction?.patient_status?.overall_risk === "MEDIUM"
+                  ? "bg-yellow-50 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400"
+                  : "bg-green-50 text-green-700 dark:bg-green-500/20 dark:text-green-400"
+              }
+            `}
+          >
+            {prediction?.patient_status?.overall_risk ?? "NO DATA"}
           </span>
         </div>
 
-        <div className="mt-6 space-y-4">
+      
+             
+         <div className="mt-6 space-y-4">
 
-          <div className="bg-panel border border-border-custom rounded-xl p-4 transition-all duration-300">
-            <p className="text-text-muted text-sm transition-colors duration-300">
-              Hypertension Risk
-            </p>
-
-            <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-2 transition-colors duration-300">
-              87%
-            </p>
-          </div>
-
-          <div className="bg-panel border border-border-custom rounded-xl p-4 transition-all duration-300">
-            <p className="text-text-muted text-sm transition-colors duration-300">
-              AI Recommendation
-            </p>
-
-            <p className="text-text-secondary mt-2 leading-relaxed transition-colors duration-300">
-              Immediate medical attention recommended.
-              High blood pressure and low hemoglobin levels
-              indicate severe maternal risk conditions.
+          {/* CARD 1 — Confidence Score */}
+          <div className="bg-panel border border-border-custom rounded-xl p-4">
+            <p className="text-text-muted text-sm">Confidence Score</p>
+            <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-2">
+              {prediction?.patient_status?.confidence_score != null
+                ? `${prediction.patient_status.confidence_score}%`
+                : "—"}
             </p>
           </div>
 
-        </div>
-      </div>
+          {/* CARD 2 — AI Recommendations */}
+          <div className="bg-panel border border-border-custom rounded-xl p-4">
+            <p className="text-text-muted text-sm">AI Recommendations</p>
+            <div className="text-text-secondary mt-2 space-y-2">
+              {prediction?.ai_recommendations?.length ? (
+                prediction.ai_recommendations.map((item, index) => (
+                  <p key={index}>• {item}</p>
+                ))
+              ) : (
+                <p className="text-text-muted italic">No recommendations yet.</p>
+              )}
+            </div>
+          </div>
 
+          {/* CARD 3 — AI Summary */}
+          <div className="bg-panel border border-border-custom rounded-xl p-4">
+            <p className="text-text-muted text-sm">AI Summary</p>
+            <p className="text-text-secondary mt-2 leading-7">
+              {prediction?.ai_summary ?? (
+                <span className="text-text-muted italic">No summary yet.</span>
+              )}
+            </p>
+          </div>
+
+          {/* CARD 4 — Clinical Findings */}
+          <div className="bg-panel border border-border-custom rounded-xl p-4">
+            <p className="text-text-muted text-sm">Clinical Findings</p>
+            <div className="text-text-secondary mt-2 space-y-2">
+              {prediction?.clinical_findings?.length ? (
+                prediction.clinical_findings.map((item, index) => (
+                  <p key={index}>• {item}</p>
+                ))
+              ) : (
+                <p className="text-text-muted italic">No findings yet.</p>
+              )}
+            </div>
+          </div>
+             
+
+ 
+          {/* Button  */}
+              <button
+              onClick={async () => {
+                try {
+                  setLoading(true);
+                  setError("");
+
+                  const result = await predictRisk(sampleData);
+
+                  setPrediction(result);
+
+                } catch (error) {
+                  console.error(error);
+
+                  setError("Prediction failed.");
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              className="
+                mt-6
+                bg-blue-600 hover:bg-blue-700
+                px-6 py-3 rounded-xl
+                transition-all
+                text-white font-medium
+              "
+            >
+              {loading ? "Analyzing..." : "Test AI Prediction"}
+            </button>
+            {error && (
+            <p className="text-red-400 mt-4">
+              {error}
+            </p>
+          )}
+                  </div>
+      
+           </div>
     </DashboardLayout>
   );
 }
