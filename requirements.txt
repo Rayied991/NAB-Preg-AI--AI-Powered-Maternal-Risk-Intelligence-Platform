@@ -18,6 +18,7 @@ python-multipart
 passlib[bcrypt]
 python-jose[cryptography]
 supabase
+requests
 
 # =========================
 
