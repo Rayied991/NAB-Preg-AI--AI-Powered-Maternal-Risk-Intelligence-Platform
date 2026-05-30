@@ -177,3 +177,5 @@ grafana-data/
 *.bak
 *.tmp
 *.temp
+# Local Netlify folder
+.netlify
