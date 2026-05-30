@@ -16,38 +16,69 @@
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { predictRisk } from "@/services/prediction.service";
-import { useState } from "react";
+import { handleFileUpload } from "@/services/upload.service";
+import { OCRExtractedData } from "@/services/ocr.service";
+import { useState, useRef } from "react";
+
 export default function UploadPage() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const sampleData = {
-  age: 29,
-  hemoglobin: 8.2,
-  systolic_bp: 150,
-  diastolic_bp: 95,
-  blood_sugar: 132,
-  heart_rate: 110,
-  weight: 65,
-  height_cm: 160,
-  meals_per_day: 2,
-  veg_freq: 1,
-};
-  
-  type PredictionResponse = {
-  patient_status: {
-    overall_risk: string;
-    anemia_risk: string;
-    hypertension_risk: string;
-    confidence_score: number;
+    age: 29,
+    hemoglobin: 8.2,
+    systolic_bp: 150,
+    diastolic_bp: 95,
+    blood_sugar: 132,
+    heart_rate: 110,
+    weight: 65,
+    height_cm: 160,
+    meals_per_day: 2,
+    veg_freq: 1,
   };
-  clinical_findings: string[];
-  ai_recommendations: string[];
-  ai_summary: string;
-};
 
-const [prediction, setPrediction] =
-  useState<PredictionResponse | null>(null);
+  type PredictionResponse = {
+    patient_status: {
+      overall_risk: string;
+      anemia_risk: string;
+      hypertension_risk: string;
+      confidence_score: number;
+    };
+    clinical_findings: string[];
+    ai_recommendations: string[];
+    ai_summary: string;
+  };
 
+  const [ocrData, setOcrData] = useState<OCRExtractedData | null>(null);
+  const [prediction, setPrediction] = useState<PredictionResponse | null>(null);
   const [loading, setLoading] = useState(false);
-const [error, setError] = useState("");
+  const [error, setError] = useState("");
+  const [ocrLoading, setOcrLoading] = useState(false);
+
+  /**
+   * Handle file selection and perform OCR
+   */
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setOcrLoading(true);
+    setError("");
+    
+    try {
+      const result = await handleFileUpload(file);
+      setOcrData(result.ocrData);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to process file";
+      setError(errorMessage);
+      setOcrData(null);
+      console.error("File upload error:", err);
+    } finally {
+      setOcrLoading(false);
+      // Reset input so the same file can be selected again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
   return (
     <DashboardLayout>
 
@@ -91,22 +122,27 @@ const [error, setError] = useState("");
           </p>
 
           <input
+            ref={fileInputRef}
             type="file"
             id="reportUpload"
             className="hidden"
+            onChange={handleFileChange}
+            accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+            disabled={ocrLoading}
           />
 
           <label
             htmlFor="reportUpload"
             className="
               mt-6 inline-block
-              bg-blue-600 hover:bg-blue-700
+              bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400
               text-white
               px-6 py-3 rounded-xl
               transition-all cursor-pointer shadow-sm active:scale-95
+              disabled:cursor-not-allowed
             "
           >
-            Choose Report
+            {ocrLoading ? "Processing..." : "Choose Report"}
           </label>
 
         </div>
@@ -128,49 +164,61 @@ const [error, setError] = useState("");
           OCR Extracted Data
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-          <div className="bg-panel border border-border-custom rounded-xl p-4 transition-all duration-300">
-            <p className="text-text-muted text-sm transition-colors duration-300">
-              Hemoglobin
-            </p>
-
-            <p className="text-2xl font-bold text-text-primary mt-2 transition-colors duration-300">
-              8.5 g/dL
-            </p>
+        {ocrLoading && (
+          <div className="text-center py-8">
+            <p className="text-text-secondary animate-pulse">Processing file with OCR...</p>
           </div>
+        )}
 
-          <div className="bg-panel border border-border-custom rounded-xl p-4 transition-all duration-300">
-            <p className="text-text-muted text-sm transition-colors duration-300">
-              Blood Pressure
-            </p>
-
-            <p className="text-2xl font-bold text-text-primary mt-2 transition-colors duration-300">
-              150/95
-            </p>
+        {error && (
+          <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl p-4 mb-4">
+            <p className="text-red-700 dark:text-red-400">{error}</p>
           </div>
+        )}
 
-          <div className="bg-panel border border-border-custom rounded-xl p-4 transition-all duration-300">
-            <p className="text-text-muted text-sm transition-colors duration-300">
-              Blood Sugar
-            </p>
+        {ocrData ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-panel border border-border-custom rounded-xl p-4 transition-all duration-300">
+              <p className="text-text-muted text-sm transition-colors duration-300">
+                Hemoglobin
+              </p>
+              <p className="text-2xl font-bold text-text-primary mt-2 transition-colors duration-300">
+                {ocrData.hemoglobin || "—"}
+              </p>
+            </div>
 
-            <p className="text-2xl font-bold text-text-primary mt-2 transition-colors duration-300">
-              132 mg/dL
-            </p>
+            <div className="bg-panel border border-border-custom rounded-xl p-4 transition-all duration-300">
+              <p className="text-text-muted text-sm transition-colors duration-300">
+                Blood Pressure
+              </p>
+              <p className="text-2xl font-bold text-text-primary mt-2 transition-colors duration-300">
+                {ocrData.blood_pressure || "—"}
+              </p>
+            </div>
+
+            <div className="bg-panel border border-border-custom rounded-xl p-4 transition-all duration-300">
+              <p className="text-text-muted text-sm transition-colors duration-300">
+                Blood Sugar
+              </p>
+              <p className="text-2xl font-bold text-text-primary mt-2 transition-colors duration-300">
+                {ocrData.blood_sugar || "—"}
+              </p>
+            </div>
+
+            <div className="bg-panel border border-border-custom rounded-xl p-4 transition-all duration-300">
+              <p className="text-text-muted text-sm transition-colors duration-300">
+                Heart Rate
+              </p>
+              <p className="text-2xl font-bold text-text-primary mt-2 transition-colors duration-300">
+                {ocrData.heart_rate || "—"}
+              </p>
+            </div>
           </div>
-
-          <div className="bg-panel border border-border-custom rounded-xl p-4 transition-all duration-300">
-            <p className="text-text-muted text-sm transition-colors duration-300">
-              Heart Rate
-            </p>
-
-            <p className="text-2xl font-bold text-text-primary mt-2 transition-colors duration-300">
-              110 bpm
-            </p>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-text-muted italic">Upload a medical report to see extracted data here.</p>
           </div>
-
-        </div>
+        )}
       </div>
 
       {/* AI Prediction */}
