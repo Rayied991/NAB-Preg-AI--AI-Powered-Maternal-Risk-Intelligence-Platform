@@ -3,26 +3,33 @@
 import RiskCard from "@/components/cards/RiskCard";
 import RiskPieChart from "@/components/charts/RiskPieChart";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { fetchAlerts } from "@/services/alerts.service";
 import { fetchAnalytics } from "@/services/analytics.service";
 import { useEffect, useState } from "react";
-
 export default function DashboardPage() {
 
   const [analytics, setAnalytics] =useState<any>(null);
-
+  const [alerts, setAlerts] = useState<any[]>([]);
 
   useEffect(() => {
-    const loadData=async()=>{
-      try{
-        const data=await fetchAnalytics();
-        setAnalytics(data);
-      }
-      catch(error){
-        console.log(error);
-      }
-    };
-    loadData();
-  }, []);
+  const loadData = async () => {
+    try {
+      const [analyticsData, alertData] =
+        await Promise.all([
+          fetchAnalytics(),
+          fetchAlerts(),
+        ]);
+
+      setAnalytics(analyticsData);
+      setAlerts(alertData);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  loadData();
+}, []);
 
 
   return (
@@ -49,7 +56,11 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-10">
-        <RiskPieChart />
+        <RiskPieChart
+        highRisk={analytics?.high_risk || 0}
+        mediumRisk={analytics?.medium_risk || 0}
+        lowRisk={analytics?.low_risk || 0}
+        />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
 
@@ -62,27 +73,26 @@ export default function DashboardPage() {
 
     <div className="space-y-4">
 
-      <div className="p-4 bg-zinc-950 rounded-xl">
-        <p className="text-red-400 font-medium">
-          High BP Detected
-        </p>
+  {alerts.map((alert) => (
 
-        <p className="text-zinc-400 text-sm mt-1">
-          Ayesha Rahman • Dhaka Rural
-        </p>
-      </div>
+    <div
+      key={alert.id}
+      className="p-4 bg-zinc-950 rounded-xl"
+    >
 
-      <div className="p-4 bg-zinc-950 rounded-xl">
-        <p className="text-yellow-300 font-medium">
-          Low Hemoglobin
-        </p>
+      <p className="text-red-400 font-medium">
+        {alert.alert_message}
+      </p>
 
-        <p className="text-zinc-400 text-sm mt-1">
-          Fatema Noor • Khulna
-        </p>
-      </div>
+      <p className="text-zinc-400 text-sm mt-1">
+        {alert.severity} • {alert.status}
+      </p>
 
     </div>
+
+  ))}
+
+</div>
   </div>
 
   {/* AI Summary */}

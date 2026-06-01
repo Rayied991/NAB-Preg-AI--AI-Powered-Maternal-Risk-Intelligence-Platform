@@ -1,0 +1,25 @@
+export async function saveOCRReport(
+  extractedText: string,
+  parsedJson: unknown
+) {
+
+  const response = await fetch(
+    "http://127.0.0.1:8000/api/ocr-report",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        extracted_text: extractedText,
+        parsed_json: parsedJson,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to save OCR report");
+  }
+
+  return response.json();
+}

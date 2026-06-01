@@ -1,18 +1,18 @@
 "use client";
 
 import {
-    Cell,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
 } from "recharts";
 
-const data = [
-  { name: "High Risk", value: 12 },
-  { name: "Medium Risk", value: 28 },
-  { name: "Low Risk", value: 45 },
-];
+interface RiskPieChartProps {
+  highRisk: number;
+  mediumRisk: number;
+  lowRisk: number;
+}
 
 const COLORS = [
   "#ef4444",
@@ -20,7 +20,27 @@ const COLORS = [
   "#22c55e",
 ];
 
-export default function RiskPieChart() {
+export default function RiskPieChart({
+  highRisk,
+  mediumRisk,
+  lowRisk,
+}: RiskPieChartProps) {
+
+  const data = [
+    {
+      name: "High Risk",
+      value: highRisk,
+    },
+    {
+      name: "Medium Risk",
+      value: mediumRisk,
+    },
+    {
+      name: "Low Risk",
+      value: lowRisk,
+    },
+  ];
+
   return (
     <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
 
@@ -29,7 +49,9 @@ export default function RiskPieChart() {
       </h2>
 
       <div className="w-full h-87.5">
+
         <ResponsiveContainer width="100%" height="100%">
+
           <PieChart>
 
             <Pie
@@ -43,7 +65,7 @@ export default function RiskPieChart() {
               {data.map((entry, index) => (
                 <Cell
                   key={index}
-                  fill={COLORS[index % COLORS.length]}
+                  fill={COLORS[index]}
                 />
               ))}
             </Pie>
@@ -51,8 +73,11 @@ export default function RiskPieChart() {
             <Tooltip />
 
           </PieChart>
+
         </ResponsiveContainer>
+
       </div>
+
     </div>
   );
 }

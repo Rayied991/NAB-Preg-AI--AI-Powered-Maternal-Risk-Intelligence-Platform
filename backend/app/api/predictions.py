@@ -7,6 +7,9 @@ from ai_engine.src.predictor import (
 from backend.app.services.prediction_storage import (
     save_prediction
 )
+from backend.app.services.ocr_report_storage import (
+    save_ocr_report
+)
 import os
 import requests
 from dotenv import load_dotenv
@@ -22,7 +25,10 @@ SUPABASE_KEY = os.getenv(
 )
 router = APIRouter()
 
-
+class OCRReportRequest(BaseModel):
+    extracted_text: str
+    parsed_json: dict
+    
 class PredictionRequest(BaseModel):
     age: int
     hemoglobin: float
@@ -63,3 +69,35 @@ async def get_predictions():
     )
 
     return response.json()
+
+@router.get("/alerts")
+async def get_alerts():
+
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+    }
+
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/alerts"
+        "?select=*"
+        "&order=triggered_at.desc"
+        "&limit=5",
+        headers=headers,
+    )
+
+    return response.json()
+
+@router.post("/ocr-report")
+async def save_report(
+    payload: OCRReportRequest
+):
+
+    save_ocr_report(
+        payload.extracted_text,
+        payload.parsed_json,
+    )
+
+    return {
+        "message": "OCR report saved"
+    }
