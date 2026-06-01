@@ -13,15 +13,15 @@
  * 5. Implemented auto-refresh polling to update the chart when data changes.
  */
 
-import { fetchAnalytics } from "@/services/analytics.service";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
+    Cell,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
 } from "recharts";
+import { fetchAnalytics } from "@/services/analytics.service";
 
 const COLORS = [
   "#ef4444",
