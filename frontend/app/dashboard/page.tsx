@@ -1,6 +1,10 @@
+"use client"
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import RiskCard from "@/components/cards/RiskCard";
 import RiskPieChart from "@/components/charts/RiskPieChart";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { fetchAnalytics } from "@/services/analytics.service";
+import { useEffect, useState } from "react";
 
 /**
  * DashboardPage Component
@@ -15,25 +19,43 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
  *    - Medium risk: `text-amber-600 dark:text-yellow-300`
  */
 export default function DashboardPage() {
+
+  const [analytics, setAnalytics] =useState<any>(null);
+
+
+  useEffect(() => {
+    const loadData=async()=>{
+      try{
+        const data=await fetchAnalytics();
+        setAnalytics(data);
+      }
+      catch(error){
+        console.log(error);
+      }
+    };
+    loadData();
+  }, []);
+
+
   return (
     <DashboardLayout>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
        <RiskCard
         title="High Risk Cases"
-        count={12}
+        count={analytics?.high_risk || 0}
         color="red"
       />
 
       <RiskCard
         title="Medium Risk"
-        count={28}
+        count={analytics?.medium_risk || 0}
         color="yellow"
       />
 
       <RiskCard
         title="Low Risk"
-        count={45}
+        count={analytics?.low_risk || 0}
         color="green"
       />
       </div>
