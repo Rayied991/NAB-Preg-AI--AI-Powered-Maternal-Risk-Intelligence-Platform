@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 /**
@@ -9,11 +10,12 @@
  */
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { saveOCRReport } from "@/services/ocr-report.service";
 import { OCRExtractedData } from "@/services/ocr.service";
+import { fetchPatients } from "@/services/patient.service";
 import { predictRisk } from "@/services/prediction.service";
 import { handleFileUpload } from "@/services/upload.service";
-import { useRef, useState } from "react";
-import { saveOCRReport } from "@/services/ocr-report.service";
+import { useEffect, useRef, useState } from "react";
 type PredictionResponse = {
   patient_status: {
     overall_risk: string;
@@ -35,6 +37,28 @@ export default function UploadPage() {
   const [predictionLoading, setPredictionLoading] = useState(false);
   const [error, setError] = useState("");
   const [ocrLoading, setOcrLoading] = useState(false);
+  const [patients, setPatients] = useState<any[]>([]);
+const [selectedPatient, setSelectedPatient] =
+  useState("");
+
+  useEffect(() => {
+
+  const loadPatients = async () => {
+    try {
+
+      const data =
+        await fetchPatients();
+
+      setPatients(data);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  loadPatients();
+
+}, []);
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -42,18 +66,27 @@ export default function UploadPage() {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Patient Validation
+    if (!selectedPatient) {
+    setError("Please select a patient first.");
+    return;
+  }
+
+
     setOcrLoading(true);
     setError("");
 
     try {
       const result = await handleFileUpload(file);
       await saveOCRReport(
+        selectedPatient,
       result.ocrData.raw_text,
       result.ocrData
     );
       setOcrData(result.ocrData);
 
-      const payload = {
+     const payload = {
+        patient_id: selectedPatient,
         // TODO: Extract age from OCR or collect manually
         age: 25,
         hemoglobin:
@@ -123,6 +156,43 @@ export default function UploadPage() {
         </p>
       </div>
 
+      <div className="mb-6">
+
+  <label className="block mb-2 font-medium">
+    Select Patient
+  </label>
+
+  <select
+    value={selectedPatient}
+    onChange={(e) =>
+      setSelectedPatient(
+        e.target.value
+      )
+    }
+    className="w-full p-3 rounded-lg border"
+  >
+
+    <option value="">
+      Choose Patient
+    </option>
+
+    {patients.map((patient) => (
+
+      <option
+        key={patient.id}
+        value={patient.id}
+      >
+        {patient.full_name}
+        {" ("}
+        {patient.patient_code}
+        {")"}
+      </option>
+
+    ))}
+
+  </select>
+
+</div>
       {/* ── Upload Section ── */}
       <div className="bg-[#131720] border border-[#1e2535] rounded-2xl p-6">
 

@@ -10,6 +10,7 @@ from backend.app.services.prediction_storage import (
 from backend.app.services.ocr_report_storage import (
     save_ocr_report
 )
+from backend.app.core.alert_storage import create_alert
 import os
 import requests
 from dotenv import load_dotenv
@@ -26,10 +27,12 @@ SUPABASE_KEY = os.getenv(
 router = APIRouter()
 
 class OCRReportRequest(BaseModel):
+    patient_id: str
     extracted_text: str
     parsed_json: dict
     
 class PredictionRequest(BaseModel):
+    patient_id: str
     age: int
     hemoglobin: float
     systolic_bp: float
@@ -41,7 +44,6 @@ class PredictionRequest(BaseModel):
     meals_per_day: int
     veg_freq: int
     
-    
 @router.post("/predict")
 async def predict(payload: PredictionRequest):
 
@@ -49,9 +51,24 @@ async def predict(payload: PredictionRequest):
         payload.dict()
     )
 
-    save_prediction(result)
+    save_prediction(
+        payload.patient_id,
+        result
+    )
 
-    return result
+    if (
+        result["patient_status"]["overall_risk"]
+        == "HIGH"
+    ):
+        create_alert(
+            patient_id=payload.patient_id,
+            severity="HIGH",
+            alert_message="HIGH RISK MATERNAL CASE DETECTED",
+            status="OPEN"
+        )
+
+    return result    
+
 
 @router.get("/predictions")
 async def get_predictions():
@@ -94,6 +111,7 @@ async def save_report(
 ):
 
     save_ocr_report(
+        payload.patient_id,
         payload.extracted_text,
         payload.parsed_json,
     )

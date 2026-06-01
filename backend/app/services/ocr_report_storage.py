@@ -15,6 +15,7 @@ SUPABASE_KEY = os.getenv(
 
 
 def save_ocr_report(
+    patient_id,
     extracted_text,
     parsed_json,
 ):
@@ -26,6 +27,7 @@ def save_ocr_report(
     }
 
     payload = {
+        "patient_id": patient_id,
         "report_url": None,
         "extracted_text": extracted_text,
         "parsed_json": parsed_json,
