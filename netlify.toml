@@ -5,7 +5,3 @@
 [build.environment]
   NETLIFY_USE_YARN = "false"
 
-[[plugins]]
-package = "@netlify/plugin-nextjs"
-
-  [plugins.inputs]

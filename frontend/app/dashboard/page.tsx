@@ -70,7 +70,7 @@ export default function DashboardPage() {
       />
       </div>
 
-      <div className="mt-6 bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+      <div className="mt-6 bg-card border border-border-custom rounded-2xl p-6 shadow-premium">
         <h2 className="text-xl font-semibold text-white mb-6">
           Risk Distribution
         </h2>
