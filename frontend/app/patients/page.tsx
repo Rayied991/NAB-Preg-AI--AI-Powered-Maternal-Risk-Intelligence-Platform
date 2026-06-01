@@ -1,56 +1,46 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
+import { useEffect, useState } from "react";
+
 import DashboardLayout from "@/components/layout/DashboardLayout";
 
-const patients = [
-  {
-    id: 1,
-    name: "LocalPDF Studio",
-    village: "No Donation Village",
-    risk: "High",
-    trimester: 3,
-    initials: "LS",
-  },
-  {
-    id: 2,
-    name: "Rafid",
-    village: "Fucking Village where Rafid is fucked everytime!",
-    risk: "High",
-    trimester: 2,
-    initials: "RF",
-  },
-  {
-    id: 3,
-    name: "Nusrat Jahan",
-    village: "Sylhet",
-    risk: "Low",
-    trimester: 1,
-    initials: "NJ",
-  },
-];
+import { fetchPatients } from "@/services/patient.service";
 
-const trimesterLabel = (t: number) => {
-  if (t === 1) return "1st Trimester";
-  if (t === 2) return "2nd Trimester";
-  return "3rd Trimester";
-};
-
-const riskConfig = (risk: string) => {
-  if (risk === "High")
-    return {
-      badge: "bg-[#2a0e0e] text-[#f06060] border border-[#5a1a1a]",
-      dot: "bg-[#f06060]",
-    };
-  if (risk === "Medium")
-    return {
-      badge: "bg-[#2a1e06] text-[#e0a040] border border-[#5a3a10]",
-      dot: "bg-[#e0a040]",
-    };
-  return {
-    badge: "bg-[#0a2010] text-[#40c070] border border-[#1a5030]",
-    dot: "bg-[#40c070]",
-  };
-};
+import { fetchPatientHistory } from "@/services/patient-history.service";
 
 export default function PatientsPage() {
+
+  const [patients, setPatients] = useState<any[]>([]);
+
+const [selectedPatient, setSelectedPatient] =
+  useState("");
+
+const [history, setHistory] =
+  useState<any>(null);
+
+  useEffect(() => {
+
+  const loadPatients = async () => {
+
+    try {
+
+      const data =
+        await fetchPatients();
+
+      setPatients(data);
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+  };
+
+  loadPatients();
+
+}, []);
+  
   return (
     <DashboardLayout>
 
@@ -100,6 +90,59 @@ export default function PatientsPage() {
           </span>
         </div>
 
+
+      <div className="mb-6">
+
+  <select
+
+    value={selectedPatient}
+
+    onChange={async (e) => {
+
+      const patientId =
+        e.target.value;
+
+      setSelectedPatient(
+        patientId
+      );
+
+      if (!patientId) return;
+
+      const data =
+        await fetchPatientHistory(
+          patientId
+        );
+
+      setHistory(data);
+
+    }}
+
+    className="bg-[#131720] border border-[#1e2535] rounded-xl px-4 py-2"
+
+  >
+
+    <option value="">
+      Select Patient
+    </option>
+
+    {patients.map((patient) => (
+
+      <option
+        key={patient.id}
+        value={patient.id}
+      >
+
+        {patient.patient_code}
+        {" - "}
+        {patient.full_name}
+
+      </option>
+
+    ))}
+
+  </select>
+
+</div>
         {/* Table */}
         <table className="w-full">
           <thead>
@@ -111,67 +154,229 @@ export default function PatientsPage() {
                 Village
               </th>
               <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">
-                Trimester
+                Patient Code
               </th>
-              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">
-                Risk Level
-              </th>
+              
             </tr>
           </thead>
 
           <tbody>
-            {patients.map((patient, index) => {
-              const config = riskConfig(patient.risk);
-              return (
-                <tr
-                  key={patient.id}
-                  className={`border-t border-[#1a2235] transition-colors duration-150 hover:bg-[#0f1520] ${
-                    index % 2 === 0 ? "bg-[#0d1118]" : "bg-[#0b0f16]"
-                  }`}
-                >
-                  {/* Patient */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="relative shrink-0">
-                        <div className="w-9 h-9 rounded-xl bg-[#0a0d14] border border-[#1a2235] flex items-center justify-center">
-                          <span className="text-[10px] font-bold text-[#4a7fa8] font-mono tracking-wider">
-                            {patient.initials}
-                          </span>
-                        </div>
-                        <span className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${config.dot} ring-2 ring-[#0d1118]`} />
-                      </div>
-                      <span className="text-[14px] font-semibold text-[#dce4f0]">
-                        {patient.name}
-                      </span>
-                    </div>
-                  </td>
+            {patients.map((patient) => (
 
-                  {/* Village */}
-                  <td className="px-6 py-4">
-                    <span className="text-[13px] text-[#5a6a84] max-w-50 truncate block">
-                      {patient.village}
-                    </span>
-                  </td>
+<tr key={patient.id} className="border-t border-[#1a2235]">
 
-                  {/* Trimester */}
-                  <td className="px-6 py-4">
-                    <span className="text-[12px] font-mono font-semibold px-3 py-1 rounded-full bg-[#0f1f32] border border-[#1e3350] text-[#4a6fa0] tracking-wider">
-                      {trimesterLabel(patient.trimester)}
-                    </span>
-                  </td>
+  <td className="px-6 py-4">
+  {patient.full_name}
+</td>
 
-                  {/* Risk */}
-                  <td className="px-6 py-4">
-                    <span className={`text-[11px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full ${config.badge}`}>
-                      {patient.risk}
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
+<td className="px-6 py-4">
+  {patient.village}
+</td>
+
+<td className="px-6 py-4">
+  {patient.patient_code}
+</td>
+
+</tr>
+
+))}
           </tbody>
         </table>
+{/* Patient details */}
+        {history && (
 
+  <div className="mt-8 p-6 border border-[#1e2535] rounded-2xl">
+
+    <h2 className="text-xl font-semibold mb-4">
+      Patient Details
+    </h2>
+
+    <p>
+      Name: {history.patient.full_name}
+    </p>
+
+    <p>
+      Village: {history.patient.village}
+    </p>
+
+    <p>
+      Age: {history.patient.age}
+    </p>
+
+    <p>
+      Patient Code:
+      {" "}
+      {history.patient.patient_code}
+    </p>
+
+  </div>
+
+)}
+      {/* OCR REPORTS */}
+{history && (
+
+  <>
+    <h3 className="mt-6 text-lg font-semibold">
+      OCR Reports
+    </h3>
+
+    {history.ocr_reports.length === 0 ? (
+
+      <p className="text-zinc-500 mt-2">
+        No OCR reports found
+      </p>
+
+    ) : (
+
+      history.ocr_reports.map((report: any) => (
+
+        <div
+          key={report.id}
+          className="mt-3 p-4 border border-[#1e2535] rounded-xl"
+        >
+
+          <p>
+            Hb: {report.parsed_json?.hemoglobin}
+          </p>
+
+          <p>
+            BP: {report.parsed_json?.blood_pressure}
+          </p>
+
+          <p>
+            Sugar: {report.parsed_json?.blood_sugar}
+          </p>
+          <p>
+          Uploaded:
+          {" "}
+          {new Date(report.uploaded_at)
+            .toLocaleString()}
+        </p>
+
+        </div>
+
+      ))
+
+    )}
+  </>
+
+)}
+
+{/* Predictions */}
+{history && (
+
+  <>
+    <h3 className="mt-6 text-lg font-semibold">
+      Predictions
+    </h3>
+
+    {history.predictions.length === 0 ? (
+
+      <p className="text-zinc-500 mt-2">
+        No predictions found
+      </p>
+
+    ) : (
+
+      history.predictions.map(
+        (prediction: any) => (
+
+          <div
+            key={prediction.id}
+            className="mt-3 p-4 border border-[#1e2535] rounded-xl"
+          >
+
+            <p>
+              Risk:
+              {" "}
+              {prediction.overall_risk}
+            </p>
+
+            <p>
+              Confidence:
+              {" "}
+              {prediction.confidence_score}
+            </p>
+
+            <p>
+              Clinical Score:
+              {" "}
+              {prediction.clinical_score}
+            </p>
+
+            <p>
+          Predicted:
+          {" "}
+          {new Date(prediction.predicted_at)
+            .toLocaleString()}
+        </p>
+
+          </div>
+
+        )
+      )
+
+    )}
+  </>
+
+)}
+
+{/* Alerts */}
+{history && (
+
+  <>
+    <h3 className="mt-6 text-lg font-semibold">
+      Alerts
+    </h3>
+
+    {history.alerts.length === 0 ? (
+
+      <p className="text-zinc-500 mt-2">
+        No alerts found
+      </p>
+
+    ) : (
+
+      history.alerts.map(
+        (alert: any) => (
+
+          <div
+            key={alert.id}
+            className="mt-3 p-4 border border-[#1e2535] rounded-xl"
+          >
+
+            <p>
+              {alert.alert_message}
+            </p>
+
+            <p>
+              Severity:
+              {" "}
+              {alert.severity}
+            </p>
+
+            <p>
+              Status:
+              {" "}
+              {alert.status}
+            </p>
+
+            <p>
+          Triggered:
+          {" "}
+          {new Date(alert.triggered_at)
+            .toLocaleString()}
+        </p>
+
+          </div>
+
+        )
+      )
+
+    )}
+  </>
+
+)}
       </div>
 
     </DashboardLayout>
