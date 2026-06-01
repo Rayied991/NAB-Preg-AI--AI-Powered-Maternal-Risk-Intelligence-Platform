@@ -3,8 +3,10 @@
 import RiskCard from "@/components/cards/RiskCard";
 import RiskPieChart from "@/components/charts/RiskPieChart";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { fetchAlerts } from "@/services/alerts.service";
 import { fetchAnalytics } from "@/services/analytics.service";
 import { useEffect, useState } from "react";
+
 
 /**
  * DashboardPage Component
@@ -18,23 +20,31 @@ import { useEffect, useState } from "react";
  *    - High risk: `text-red-600 dark:text-red-400`
  *    - Medium risk: `text-amber-600 dark:text-yellow-300`
  */
+
 export default function DashboardPage() {
 
   const [analytics, setAnalytics] =useState<any>(null);
-
+  const [alerts, setAlerts] = useState<any[]>([]);
 
   useEffect(() => {
-    const loadData=async()=>{
-      try{
-        const data=await fetchAnalytics();
-        setAnalytics(data);
-      }
-      catch(error){
-        console.log(error);
-      }
-    };
-    loadData();
-  }, []);
+  const loadData = async () => {
+    try {
+      const [analyticsData, alertData] =
+        await Promise.all([
+          fetchAnalytics(),
+          fetchAlerts(),
+        ]);
+
+      setAnalytics(analyticsData);
+      setAlerts(alertData);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  loadData();
+}, []);
 
 
   return (
@@ -61,7 +71,11 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-10">
-        <RiskPieChart />
+        <RiskPieChart
+        highRisk={analytics?.high_risk || 0}
+        mediumRisk={analytics?.medium_risk || 0}
+        lowRisk={analytics?.low_risk || 0}
+        />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
 
@@ -72,29 +86,28 @@ export default function DashboardPage() {
       Recent Alerts
     </h2>
 
-    <div className="space-y-4">
+   <div className="space-y-4">
 
-      <div className="p-4 bg-panel border border-border-custom rounded-xl transition-all duration-300">
-        <p className="text-red-600 dark:text-red-400 font-semibold transition-colors duration-300">
-          High BP Detected
-        </p>
+  {alerts.map((alert) => (
 
-        <p className="text-text-muted text-sm mt-1 transition-colors duration-300">
-          Ayesha Rahman • Dhaka Rural
-        </p>
-      </div>
+    <div
+      key={alert.id}
+      className="p-4 bg-panel border border-border-custom rounded-xl transition-all duration-300"
+    >
 
-      <div className="p-4 bg-panel border border-border-custom rounded-xl transition-all duration-300">
-        <p className="text-amber-600 dark:text-yellow-300 font-semibold transition-colors duration-300">
-          Low Hemoglobin
-        </p>
+      <p className="text-red-600 dark:text-red-400 font-semibold transition-colors duration-300">
+        {alert.alert_message}
+      </p>
 
-        <p className="text-text-muted text-sm mt-1 transition-colors duration-300">
-          Fatema Noor • Khulna
-        </p>
-      </div>
+      <p className="text-text-muted text-sm mt-1 transition-colors duration-300">
+        {alert.severity} • {alert.status}
+      </p>
 
     </div>
+
+  ))}
+
+</div> 
   </div>
 
   {/* AI Summary */}

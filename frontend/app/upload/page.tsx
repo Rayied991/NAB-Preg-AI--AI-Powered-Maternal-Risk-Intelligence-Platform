@@ -13,7 +13,7 @@ import { OCRExtractedData } from "@/services/ocr.service";
 import { predictRisk } from "@/services/prediction.service";
 import { handleFileUpload } from "@/services/upload.service";
 import { useRef, useState } from "react";
-
+import { saveOCRReport } from "@/services/ocr-report.service";
 type PredictionResponse = {
   patient_status: {
     overall_risk: string;
@@ -47,6 +47,10 @@ export default function UploadPage() {
 
     try {
       const result = await handleFileUpload(file);
+      await saveOCRReport(
+      result.ocrData.raw_text,
+      result.ocrData
+    );
       setOcrData(result.ocrData);
 
       const payload = {
