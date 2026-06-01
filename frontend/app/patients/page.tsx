@@ -1,17 +1,10 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 
 /**
- * PatientsPage Component
- * 
- * Group Project Documentation:
- * 1. Swapped layout structures from zinc-900/950 to semantic `bg-card`, `bg-header-bg`, and `border-border-custom`.
- * 2. Explicitly added `text-white` to the "+ Add Patient" blue button so it retains legibility in light mode.
- * 3. Rewrote the risk badge class resolver:
- *    - Expanded the matching to check if the risk description starts with or contains 'high', 'medium', or 'low'.
- *    - Stylized the badges with soft background tints and high-contrast text in light mode, and transparent fallback glow in dark mode:
- *      - High: `text-red-700 bg-red-50 dark:bg-red-500/20 dark:text-red-400`
- *      - Medium: `text-amber-700 bg-amber-50 dark:bg-yellow-500/20 dark:text-yellow-300`
- *      - Low: `text-green-700 bg-green-50 dark:bg-green-500/20 dark:text-green-400`
+ * PatientsPage Component — Merge resolved
+ * Header: eyebrow + text-text-primary / text-text-muted (theme-aware)
+ * Button: kept HEAD version (text-white, blue-600)
+ * Table container + thead + tbody: kept test-rayied redesign
  */
 
 const patients = [
@@ -19,15 +12,17 @@ const patients = [
     id: 1,
     name: "LocalPDF Studio",
     village: "No Donation Village",
-    risk: "High risk of no donation",
+    risk: "High",
     trimester: 3,
+    initials: "LS",
   },
   {
     id: 2,
     name: "Rafid",
     village: "Fucking Village where Rafid is fucked everytime!",
-    risk: "High level features",
+    risk: "High",
     trimester: 2,
+    initials: "RF",
   },
   {
     id: 3,
@@ -35,20 +30,46 @@ const patients = [
     village: "Sylhet",
     risk: "Low",
     trimester: 1,
+    initials: "NJ",
   },
 ];
+
+const trimesterLabel = (t: number) => {
+  if (t === 1) return "1st Trimester";
+  if (t === 2) return "2nd Trimester";
+  return "3rd Trimester";
+};
+
+const riskConfig = (risk: string) => {
+  if (risk === "High")
+    return {
+      badge: "bg-[#2a0e0e] text-[#f06060] border border-[#5a1a1a]",
+      dot: "bg-[#f06060]",
+    };
+  if (risk === "Medium")
+    return {
+      badge: "bg-[#2a1e06] text-[#e0a040] border border-[#5a3a10]",
+      dot: "bg-[#e0a040]",
+    };
+  return {
+    badge: "bg-[#0a2010] text-[#40c070] border border-[#1a5030]",
+    dot: "bg-[#40c070]",
+  };
+};
 
 export default function PatientsPage() {
   return (
     <DashboardLayout>
 
-      <div className="flex items-center justify-between mb-8">
-
+      {/* ── Page Header ── */}
+      <div className="flex items-start justify-between mb-8">
         <div>
+          <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] mb-1">
+            Maternal Health AI
+          </p>
           <h1 className="text-3xl font-bold text-text-primary transition-colors duration-300">
             Patients
           </h1>
-
           <p className="text-text-muted mt-1 transition-colors duration-300">
             Maternal healthcare monitoring
           </p>
@@ -64,64 +85,88 @@ export default function PatientsPage() {
         </button>
       </div>
 
-      {/* Patients Table */}
-      <div className="
-        bg-card
-        rounded-2xl
-        border border-border-custom
-        shadow-premium
-        overflow-hidden
-        transition-all
-        duration-300
-      ">
+      {/* ── Patients Table ── */}
+      <div className="bg-[#131720] border border-[#1e2535] rounded-2xl overflow-hidden mb-8">
 
+        {/* Section label */}
+        <div className="px-6 py-4 border-b border-[#1e2535] flex items-center justify-between">
+          <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            All Patients
+          </p>
+          <span className="px-2.5 py-0.5 rounded-full bg-[#0f1f32] border border-[#1e3350] text-[#4a6fa0] text-[11px] font-bold font-mono">
+            {patients.length}
+          </span>
+        </div>
+
+        {/* Table */}
         <table className="w-full">
-
-          <thead className="bg-header-bg text-text-muted border-b border-border-custom transition-colors duration-300">
-            <tr>
-              <th className="text-left p-4">Patient</th>
-              <th className="text-left p-4">Village</th>
-              <th className="text-left p-4">Trimester</th>
-              <th className="text-left p-4">Risk Level</th>
+          <thead>
+            <tr className="bg-[#0d1118]">
+              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">
+                Patient
+              </th>
+              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">
+                Village
+              </th>
+              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">
+                Trimester
+              </th>
+              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">
+                Risk Level
+              </th>
             </tr>
           </thead>
 
           <tbody>
-            {patients.map((patient) => {
-              const riskLower = patient.risk.toLowerCase();
-              const isHigh = riskLower.includes("high");
-              const isMedium = riskLower.includes("medium");
-
+            {patients.map((patient, index) => {
+              const config = riskConfig(patient.risk);
               return (
                 <tr
                   key={patient.id}
-                  className="border-t border-border-custom transition-colors duration-300"
+                  className={`border-t border-[#1a2235] transition-colors duration-150 hover:bg-[#0f1520] ${
+                    index % 2 === 0 ? "bg-[#0d1118]" : "bg-[#0b0f16]"
+                  }`}
                 >
-                  <td className="p-4 text-text-primary font-medium transition-colors duration-300">
-                    {patient.name}
+                  {/* Patient */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-[#0a0d14] border border-[#1a2235] flex items-center justify-center">
+                          <span className="text-[10px] font-bold text-[#4a7fa8] font-mono tracking-wider">
+                            {patient.initials}
+                          </span>
+                        </div>
+                        <span className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${config.dot} ring-2 ring-[#0d1118]`} />
+                      </div>
+                      <span className="text-[14px] font-semibold text-[#dce4f0]">
+                        {patient.name}
+                      </span>
+                    </div>
                   </td>
 
-                  <td className="p-4 text-text-secondary transition-colors duration-300">
-                    {patient.village}
+                  {/* Village */}
+                  <td className="px-6 py-4">
+                    <span className="text-[13px] text-[#5a6a84] max-w-50 truncate block">
+                      {patient.village}
+                    </span>
                   </td>
 
-                  <td className="p-4 text-text-secondary transition-colors duration-300">
-                    {patient.trimester}
+                  {/* Trimester */}
+                  <td className="px-6 py-4">
+                    <span className="text-[12px] font-mono font-semibold px-3 py-1 rounded-full bg-[#0f1f32] border border-[#1e3350] text-[#4a6fa0] tracking-wider">
+                      {trimesterLabel(patient.trimester)}
+                    </span>
                   </td>
 
-                  <td className="p-4">
-                    <span
-                      className={`
-                        px-3 py-1 rounded-full text-sm font-semibold transition-all duration-300
-                        ${
-                          isHigh
-                            ? "bg-red-50 text-red-700 dark:bg-red-500/20 dark:text-red-400"
-                            : isMedium
-                            ? "bg-amber-50 text-amber-700 dark:bg-yellow-500/20 dark:text-yellow-300"
-                            : "bg-green-50 text-green-700 dark:bg-green-500/20 dark:text-green-400"
-                        }
-                      `}
-                    >
+                  {/* Risk */}
+                  <td className="px-6 py-4">
+                    <span className={`text-[11px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full ${config.badge}`}>
                       {patient.risk}
                     </span>
                   </td>
@@ -129,8 +174,8 @@ export default function PatientsPage() {
               );
             })}
           </tbody>
-
         </table>
+
       </div>
 
     </DashboardLayout>

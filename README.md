@@ -2,146 +2,151 @@
 
 > Predicting pregnancy risks before they become emergencies.
 
-NAB Preg AI is an AI-powered maternal healthcare platform that uses OCR-extracted medical reports, health data, and AI analytics to enable early detection of anemia, hypertension, and other pregnancy complications — built for underserved and rural communities where continuous maternal care is out of reach.
+## Overview
+
+NAB Preg AI is an AI-powered maternal healthcare platform that combines OCR, machine learning, and clinical rules to identify pregnancy-related health risks from medical reports.
+
+The platform extracts clinical values from uploaded reports, analyzes maternal health indicators, predicts risk levels, and provides explainable recommendations for healthcare workers and patients.
 
 ---
 
-## The Problem
+## Current Features
 
-Pregnant women in rural and underserved communities often lack access to continuous maternal healthcare. Limited medical infrastructure, delayed diagnoses, and irregular monitoring mean conditions like anemia, hypertension, and other complications frequently go undetected — leading to preventable maternal emergencies.
+✅ Upload PDF, JPG, and PNG medical reports
+
+✅ OCR extraction using Tesseract.js
+
+✅ Automatic extraction of:
+- Hemoglobin
+- Blood Pressure
+- Blood Sugar
+- Heart Rate
+
+✅ AI-powered maternal risk prediction
+
+✅ Multi-output XGBoost prediction model
+
+✅ Clinical rule-based risk scoring
+
+✅ Explainable AI recommendations
+
+✅ Clinical findings generation
+
+✅ Confidence scoring
+
+✅ Modern healthcare dashboard UI
 
 ---
 
-## What It Does
+## AI Pipeline
 
-- **AI Risk API** — FastAPI backend serving real-time maternal risk predictions
-- **Interactive Dashboard** — Modern healthcare analytics dashboard built with Next.js
-- **Supabase Integration** — Cloud PostgreSQL storage for patients, alerts, predictions, and reports
+Medical Report
+↓
+OCR Extraction
+↓
+Structured Clinical Data
+↓
+XGBoost Prediction Model
+↓
+Clinical Rule Engine
+↓
+Risk Scoring
+↓
+Recommendations
+↓
+AI Dashboard
 
 ---
 
-## AI Engine Features
+## AI Model
 
-- Maternal risk prediction using XGBoost MultiOutputClassifier
-- Confidence scoring system
-- AI-generated healthcare recommendations
-- Rule-based clinical reasoning
-- Risk explanation engine
-- Structured AI reporting
+The prediction engine uses a trained MultiOutput XGBoost classifier.
 
-## AI Inference Pipeline
- 
-```
-Patient Input
-      ↓
-Preprocessing
-      ↓
-XGBoost MultiOutput Model
-      ↓
-Risk Predictions
-      ↓
-Rule Engine
-      ↓
-Reasons + Recommendations
-      ↓
-Final AI Response
-```
- 
+Predicted outputs:
+
+- Overall Maternal Risk
+- Anemia Risk
+- Hypertension Risk
+
+The ML prediction is combined with a clinical rule engine based on:
+
+- Hemoglobin
+- Blood Pressure
+- Blood Sugar
+- Heart Rate
+
+This hybrid approach improves explainability and transparency.
+
 ---
 
+## Explainable Risk Scoring
+
+Clinical Risk Score is calculated using:
+
+| Indicator | Risk Condition |
+|------------|---------------|
+| Hemoglobin | < 11 g/dL |
+| Blood Pressure | ≥ 140/90 mmHg |
+| Blood Sugar | ≥ 126 mg/dL |
+| Heart Rate | ≥ 100 bpm |
+
+The score is displayed alongside AI predictions to provide clear reasoning behind the final risk classification.
+
+---
 
 ## Tech Stack
 
 | Layer | Technologies |
-|---|---|
-| **Backend** | Python, FastAPI, PostgreSQL, Redis |
-| **AI Engine** | Custom ML models, RAG pipeline, multi-agent system |
-| **OCR** | Automated extraction from medical reports |
-| **Frontend** | Next.js, TypeScript |
-| **Database** | Supabase PostgreSQL |
-| **Charts & Visualization** | Recharts |
-| **Styling** | Tailwind CSS |
+|---------|-------------|
+| Frontend | Next.js, TypeScript, Tailwind CSS |
+| OCR | Tesseract.js |
+| Backend | FastAPI, Python |
+| AI Model | XGBoost MultiOutput Classifier |
+| Database | Supabase PostgreSQL |
+| Charts | Recharts |
 
 ---
 
 ## Project Structure
 
-```
-nab-preg-ai/
-├── backend/              # FastAPI app — auth, patients, predictions, alerts, OCR
+```text
+NAB-Preg-AI/
+├── frontend/
 │   ├── app/
-│   │   ├── api/          # Route handlers (auth, patients, predictions, analytics, alerts, ocr)
-│   │   ├── core/         # Config, database, security, Redis
-│   │   ├── models/       # ORM models
-│   │   ├── schemas/      # Pydantic schemas
-│   │   ├── services/     # Business logic
+│   ├── components/
+│   └── services/
+│
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   ├── core/
+│   │   ├── services/
 │   │   └── main.py
-│   └── requirements.txt
 │
-├── ai_engine/            # ML models, agents, RAG, and prompts
-│   ├── models/           # Trained model artifacts
-│   ├── src/              # Inference, preprocessing, anomaly detection, embeddings
-│   ├── agents/           # Nutrition, alert, risk explainer, village analytics agents
-│   ├── rag/              # Retrieval pipeline, vector store, chunking, knowledge base
-│   └── prompts/          # Prompt templates (nutrition, alerts, summarization, multilingual)
+├── ai_engine/
+│   ├── models/
+│   └── src/
 │
-├── frontend/             # Next.js dashboard
-│   └── app/
-│       ├── dashboard/
-│       ├── analytics/
-│       ├── alerts/
-│       ├── patients/
-│       └── upload/
-│
-├── tests/                # API, AI, OCR, frontend, and integration tests
-├── scripts/              # Seed data, load embeddings, bootstrap
-└── docs/                 # Architecture, API contracts, data schema, deployment guides
+└── docs/
 ```
 
 ---
 
 ## Getting Started
 
-### Prerequisites
-
-- Python 3.10+
-- Node.js 18+
-- Docker & Docker Compose
-- [`uv`](https://github.com/astral-sh/uv) (Python package manager)
-
-### 1. Clone the Repository
+### Backend
 
 ```bash
-git clone https://github.com/your-org/nab-preg-ai.git
-cd nab-preg-ai
+uv run uvicorn backend.app.main:app --reload
 ```
 
-### 2. Set Up Environment Variables
+Backend URL:
 
-```bash
-cp .env.example .env
-# Fill in your credentials and config values
+```text
+http://127.0.0.1:8000
 ```
 
-### 3. Backend Setup
-
-```bash
-cd backend
-
-# Activate virtual environment
-.venv\Scripts\activate          # Windows
-# source .venv/bin/activate     # macOS/Linux
-
-# Install dependencies
-uv pip install -r requirements.txt
-
-# Start the server
-uv run uvicorn app.main:app --reload
-```
-
-The API will be available at `http://localhost:8000`.
-
-### 4. Frontend Setup
+### Frontend
 
 ```bash
 cd frontend
@@ -149,85 +154,36 @@ npm install
 npm run dev
 ```
 
-The dashboard will be available at `http://localhost:3000`.
+Frontend URL:
 
----
-
-### 5. AI Engine Setup
- 
-```bash
-cd ai_engine
- 
-# Create and activate virtual environment
-uv venv
-.venv\Scripts\activate          # Windows
-# source .venv/bin/activate     # macOS/Linux
- 
-# Install dependencies
-uv pip install -r requirements.txt
-```
-
-
-## AI Agents
-
-| Agent | Role |
-|---|---|
-| `nutrition_agent` | Personalized dietary recommendations based on patient data |
-| `alert_agent` | Real-time risk escalation and healthcare worker notifications |
-| `risk_explainer_agent` | Plain-language explanations of predicted risks |
-| `village_analytics_agent` | Community-level health trend analysis |
-
----
-
-## Documentation
-
-All detailed documentation lives in the `/docs` folder:
-
-- [`data_schema.md`](docs/data_schema.md) — Database and data models
-- [`ai_architecture.md`](docs/ai_architecture.md) — AI/ML system design
-- [`api_contracts.md`](docs/api_contracts.md) — API endpoint reference
-- [`offline_sync_flow.md`](docs/offline_sync_flow.md) — Offline-first sync design
-- [`system_design.md`](docs/system_design.md) — Overall system architecture
-- [`deployment.md`](docs/deployment.md) — Deployment guide
-
----
-
-## Running Tests
-
-```bash
-# All tests
-pytest tests/
-
-# Specific suites
-pytest tests/api/
-pytest tests/ai/
-pytest tests/ocr/
-pytest tests/integration/
+```text
+http://localhost:3000
 ```
 
 ---
 
-## Contributing
+## Impact
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -m 'Add your feature'`)
-4. Push to the branch (`git push origin feature/your-feature`)
-5. Open a Pull Request
+NAB Preg AI helps frontline healthcare workers identify maternal health risks early by transforming routine medical reports into actionable clinical insights.
 
----
+Potential benefits:
 
-## License
-
-This project is licensed under the MIT License. See [`LICENSE`](LICENSE) for details.
+- Early anemia detection
+- Hypertension screening
+- Gestational diabetes awareness
+- Faster clinical triage
+- Improved maternal monitoring in low-resource settings
 
 ---
 
-## Acknowledgements
- 
-- **WHO & UNICEF** — for publicly available maternal health guidelines and datasets that informed our risk models
-- **Open-source community** — [XGBoost](https://github.com/dmlc/xgboost), [FastAPI](https://fastapi.tiangolo.com/), [Next.js](https://nextjs.org/), and [LangChain](https://github.com/langchain-ai/langchain) for the foundational tools powering this platform
-- **Healthcare workers in rural communities** — whose challenges inspired this project and whose feedback continues to shape it
+## Future Roadmap
+
+- Save predictions to Supabase
+- Patient history tracking
+- Village-level analytics
+- Healthcare worker dashboard
+- Cloud deployment
+
 ---
 
-*Built to reduce preventable maternal deaths through accessible AI-powered healthcare.*
+Built for maternal healthcare innovation and early risk detection.
