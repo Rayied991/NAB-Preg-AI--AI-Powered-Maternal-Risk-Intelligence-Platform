@@ -23,8 +23,14 @@ class PredictionRequest(BaseModel):
 @router.post("/predict")
 async def predict(payload: PredictionRequest):
 
+    print("\n===== API RECEIVED =====")
+    print(payload.dict())
+
     result = predict_maternal_risk(
         payload.dict()
     )
+
+    print("\n===== FINAL RESULT =====")
+    print(result)
 
     return result
