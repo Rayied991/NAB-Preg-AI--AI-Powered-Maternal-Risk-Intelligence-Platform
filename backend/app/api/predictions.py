@@ -7,6 +7,19 @@ from ai_engine.src.predictor import (
 from backend.app.services.prediction_storage import (
     save_prediction
 )
+import os
+import requests
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SUPABASE_URL = os.getenv(
+    "NEXT_PUBLIC_SUPABASE_URL"
+)
+
+SUPABASE_KEY = os.getenv(
+    "NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY"
+)
 router = APIRouter()
 
 
@@ -33,3 +46,20 @@ async def predict(payload: PredictionRequest):
     save_prediction(result)
 
     return result
+
+@router.get("/predictions")
+async def get_predictions():
+
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+    }
+
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/predictions"
+        "?select=*"
+        "&order=predicted_at.desc",
+        headers=headers,
+    )
+
+    return response.json()

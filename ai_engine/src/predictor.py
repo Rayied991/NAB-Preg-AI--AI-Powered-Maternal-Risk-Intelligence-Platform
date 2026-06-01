@@ -1,6 +1,7 @@
 from ai_engine.src.preprocessing import preprocess_input
 from ai_engine.src.inference import run_prediction
 from ai_engine.src.risk_rules import generate_risk_reason
+from backend.app.core.alert_storage import create_alert
 from ai_engine.src.recommendation_engine import generate_recommendation
 from ai_engine.src.constants import (
     MEDIUM_HB_THRESHOLD,
@@ -15,20 +16,14 @@ from ai_engine.src.constants import (
 
 def predict_maternal_risk(payload):
 
-    # print("\n===== ORIGINAL PAYLOAD =====")
-    # print(payload)
+ 
     processed = preprocess_input(payload)
     
-    # print("\n===== PROCESSED INPUT =====")
-    # print(processed)
+
 
     prediction, probability = run_prediction(processed)
     
-    # print("\n===== RAW PREDICTION =====")
-    # print(prediction)
-    
-    # print("\n===== RAW PROBABILITY =====")
-    # print(probability)
+
 
     reasons = generate_risk_reason(payload)
 
@@ -94,6 +89,12 @@ def predict_maternal_risk(payload):
 
     else:
         overall_risk = "LOW"
+    if overall_risk == "HIGH":
+     create_alert(
+        severity="HIGH",
+        alert_message="HIGH RISK MATERNAL CASE DETECTED",
+        status="OPEN"
+    )    
 
     anemia_risk = risk_mapping.get(
         int(predictions[1]),
