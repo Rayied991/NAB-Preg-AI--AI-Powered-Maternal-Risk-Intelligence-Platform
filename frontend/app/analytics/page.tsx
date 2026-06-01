@@ -1,7 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 import BPTrendChart from "@/components/charts/BPTrendChart";
 import RiskPieChart from "@/components/charts/RiskPieChart";
 import VillageAnalyticsChart from "@/components/charts/VillageAnalyticsChart";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { fetchAnalytics } from "@/services/analytics.service";
+import { fetchVillageAnalytics } from "@/services/village-analytics.service";
+import { useEffect, useState } from "react";
 
 /**
  * AnalyticsPage Component
@@ -12,6 +17,36 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
  * - Subtitle description mapped to `text-text-muted`.
  */
 export default function AnalyticsPage() {
+ const [villages, setVillages] = useState<any[]>([]);
+ const [analytics, setAnalytics] = useState<any>(null);
+
+ useEffect(() => {
+  const loadAnalytics = async () => {
+    try {
+      const data = await fetchAnalytics();
+      setAnalytics(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  loadAnalytics();
+}, []);
+
+useEffect(() => {
+  const loadVillageAnalytics = async () => {
+    try {
+      const data =
+        await fetchVillageAnalytics();
+
+      setVillages(data);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  loadVillageAnalytics();
+}, []); 
   return (
     <DashboardLayout>
 
@@ -42,7 +77,12 @@ export default function AnalyticsPage() {
             </svg>
             Risk Distribution
           </p>
-          <RiskPieChart />
+          <RiskPieChart
+        highRisk={analytics?.high_risk || 0}
+        mediumRisk={analytics?.medium_risk || 0}
+        lowRisk={analytics?.low_risk || 0}
+      />
+
         </div>
 
         {/* BP Trend Chart */}
@@ -68,8 +108,56 @@ export default function AnalyticsPage() {
           </svg>
           Village-Level Analytics
         </p>
-        <VillageAnalyticsChart />
+        <VillageAnalyticsChart   data={villages}/>
       </div>
+
+      <div className="mt-6 overflow-x-auto">
+
+  <table className="w-full text-sm">
+
+    <thead>
+      <tr className="border-b border-[#1e2535]">
+        <th className="text-left p-2">Village</th>
+        <th className="text-left p-2">High Risk</th>
+        <th className="text-left p-2">Medium Risk</th>
+        <th className="text-left p-2">Low Risk</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      {villages.map((village) => (
+
+        <tr
+          key={village.id}
+          className="border-b border-[#1e2535]"
+        >
+
+          <td className="p-2">
+            {village.village_name}
+          </td>
+
+          <td className="p-2 text-red-400">
+            {village.high_risk_cases}
+          </td>
+
+          <td className="p-2 text-yellow-400">
+            {village.medium_risk_cases}
+          </td>
+
+          <td className="p-2 text-green-400">
+            {village.low_risk_cases}
+          </td>
+
+        </tr>
+
+      ))}
+
+    </tbody>
+
+  </table>
+
+</div>
 
     </DashboardLayout>
   );

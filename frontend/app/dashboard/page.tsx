@@ -70,13 +70,16 @@ export default function DashboardPage() {
       />
       </div>
 
-      <div className="mt-10">
+      <div className="mt-6 bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+        <h2 className="text-xl font-semibold text-white mb-6">
+          Risk Distribution
+        </h2>
         <RiskPieChart
-        highRisk={analytics?.high_risk || 0}
-        mediumRisk={analytics?.medium_risk || 0}
-        lowRisk={analytics?.low_risk || 0}
+          highRisk={analytics?.high_risk || 0}
+          mediumRisk={analytics?.medium_risk || 0}
+          lowRisk={analytics?.low_risk || 0}
         />
-      </div>
+</div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
 
   {/* Recent Alerts */}
