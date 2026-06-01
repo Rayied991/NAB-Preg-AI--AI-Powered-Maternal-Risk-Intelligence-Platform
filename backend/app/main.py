@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.app.api.predictions import (
     router as prediction_router
 )
-
+from backend.app.api.routes.analytics import router as analytics_router
 app = FastAPI(
     title="NAB Preg AI API"
 )
@@ -21,9 +21,10 @@ app.include_router(
     prefix="/api"
 )
 
-# app.include_router(
-# prefix="/api"
-# )
+app.include_router(
+    analytics_router,
+    prefix="/api"
+)
 
 @app.get("/")
 def root():
