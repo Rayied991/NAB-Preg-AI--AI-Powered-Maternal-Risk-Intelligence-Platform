@@ -5,6 +5,9 @@ from backend.app.api.predictions import (
 )
 from backend.app.api.routes.analytics import router as analytics_router
 from backend.app.api.routes.village_analytics import router as village_router
+from backend.app.api.routes.patients import (
+    router as patient_router
+)
 app = FastAPI(
     title="NAB Preg AI API"
 )
@@ -28,6 +31,10 @@ app.include_router(
 )
 app.include_router(
     village_router,
+    prefix="/api"
+)
+app.include_router(
+    patient_router,
     prefix="/api"
 )
 

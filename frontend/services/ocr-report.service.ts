@@ -1,4 +1,5 @@
 export async function saveOCRReport(
+    patientId: string,
   extractedText: string,
   parsedJson: unknown
 ) {
@@ -11,6 +12,7 @@ export async function saveOCRReport(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        patient_id: patientId,
         extracted_text: extractedText,
         parsed_json: parsedJson,
       }),

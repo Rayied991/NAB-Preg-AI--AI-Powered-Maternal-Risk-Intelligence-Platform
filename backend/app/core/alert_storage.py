@@ -15,6 +15,7 @@ SUPABASE_KEY = os.getenv(
 
 
 def create_alert(
+    patient_id,
     severity,
     alert_message,
     status="OPEN"
@@ -28,6 +29,7 @@ def create_alert(
     }
 
     payload = {
+        "patient_id": patient_id,
         "severity": severity,
         "alert_message": alert_message,
         "status": status,

@@ -33,7 +33,7 @@ export default function VillageAnalyticsChart({
         High Risk Cases by Village
       </h2>
 
-      <div className="w-full h-[300px]">
+      <div className="w-full h-75">
 
         <ResponsiveContainer width="100%" height="100%">
 
