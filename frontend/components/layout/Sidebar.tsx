@@ -15,6 +15,7 @@
 import {
     BarChart3,
     Bell,
+    ClipboardClock,
     LayoutDashboard,
     Upload,
     Users,
@@ -48,6 +49,11 @@ const menuItems = [
     name: "Analytics",
     href: "/analytics",
     icon: BarChart3,
+  },
+  {
+    name: "Prediction History",
+    href: "/history",
+    icon: ClipboardClock,
   },
 ];
 
