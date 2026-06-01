@@ -4,6 +4,9 @@ from pydantic import BaseModel
 from ai_engine.src.predictor import (
     predict_maternal_risk,
 )
+from backend.app.services.prediction_storage import (
+    save_prediction
+)
 router = APIRouter()
 
 
@@ -18,19 +21,15 @@ class PredictionRequest(BaseModel):
     height_cm: float
     meals_per_day: int
     veg_freq: int
-
-
+    
+    
 @router.post("/predict")
 async def predict(payload: PredictionRequest):
-
-    print("\n===== API RECEIVED =====")
-    print(payload.dict())
 
     result = predict_maternal_risk(
         payload.dict()
     )
 
-    print("\n===== FINAL RESULT =====")
-    print(result)
+    save_prediction(result)
 
     return result
