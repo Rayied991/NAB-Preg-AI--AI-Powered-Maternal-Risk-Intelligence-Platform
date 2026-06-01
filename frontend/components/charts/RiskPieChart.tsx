@@ -29,11 +29,17 @@ const COLORS = [
   "#22c55e",
 ];
 
-export default function RiskPieChart() {
+interface RiskPieChartProps {
+  highRisk: number;
+  mediumRisk: number;
+  lowRisk: number;
+}
+
+export default function RiskPieChart({ highRisk, mediumRisk, lowRisk }: RiskPieChartProps) {
   const [data, setData] = useState([
-    { name: "High Risk", value: 0 },
-    { name: "Medium Risk", value: 0 },
-    { name: "Low Risk", value: 0 },
+    { name: "High Risk", value: highRisk },
+    { name: "Medium Risk", value: mediumRisk },
+    { name: "Low Risk", value: lowRisk },
   ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,61 +71,43 @@ export default function RiskPieChart() {
 
     return () => clearInterval(intervalId);
   }, []);
-
-  return (
-    <div className="bg-card rounded-2xl p-6 border border-border-custom shadow-premium transition-all duration-300">
-
-      <h2 className="text-xl font-semibold text-text-primary mb-6 transition-colors duration-300">
-        Maternal Risk Distribution
-      </h2>
-
-      {error && (
-        <div className="text-red-500 text-sm mb-4">
-          {error}
+return (
+  <div className="w-full h-full">
+    {error && (
+      <div className="text-red-500 text-sm mb-4">{error}</div>
+    )}
+    <div className="w-full h-87.5">
+      {loading ? (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-[#5a6478]">Loading...</p>
         </div>
+      ) : (
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              outerRadius={120}
+              dataKey="value"
+              label
+            >
+              {data.map((entry, index) => (
+                <Cell key={index} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#131720",
+                borderColor: "#1e2535",
+                borderRadius: "12px",
+                color: "#f0f2f6",
+              }}
+              itemStyle={{ color: "#f0f2f6" }}
+            />
+          </PieChart>
+        </ResponsiveContainer>
       )}
-
-      <div className="w-full h-87.5">
-        {loading ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-text-secondary">Loading...</p>
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                outerRadius={120}
-                dataKey="value"
-                label
-              >
-                {data.map((entry, index) => (
-                  <Cell
-                    key={index}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "var(--bg-card)",
-                  borderColor: "var(--border-color)",
-                  borderRadius: "12px",
-                  color: "var(--text-main)",
-                }}
-                itemStyle={{
-                  color: "var(--text-main)",
-                }}
-              />
-
-            </PieChart>
-          </ResponsiveContainer>
-        )}
-      </div>
     </div>
-  );
-}
+  </div>
+)};
