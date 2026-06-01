@@ -9,8 +9,11 @@
  * 2. Swapped text header from `text-white` to `text-text-primary`.
  * 3. Styled the Recharts `<Tooltip>` element contentStyle dynamically using custom CSS properties
  *    (`var(--bg-card)`, `var(--border-color)`, `var(--text-main)`) so that it automatically updates colors in light/dark modes.
+ * 4. Integrated with fetchAnalytics API to display real-time risk distribution data.
+ * 5. Implemented auto-refresh polling to update the chart when data changes.
  */
 
+import { useState, useEffect } from "react";
 import {
     Cell,
     Pie,
@@ -18,12 +21,7 @@ import {
     ResponsiveContainer,
     Tooltip,
 } from "recharts";
-
-const data = [
-  { name: "High Risk", value: 12 },
-  { name: "Medium Risk", value: 28 },
-  { name: "Low Risk", value: 45 },
-];
+import { fetchAnalytics } from "@/services/analytics.service";
 
 const COLORS = [
   "#ef4444",
@@ -32,6 +30,42 @@ const COLORS = [
 ];
 
 export default function RiskPieChart() {
+  const [data, setData] = useState([
+    { name: "High Risk", value: 0 },
+    { name: "Medium Risk", value: 0 },
+    { name: "Low Risk", value: 0 },
+  ]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadAnalytics = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const analyticsData = await fetchAnalytics();
+
+        setData([
+          { name: "High Risk", value: analyticsData.high_risk },
+          { name: "Medium Risk", value: analyticsData.medium_risk },
+          { name: "Low Risk", value: analyticsData.low_risk },
+        ]);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to fetch analytics");
+        console.error("Analytics fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAnalytics();
+
+    // Set up auto-refresh every 30 seconds
+    const intervalId = setInterval(loadAnalytics, 30000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <div className="bg-card rounded-2xl p-6 border border-border-custom shadow-premium transition-all duration-300">
 
@@ -39,40 +73,52 @@ export default function RiskPieChart() {
         Maternal Risk Distribution
       </h2>
 
+      {error && (
+        <div className="text-red-500 text-sm mb-4">
+          {error}
+        </div>
+      )}
+
       <div className="w-full h-87.5">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
+        {loading ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-text-secondary">Loading...</p>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
 
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              outerRadius={120}
-              dataKey="value"
-              label
-            >
-              {data.map((entry, index) => (
-                <Cell
-                  key={index}
-                  fill={COLORS[index % COLORS.length]}
-                />
-              ))}
-            </Pie>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                outerRadius={120}
+                dataKey="value"
+                label
+              >
+                {data.map((entry, index) => (
+                  <Cell
+                    key={index}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
 
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "var(--bg-card)",
-                borderColor: "var(--border-color)",
-                borderRadius: "12px",
-                color: "var(--text-main)",
-              }}
-              itemStyle={{
-                color: "var(--text-main)",
-              }}
-            />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "var(--bg-card)",
+                  borderColor: "var(--border-color)",
+                  borderRadius: "12px",
+                  color: "var(--text-main)",
+                }}
+                itemStyle={{
+                  color: "var(--text-main)",
+                }}
+              />
 
-          </PieChart>
-        </ResponsiveContainer>
+            </PieChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );
