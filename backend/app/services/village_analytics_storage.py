@@ -31,3 +31,71 @@ def get_patient_village(patient_id):
         return None
 
     return data[0]["village"]
+def update_village_analytics(
+    patient_id,
+    overall_risk
+):
+
+    village = get_patient_village(
+        patient_id
+    )
+
+    if not village:
+        return
+
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/village_analytics"
+        f"?village_name=eq.{village}",
+        headers=headers,
+    )
+
+    rows = response.json()
+
+    if not rows:
+        return
+
+    row = rows[0]
+    
+    high_risk = row["high_risk_cases"]
+    medium_risk = row["medium_risk_cases"]
+    low_risk = row["low_risk_cases"]
+
+    if overall_risk == "HIGH":
+        high_risk += 1
+
+    elif overall_risk == "MEDIUM":
+        medium_risk += 1
+
+    elif overall_risk == "LOW":
+        low_risk += 1
+
+    payload = {
+        "high_risk_cases": high_risk,
+        "medium_risk_cases": medium_risk,
+        "low_risk_cases": low_risk,
+    }
+
+    update_response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/village_analytics"
+        f"?id=eq.{row['id']}",
+        headers=headers,
+        json=payload,
+    )
+
+    print(
+        "VILLAGE ANALYTICS STATUS:",
+        update_response.status_code
+    )
+
+    print(
+        "VILLAGE ANALYTICS BODY:",
+        update_response.text
+    )
+
+    return update_response
