@@ -42,6 +42,12 @@ async def get_heatmap():
     result = []
 
     for patient in patients:
+        
+      if (
+        patient["latitude"] is None
+        or patient["longitude"] is None
+    ):
+        continue   
 
         village_name = patient["village"]
 
