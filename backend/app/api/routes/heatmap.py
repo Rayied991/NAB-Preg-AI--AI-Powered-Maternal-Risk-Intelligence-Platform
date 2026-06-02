@@ -42,31 +42,31 @@ async def get_heatmap():
     result = []
 
     for patient in patients:
-        
-      if (
+
+     if (
         patient["latitude"] is None
         or patient["longitude"] is None
     ):
-        continue   
+        continue
 
-        village_name = patient["village"]
+    village_name = patient["village"]
 
-        analytics = next(
-            (
-                v for v in villages
-                if v["village_name"] == village_name
-            ),
-            None
-        )
+    analytics = next(
+        (
+            v for v in villages
+            if v["village_name"] == village_name
+        ),
+        None
+    )
 
-        result.append({
-            "village": village_name,
-            "latitude": patient["latitude"],
-            "longitude": patient["longitude"],
-            "high_risk_cases":
-                analytics["high_risk_cases"]
-                if analytics
-                else 0
-        })
+    result.append({
+        "village": village_name,
+        "latitude": patient["latitude"],
+        "longitude": patient["longitude"],
+        "high_risk_cases":
+            analytics["high_risk_cases"]
+            if analytics
+            else 0
+    })
 
     return result
