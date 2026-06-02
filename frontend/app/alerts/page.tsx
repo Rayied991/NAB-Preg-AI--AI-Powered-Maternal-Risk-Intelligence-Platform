@@ -1,32 +1,21 @@
+"use client";
+
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { fetchAlerts } from "@/services/alerts.service";
+import { useEffect, useState } from "react";
 
-/**
- * AlertsPage Component — Merge resolved
- * Header: kept text-text-primary / text-text-muted (theme-aware) + eyebrow from test-rayied
- * Body: kept test-rayied redesigned card layout
- */
+interface Alert {
+  id: string;
+  severity: string;
+  status: string;
+  alert_message: string;
+  triggered_at: string;
+}
 
-const alerts = [
-  {
-    id: 1,
-    patient: "Ayesha Rahman",
-    message: "Critical blood pressure detected",
-    severity: "High",
-    time: "2 min ago",
-    initials: "AR",
-  },
-  {
-    id: 2,
-    patient: "Fatema Noor",
-    message: "Hemoglobin level dropping",
-    severity: "Medium",
-    time: "18 min ago",
-    initials: "FN",
-  },
-];
+
 
 const severityConfig = (severity: string) => {
-  if (severity === "High")
+  if (severity === "HIGH")
     return {
       badge: "bg-[#2a0e0e] text-[#f06060] border border-[#5a1a1a]",
       dot: "bg-[#f06060]",
@@ -54,6 +43,28 @@ const severityConfig = (severity: string) => {
 };
 
 export default function AlertsPage() {
+
+  const [alerts, setAlerts] =
+    useState<Alert[]>([]);
+
+  useEffect(() => {
+
+    const loadAlerts = async () => {
+      try {
+
+        const data =
+          await fetchAlerts();
+
+        setAlerts(data);
+
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadAlerts();
+
+  }, []);
   return (
     <DashboardLayout>
 
@@ -80,7 +91,11 @@ export default function AlertsPage() {
           </svg>
           Active Alerts
           <span className="ml-1 px-2 py-0.5 rounded-full bg-[#2a0e0e] text-[#f06060] border border-[#5a1a1a] text-[10px] font-bold tracking-wider">
-            {alerts.length}
+            {
+  alerts.filter(
+    (a) => a.status === "OPEN"
+  ).length
+}
           </span>
         </p>
 
@@ -101,7 +116,7 @@ export default function AlertsPage() {
                     <div className="relative shrink-0">
                       <div className="w-10 h-10 rounded-xl bg-[#0a0d14] border border-[#1a2235] flex items-center justify-center">
                         <span className="text-[11px] font-bold text-[#4a7fa8] font-mono tracking-wider">
-                          {alert.initials}
+                          {alert.severity.substring(0, 2)}
                         </span>
                       </div>
                       {/* Live dot */}
@@ -111,13 +126,15 @@ export default function AlertsPage() {
                     {/* Text */}
                     <div>
                       <p className="text-[14px] font-semibold text-[#dce4f0] leading-tight">
-                        {alert.patient}
+                        {alert.alert_message}
                       </p>
                       <p className="text-[13px] text-[#5a6a84] mt-1 leading-relaxed">
-                        {alert.message}
+                        {alert.status}
                       </p>
                       <p className="text-[11px] text-[#2d3a50] mt-2 font-mono tracking-wide">
-                        {alert.time}
+                        {new Date(
+                          alert.triggered_at
+                        ).toLocaleString()}
                       </p>
                     </div>
 

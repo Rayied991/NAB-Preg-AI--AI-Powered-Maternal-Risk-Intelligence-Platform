@@ -6,6 +6,9 @@ from dotenv import load_dotenv
 from backend.app.services.village_analytics_storage import (
     get_patient_village
 )
+from backend.app.core.village_coordinates import (
+    DISTRICT_COORDINATES
+)
 load_dotenv()
 
 router = APIRouter()
@@ -19,6 +22,8 @@ class CreatePatientRequest(BaseModel):
     village: str
     blood_group: str
     contact_number: str
+    emergency_contact: str
+    height_cm: float
     
 SUPABASE_URL = os.getenv(
     "NEXT_PUBLIC_SUPABASE_URL"
@@ -61,6 +66,21 @@ async def create_patient(
     payload: CreatePatientRequest
 ):
 
+    coords = DISTRICT_COORDINATES.get(
+        payload.village
+    )
+
+    patient_data = {
+        **payload.dict(),
+        "latitude": (
+            coords["latitude"]
+            if coords else None
+        ),
+        "longitude": (
+            coords["longitude"]
+            if coords else None
+        ),
+    }
     headers = {
         "apikey": SUPABASE_KEY,
         "Authorization": f"Bearer {SUPABASE_KEY}",
@@ -71,7 +91,7 @@ async def create_patient(
     response = requests.post(
         f"{SUPABASE_URL}/rest/v1/patients",
         headers=headers,
-        json=payload.dict(),
+        json=patient_data
     )
 
     return response.json()    

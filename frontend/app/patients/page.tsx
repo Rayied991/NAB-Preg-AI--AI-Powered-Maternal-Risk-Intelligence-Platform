@@ -2,6 +2,9 @@
 "use client";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import {
+  createPatient,
+} from "@/services/create-patient.service";
 import { fetchPatientHistory } from "@/services/patient-history.service";
 import { fetchPatients } from "@/services/patient.service";
 import { useEffect, useState } from "react";
@@ -108,6 +111,84 @@ export default function PatientsPage() {
   const [selectedPatient, setSelectedPatient] = useState("");
   const [history, setHistory] = useState<any>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [creating, setCreating] =
+  useState(false);
+
+  const [showModal, setShowModal] =
+  useState(false);
+
+const [form, setForm] = useState({
+  patient_code: "",
+  full_name: "",
+  age: 0,
+  trimester: 1,
+  pregnancy_week: 1,
+  village: "",
+  blood_group: "",
+  contact_number: "",
+  emergency_contact: "",
+  height_cm: 0.0
+});
+
+const handleCreatePatient =
+  async () => {
+    if (
+  !form.patient_code ||
+  !form.full_name ||
+  !form.village
+) {
+  alert(
+    "Please fill all required fields"
+  );
+  return;
+}
+
+  setCreating(true);
+    try {
+
+      await createPatient(form);
+
+      const updatedPatients =
+        await fetchPatients();
+
+      setPatients(updatedPatients);
+      const createdPatient =
+  updatedPatients.find(
+    (p: any) =>
+      p.patient_code === form.patient_code
+  );
+
+if (createdPatient) {
+  setSelectedPatient(
+    createdPatient.id
+  );
+
+  await loadHistory(
+    createdPatient.id
+  );
+}
+
+      setShowModal(false);
+     setForm({
+  patient_code: "",
+  full_name: "",
+  age: 0,
+  trimester: 1,
+  pregnancy_week: 1,
+  village: "",
+  blood_group: "",
+  contact_number: "",
+  emergency_contact: "",
+  height_cm: 0,
+});
+
+    } catch (error) {
+      console.error(error);
+    }
+    finally{
+      setCreating(false);
+    }
+  };
 
   useEffect(() => {
     const loadPatients = async () => {
@@ -165,12 +246,29 @@ export default function PatientsPage() {
 
 
 
-        <button className="flex items-center gap-2 bg-[#1a4fa8] hover:bg-[#2060c8] active:scale-95 text-[#d8e8ff] text-[13px] font-semibold tracking-wide px-5 py-2.5 rounded-xl transition-all duration-200">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Add Patient
-        </button>
+
+    <button
+  onClick={() => setShowModal(true)}
+  className="flex items-center gap-2 bg-[#1a4fa8] hover:bg-[#2060c8] active:scale-95 text-[#d8e8ff] text-[13px] font-semibold tracking-wide px-5 py-2.5 rounded-xl transition-all duration-200"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+
+  Add Patient
+</button>
+
       </div>
 
       {/* ── Patients Table Card ── */}
@@ -381,6 +479,190 @@ export default function PatientsPage() {
 
         </div>
       )}
+
+      {showModal && (
+  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+
+    <div className="bg-[#131720] border border-[#1e2535] rounded-2xl p-6 w-full max-w-lg">
+
+      <h2 className="text-xl text-white font-semibold mb-4">
+        Create Patient
+      </h2>
+
+      <div className="space-y-3">
+
+       <input
+  value={form.patient_code}
+  placeholder="Patient Code"
+  className="w-full p-3 rounded-lg bg-[#0d1118]"
+  onChange={(e) =>
+    setForm({
+      ...form,
+      patient_code: e.target.value,
+    })
+  }
+/>
+
+        <input
+        value={form.full_name}
+          placeholder="Full Name"
+          className="w-full p-3 rounded-lg bg-[#0d1118]"
+          onChange={(e) =>
+            setForm({
+              ...form,
+              full_name: e.target.value,
+            })
+          }
+        />
+        <input
+        value={form.age}
+  type="number"
+  placeholder="Age"
+  className="w-full p-3 rounded-lg bg-[#0d1118]"
+  onChange={(e) =>
+    setForm({
+      ...form,
+      age: Number(e.target.value),
+    })
+  }
+/>
+
+<input
+  type="number"
+  value={form.trimester}
+  placeholder="Trimester"
+  className="w-full p-3 rounded-lg bg-[#0d1118]"
+  onChange={(e) =>
+    setForm({
+      ...form,
+      trimester: Number(e.target.value),
+    })
+  }
+/>
+
+<input
+  type="number"
+  value={form.pregnancy_week}
+  placeholder="Pregnancy Week"
+  className="w-full p-3 rounded-lg bg-[#0d1118]"
+  onChange={(e) =>
+    setForm({
+      ...form,
+      pregnancy_week: Number(e.target.value),
+    })
+  }
+/>
+
+        <input
+        value={form.village}
+          placeholder="Village"
+          className="w-full p-3 rounded-lg bg-[#0d1118]"
+          onChange={(e) =>
+            setForm({
+              ...form,
+              village: e.target.value,
+            })
+          }
+        />
+
+        <input
+        value={form.blood_group}
+          placeholder="Blood Group"
+          className="w-full p-3 rounded-lg bg-[#0d1118]"
+          onChange={(e) =>
+            setForm({
+              ...form,
+              blood_group: e.target.value,
+            })
+          }
+        />
+
+        <input
+        value={form.contact_number}
+          placeholder="Phone Number"
+          className="w-full p-3 rounded-lg bg-[#0d1118]"
+          onChange={(e) =>
+            setForm({
+              ...form,
+              contact_number:
+                e.target.value,
+            })
+          }
+        />
+
+        <input
+  value={form.emergency_contact}
+  placeholder="Emergency Contact"
+  className="w-full p-3 rounded-lg bg-[#0d1118]"
+  onChange={(e) =>
+    setForm({
+      ...form,
+      emergency_contact: e.target.value,
+    })
+  }
+/>
+
+<input
+  type="number"
+  value={form.height_cm}
+  placeholder="Height (cm)"
+  className="w-full p-3 rounded-lg bg-[#0d1118]"
+  onChange={(e) =>
+    setForm({
+      ...form,
+      height_cm: Number(e.target.value),
+    })
+  }
+/>
+
+      </div>
+
+      <div className="flex gap-3 mt-6">
+
+        <button
+  onClick={() => {
+    setShowModal(false);
+
+    setForm({
+  patient_code: "",
+  full_name: "",
+  age: 0,
+  trimester: 1,
+  pregnancy_week: 1,
+  village: "",
+  blood_group: "",
+  contact_number: "",
+  emergency_contact: "",
+  height_cm: 0,
+});
+  }}
+  className="px-4 py-2 rounded-lg bg-zinc-700"
+>
+  Cancel
+</button>
+
+       <button
+          onClick={handleCreatePatient}
+          disabled={creating}
+          className="
+            px-4 py-2
+            rounded-lg
+            bg-blue-600
+            disabled:opacity-50
+            disabled:cursor-not-allowed
+          "
+        >
+          {creating
+            ? "Creating..."
+            : "Create"}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
 
     </DashboardLayout>
   );

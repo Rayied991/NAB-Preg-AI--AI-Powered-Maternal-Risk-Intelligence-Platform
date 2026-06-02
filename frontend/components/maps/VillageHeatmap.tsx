@@ -60,13 +60,19 @@ export default function VillageHeatmap() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {data.map((point, index) => (
-          <CircleMarker
-            key={index}
-            center={[
-              point.latitude,
-              point.longitude,
-            ]}
+        {data
+  .filter(
+    (point) =>
+      point.latitude != null &&
+      point.longitude != null
+  )
+  .map((point, index) => (
+    <CircleMarker
+      key={index}
+      center={[
+        point.latitude,
+        point.longitude,
+      ]}
            radius={
   Math.min(
     Math.max(point.high_risk_cases * 2, 8),
