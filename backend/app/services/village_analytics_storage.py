@@ -58,7 +58,29 @@ def update_village_analytics(
     rows = response.json()
 
     if not rows:
-        return
+
+        create_payload = {
+            "village_name": village,
+            "high_risk_cases": 0,
+            "medium_risk_cases": 0,
+            "low_risk_cases": 0,
+            "anemia_cases": 0,
+            "hypertension_cases": 0,
+        }
+
+        requests.post(
+            f"{SUPABASE_URL}/rest/v1/village_analytics",
+            headers=headers,
+            json=create_payload,
+        )
+
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/village_analytics"
+            f"?village_name=eq.{village}",
+            headers=headers,
+        )
+
+    rows = response.json()
 
     row = rows[0]
     
