@@ -1,15 +1,25 @@
 from fastapi import APIRouter
 import requests
 import os
+from pydantic import BaseModel
 from dotenv import load_dotenv
 from backend.app.services.village_analytics_storage import (
     get_patient_village
 )
-
 load_dotenv()
 
 router = APIRouter()
 
+class CreatePatientRequest(BaseModel):
+    patient_code: str
+    full_name: str
+    age: int
+    trimester: int
+    pregnancy_week: int
+    village: str
+    blood_group: str
+    contact_number: str
+    
 SUPABASE_URL = os.getenv(
     "NEXT_PUBLIC_SUPABASE_URL"
 )
@@ -45,3 +55,23 @@ async def test_village(patient_id: str):
     return {
         "village": village
     }
+    
+@router.post("/patients")
+async def create_patient(
+    payload: CreatePatientRequest
+):
+
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json",
+        "Prefer": "return=representation",
+    }
+
+    response = requests.post(
+        f"{SUPABASE_URL}/rest/v1/patients",
+        headers=headers,
+        json=payload.dict(),
+    )
+
+    return response.json()    
