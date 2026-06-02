@@ -125,3 +125,27 @@ async def save_report(
     return {
         "message": "OCR report saved"
     }
+
+@router.patch("/alerts/{alert_id}/resolve")
+async def resolve_alert(alert_id: str):
+
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/alerts?id=eq.{alert_id}",
+        headers=headers,
+        json={
+            "status": "RESOLVED"
+        },
+    )
+
+    print("RESOLVE STATUS:", response.status_code)
+    print("RESOLVE BODY:", response.text)
+
+    return {
+        "message": "Alert resolved"
+    }
