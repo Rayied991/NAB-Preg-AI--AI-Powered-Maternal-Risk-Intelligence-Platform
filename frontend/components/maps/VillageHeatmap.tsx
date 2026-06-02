@@ -73,7 +73,7 @@ export default function VillageHeatmap() {
     30
   )
 }
-            pathOptions={{
+    pathOptions={{
   color:
     point.high_risk_cases > 10
       ? "#ef4444"
