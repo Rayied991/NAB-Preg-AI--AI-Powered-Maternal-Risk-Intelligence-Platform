@@ -10,6 +10,9 @@ from backend.app.services.prediction_storage import (
 from backend.app.services.ocr_report_storage import (
     save_ocr_report
 )
+from backend.app.services.village_analytics_storage import (
+    update_village_analytics
+)
 from backend.app.core.alert_storage import create_alert
 import os
 import requests
@@ -55,7 +58,10 @@ async def predict(payload: PredictionRequest):
         payload.patient_id,
         result
     )
-
+    update_village_analytics(
+    payload.patient_id,
+    result["patient_status"]["overall_risk"]
+    )
     if (
         result["patient_status"]["overall_risk"]
         == "HIGH"
