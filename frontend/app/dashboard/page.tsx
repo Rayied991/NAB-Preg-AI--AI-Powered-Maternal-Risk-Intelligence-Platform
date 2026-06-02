@@ -3,6 +3,9 @@
 import RiskCard from "@/components/cards/RiskCard";
 import RiskPieChart from "@/components/charts/RiskPieChart";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import {
+  resolveAlert,
+} from "@/services/alert.service";
 import { fetchAlerts } from "@/services/alerts.service";
 import { fetchAnalytics } from "@/services/analytics.service";
 import { useEffect, useState } from "react";
@@ -10,6 +13,30 @@ export default function DashboardPage() {
 
   const [analytics, setAnalytics] =useState<any>(null);
   const [alerts, setAlerts] = useState<any[]>([]);
+
+  const handleResolve = async (
+  alertId: string
+) => {
+
+  try {
+
+    await resolveAlert(alertId);
+
+    setAlerts((prev) =>
+      prev.map((alert) =>
+        alert.id === alertId
+          ? {
+              ...alert,
+              status: "RESOLVED",
+            }
+          : alert
+      )
+    );
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   useEffect(() => {
   const loadData = async () => {
@@ -87,9 +114,40 @@ export default function DashboardPage() {
         {alert.alert_message}
       </p>
 
-      <p className="text-zinc-400 text-sm mt-1">
-        {alert.severity} • {alert.status}
-      </p>
+      <p
+  className={`text-sm mt-1 font-medium ${
+    alert.status === "RESOLVED"
+      ? "text-green-500"
+      : "text-red-500"
+  }`}
+>
+  {alert.severity} • {alert.status}
+</p>
+
+<button
+  onClick={() =>
+    handleResolve(alert.id)
+  }
+  disabled={
+    alert.status === "RESOLVED"
+  }
+  className="
+    mt-3
+    px-3
+    py-1
+    rounded-lg
+    text-sm
+    bg-green-600
+    text-white
+    hover:bg-green-700
+    disabled:opacity-50
+    disabled:cursor-not-allowed
+  "
+>
+  {alert.status === "RESOLVED"
+    ? "Resolved"
+    : "Resolve"}
+</button>
 
     </div>
 
