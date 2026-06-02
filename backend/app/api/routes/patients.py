@@ -2,6 +2,9 @@ from fastapi import APIRouter
 import requests
 import os
 from dotenv import load_dotenv
+from backend.app.services.village_analytics_storage import (
+    get_patient_village
+)
 
 load_dotenv()
 
@@ -31,3 +34,14 @@ async def get_patients():
     )
 
     return response.json()
+
+@router.get("/test-village/{patient_id}")
+async def test_village(patient_id: str):
+
+    village = get_patient_village(
+        patient_id
+    )
+
+    return {
+        "village": village
+    }
