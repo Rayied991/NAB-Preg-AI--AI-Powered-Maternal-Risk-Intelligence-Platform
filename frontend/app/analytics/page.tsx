@@ -6,7 +6,15 @@ import VillageAnalyticsChart from "@/components/charts/VillageAnalyticsChart";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { fetchAnalytics } from "@/services/analytics.service";
 import { fetchVillageAnalytics } from "@/services/village-analytics.service";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+
+const VillageHeatmap = dynamic(
+  () => import("@/components/maps/VillageHeatmap"),
+  {
+    ssr: false,
+  }
+);
 
 export default function AnalyticsPage() {
  const [villages, setVillages] = useState<any[]>([]);
@@ -146,6 +154,14 @@ useEffect(() => {
     </tbody>
 
   </table>
+
+  <div className="mt-6 bg-[#131720] border border-[#1e2535] rounded-2xl p-6">
+  <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] mb-4">
+    Village Risk Heatmap
+  </p>
+
+  <VillageHeatmap />
+</div>
 
 </div>
 
