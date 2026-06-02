@@ -1,45 +1,151 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import { fetchPatientHistory } from "@/services/patient-history.service";
+import { fetchPatients } from "@/services/patient.service";
 import { useEffect, useState } from "react";
 
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { fetchPatients } from "@/services/patient.service";
+// ── Helpers declared outside page component ───────────────────────────────────
 
-import { fetchPatientHistory } from "@/services/patient-history.service";
+function RiskBadge({ risk }: { risk: string }) {
+  const map: Record<string, string> = {
+    HIGH:   "bg-red-500/15 text-red-400 border-red-500/30",
+    MEDIUM: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
+    LOW:    "bg-green-500/15 text-green-400 border-green-500/30",
+  };
+  const cls = map[risk?.toUpperCase()] ?? "bg-[#1e2535] text-[#5a6478] border-[#1e2535]";
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${cls}`}>
+      {risk ?? "—"}
+    </span>
+  );
+}
+
+
+function SeverityBadge({ severity }: { severity: string }) {
+  const map: Record<string, string> = {
+    CRITICAL: "bg-red-600/20 text-red-300 border-red-600/40",
+    HIGH:     "bg-red-500/15 text-red-400 border-red-500/30",
+    MEDIUM:   "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
+    LOW:      "bg-blue-500/15 text-blue-400 border-blue-500/30",
+  };
+  const cls = map[severity?.toUpperCase()] ?? "bg-[#1e2535] text-[#5a6478] border-[#1e2535]";
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${cls}`}>
+      {severity ?? "—"}
+    </span>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, string> = {
+    RESOLVED: "bg-green-500/15 text-green-400 border-green-500/30",
+    PENDING:  "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
+    ACTIVE:   "bg-red-500/15 text-red-400 border-red-500/30",
+  };
+  const cls = map[status?.toUpperCase()] ?? "bg-[#1e2535] text-[#5a6478] border-[#1e2535]";
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${cls}`}>
+      {status ?? "—"}
+    </span>
+  );
+}
+
+function SectionCard({
+  title,
+  icon,
+  count,
+  empty,
+  emptyLabel = "No records found",
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  count?: number;
+  empty?: boolean;
+  emptyLabel?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="bg-[#131720] border border-[#1e2535] rounded-2xl overflow-hidden">
+      {/* card header */}
+      <div className="px-6 py-4 border-b border-[#1e2535] flex items-center justify-between">
+        <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] flex items-center gap-2">
+          {icon}
+          {title}
+        </p>
+        {count !== undefined && (
+          <span className="px-2.5 py-0.5 rounded-full bg-[#0f1f32] border border-[#1e3350] text-[#4a6fa0] text-[11px] font-bold font-mono">
+            {count}
+          </span>
+        )}
+      </div>
+      {empty ? (
+        <div className="px-6 py-10 text-center">
+          <p className="text-[13px] text-[#2d3a50] italic">{emptyLabel}</p>
+        </div>
+      ) : (
+        children
+      )}
+    </div>
+  );
+}
+
+function MetaRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-3 py-3 border-b border-[#181f30] last:border-0">
+      <span className="text-[12px] text-[#3a4a68] w-28 shrink-0 pt-0.5">{label}</span>
+      <span className="text-[13px] text-[#c8d0e0] font-medium">{value ?? "—"}</span>
+    </div>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function PatientsPage() {
-
   const [patients, setPatients] = useState<any[]>([]);
-
-const [selectedPatient, setSelectedPatient] =
-  useState("");
-
-const [history, setHistory] =
-  useState<any>(null);
+  const [selectedPatient, setSelectedPatient] = useState("");
+  const [history, setHistory] = useState<any>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   useEffect(() => {
+    const loadPatients = async () => {
+      try {
+        const data = await fetchPatients();
+        setPatients(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    loadPatients();
+  }, []);
 
-  const loadPatients = async () => {
-
+  const loadHistory = async (patientId: string) => {
+    setHistory(null);
+    if (!patientId) return;
+    setHistoryLoading(true);
     try {
-
-      const data =
-        await fetchPatients();
-
-      setPatients(data);
-
-    } catch (error) {
-
-      console.error(error);
-
+      const data = await fetchPatientHistory(patientId);
+      setHistory(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
-  loadPatients();
+  const handleSelectChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const id = e.target.value;
+    setSelectedPatient(id);
+    await loadHistory(id);
+  };
 
-}, []);
-  
+  const handleRowClick = async (id: string) => {
+    setSelectedPatient(id);
+    await loadHistory(id);
+  };
+
   return (
     <DashboardLayout>
 
@@ -57,323 +163,224 @@ const [history, setHistory] =
           </p>
         </div>
 
-        <button className="
-          bg-blue-600 hover:bg-blue-700
-          text-white
-          px-5 py-3 rounded-xl
-          font-medium transition-all duration-300 cursor-pointer shadow-sm active:scale-95
-        ">
-          + Add Patient
+
+
+        <button className="flex items-center gap-2 bg-[#1a4fa8] hover:bg-[#2060c8] active:scale-95 text-[#d8e8ff] text-[13px] font-semibold tracking-wide px-5 py-2.5 rounded-xl transition-all duration-200">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Patient
         </button>
       </div>
 
-      {/* ── Patients Table ── */}
-      <div className="bg-[#131720] border border-[#1e2535] rounded-2xl overflow-hidden mb-8">
-
-        {/* Section label */}
-        <div className="px-6 py-4 border-b border-[#1e2535] flex items-center justify-between">
-          <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            All Patients
-          </p>
-          <span className="px-2.5 py-0.5 rounded-full bg-[#0f1f32] border border-[#1e3350] text-[#4a6fa0] text-[11px] font-bold font-mono">
-            {patients.length}
-          </span>
+      {/* ── Patients Table Card ── */}
+      <SectionCard
+        title="All Patients"
+        count={patients.length}
+        icon={
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        }
+      >
+        {/* Dropdown selector */}
+        <div className="px-6 py-4 border-b border-[#1e2535]">
+          <select
+            value={selectedPatient}
+            onChange={handleSelectChange}
+            className="w-full sm:w-72 bg-[#0d1118] border border-[#1e2535] hover:border-[#2a3650] focus:border-[#1a4fa8] focus:outline-none text-[#c8d0e0] text-[13px] rounded-xl px-4 py-2 transition-all duration-200"
+          >
+            <option value="">Select a patient to view history</option>
+            {patients.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.patient_code} — {p.full_name}
+              </option>
+            ))}
+          </select>
         </div>
 
-
-      <div className="mb-6">
-
-  <select
-
-    value={selectedPatient}
-
-    onChange={async (e) => {
-
-      const patientId =
-        e.target.value;
-
-      setSelectedPatient(
-        patientId
-      );
-
-      if (!patientId) return;
-
-      const data =
-        await fetchPatientHistory(
-          patientId
-        );
-
-      setHistory(data);
-
-    }}
-
-    className="bg-[#131720] border border-[#1e2535] rounded-xl px-4 py-2"
-
-  >
-
-    <option value="">
-      Select Patient
-    </option>
-
-    {patients.map((patient) => (
-
-      <option
-        key={patient.id}
-        value={patient.id}
-      >
-
-        {patient.patient_code}
-        {" - "}
-        {patient.full_name}
-
-      </option>
-
-    ))}
-
-  </select>
-
-</div>
         {/* Table */}
         <table className="w-full">
           <thead>
             <tr className="bg-[#0d1118]">
-              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">
-                Patient
-              </th>
-              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">
-                Village
-              </th>
-              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">
-                Patient Code
-              </th>
-              
+              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">Patient</th>
+              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">Village</th>
+              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">Patient Code</th>
             </tr>
           </thead>
-
           <tbody>
-            {patients.map((patient) => (
-
-<tr key={patient.id} className="border-t border-[#1a2235]">
-
-  <td className="px-6 py-4">
-  {patient.full_name}
-</td>
-
-<td className="px-6 py-4">
-  {patient.village}
-</td>
-
-<td className="px-6 py-4">
-  {patient.patient_code}
-</td>
-
-</tr>
-
-))}
+            {patients.map((p) => (
+              <tr
+                key={p.id}
+                onClick={() => handleRowClick(p.id)}
+                className={`border-t border-[#1a2235] cursor-pointer transition-colors duration-150
+                  ${selectedPatient === p.id ? "bg-[#0f1f38]" : "hover:bg-[#0d1520]"}`}
+              >
+                <td className="px-6 py-4 text-[13px] text-[#c8d0e0] font-medium">{p.full_name}</td>
+                <td className="px-6 py-4 text-[13px] text-[#5a6478]">{p.village}</td>
+                <td className="px-6 py-4">
+                  <span className="px-2 py-0.5 rounded bg-[#0f1f32] border border-[#1e3350] text-[#4a7fa8] text-[11px] font-mono">
+                    {p.patient_code}
+                  </span>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-{/* Patient details */}
-        {history && (
+      </SectionCard>
 
-  <div className="mt-8 p-6 border border-[#1e2535] rounded-2xl">
+      {/* ── Loading state ── */}
+      {historyLoading && (
+        <div className="mt-6 bg-[#131720] border border-[#1e2535] rounded-2xl px-6 py-12 text-center">
+          <p className="text-[13px] text-[#4a7fa8] animate-pulse">Loading patient history…</p>
+        </div>
+      )}
 
-    <h2 className="text-xl font-semibold mb-4">
-      Patient Details
-    </h2>
+      {/* ── History: each section is its own card ── */}
+      {history && (
+        <div className="mt-6 flex flex-col gap-5">
 
-    <p>
-      Name: {history.patient.full_name}
-    </p>
+          {/* ── Patient Details ── */}
+          <SectionCard
+            title="Patient Details"
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            }
+          >
+            <div className="px-6 py-1">
+              <MetaRow label="Full name"    value={history.patient.full_name} />
+              <MetaRow label="Village"      value={history.patient.village} />
+              <MetaRow label="Age"          value={history.patient.age ? `${history.patient.age} yrs` : undefined} />
+              <MetaRow label="Patient code" value={
+                <span className="px-2 py-0.5 rounded bg-[#0f1f32] border border-[#1e3350] text-[#4a7fa8] font-mono text-[11px]">
+                  {history.patient.patient_code}
+                </span>
+              } />
+            </div>
+          </SectionCard>
 
-    <p>
-      Village: {history.patient.village}
-    </p>
+          {/* ── OCR Reports ── */}
+          <SectionCard
+            title="OCR Reports"
+            count={history.ocr_reports.length}
+            emptyLabel="No OCR reports found"
+            empty={history.ocr_reports.length === 0}
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+            }
+          >
+            <div className="divide-y divide-[#1a2235]">
+              {history.ocr_reports.map((report: any) => (
+                <div key={report.id} className="px-6 py-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-[11px] text-[#3a4a68] mb-1.5">Hemoglobin</p>
+                    <p className="text-[14px] font-semibold text-[#c8d0e0]">{report.parsed_json?.hemoglobin ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-[#3a4a68] mb-1.5">Blood pressure</p>
+                    <p className="text-[14px] font-semibold text-[#c8d0e0]">{report.parsed_json?.blood_pressure ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-[#3a4a68] mb-1.5">Blood sugar</p>
+                    <p className="text-[14px] font-semibold text-[#c8d0e0]">{report.parsed_json?.blood_sugar ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-[#3a4a68] mb-1.5">Uploaded</p>
+                    <p className="text-[12px] text-[#5a6478]">{new Date(report.uploaded_at).toLocaleString()}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SectionCard>
 
-    <p>
-      Age: {history.patient.age}
-    </p>
+          {/* ── Predictions ── */}
+          <SectionCard
+            title="Predictions"
+            count={history.predictions.length}
+            emptyLabel="No predictions found"
+            empty={history.predictions.length === 0}
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            }
+          >
+            <div className="divide-y divide-[#1a2235]">
+              {history.predictions.map((pred: any) => (
+                <div key={pred.id} className="px-6 py-4 flex flex-wrap items-center gap-6">
+                  <div className="min-w-27.5">
+                    <p className="text-[11px] text-[#3a4a68] mb-1.5">Overall risk</p>
+                    <RiskBadge risk={pred.overall_risk} />
+                  </div>
+                  <div className="min-w-27.5">
+                    <p className="text-[11px] text-[#3a4a68] mb-1">Confidence</p>
+                    <p className="text-[15px] font-semibold text-[#c8d0e0]">
+                      {pred.confidence_score != null ? `${pred.confidence_score}%` : "—"}
+                    </p>
+                    {pred.confidence_score != null && (
+                      <div className="mt-1.5 h-1 w-20 bg-[#1e2535] rounded-full overflow-hidden">
+                        <div className="h-full bg-[#1a4fa8] rounded-full transition-all duration-700" style={{ width: `${pred.confidence_score}%` }} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-27.5">
+                    <p className="text-[11px] text-[#3a4a68] mb-1">Clinical score</p>
+                    <p className="text-[15px] font-semibold text-[#c8d0e0]">{pred.clinical_score ?? "—"}</p>
+                  </div>
+                  <div className="min-w-35 ml-auto">
+                    <p className="text-[11px] text-[#3a4a68] mb-1">Predicted at</p>
+                    <p className="text-[12px] text-[#5a6478]">{new Date(pred.predicted_at).toLocaleString()}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SectionCard>
 
-    <p>
-      Patient Code:
-      {" "}
-      {history.patient.patient_code}
-    </p>
-
-  </div>
-
-)}
-      {/* OCR REPORTS */}
-{history && (
-
-  <>
-    <h3 className="mt-6 text-lg font-semibold">
-      OCR Reports
-    </h3>
-
-    {history.ocr_reports.length === 0 ? (
-
-      <p className="text-zinc-500 mt-2">
-        No OCR reports found
-      </p>
-
-    ) : (
-
-      history.ocr_reports.map((report: any) => (
-
-        <div
-          key={report.id}
-          className="mt-3 p-4 border border-[#1e2535] rounded-xl"
-        >
-
-          <p>
-            Hb: {report.parsed_json?.hemoglobin}
-          </p>
-
-          <p>
-            BP: {report.parsed_json?.blood_pressure}
-          </p>
-
-          <p>
-            Sugar: {report.parsed_json?.blood_sugar}
-          </p>
-          <p>
-          Uploaded:
-          {" "}
-          {new Date(report.uploaded_at)
-            .toLocaleString()}
-        </p>
+          {/* ── Alerts ── */}
+          <SectionCard
+            title="Alerts"
+            count={history.alerts.length}
+            emptyLabel="No alerts found"
+            empty={history.alerts.length === 0}
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            }
+          >
+            <div className="divide-y divide-[#1a2235]">
+              {history.alerts.map((alert: any) => (
+                <div key={alert.id} className="px-6 py-4">
+                  <div className="flex flex-wrap items-center gap-2 mb-2.5">
+                    <SeverityBadge severity={alert.severity} />
+                    <StatusBadge   status={alert.status} />
+                  </div>
+                  <p className="text-[13px] text-[#c8d0e0] leading-relaxed mb-2">
+                    {alert.alert_message}
+                  </p>
+                  <p className="text-[12px] text-[#3a4a68]">
+                    Triggered: {new Date(alert.triggered_at).toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </SectionCard>
 
         </div>
-
-      ))
-
-    )}
-  </>
-
-)}
-
-{/* Predictions */}
-{history && (
-
-  <>
-    <h3 className="mt-6 text-lg font-semibold">
-      Predictions
-    </h3>
-
-    {history.predictions.length === 0 ? (
-
-      <p className="text-zinc-500 mt-2">
-        No predictions found
-      </p>
-
-    ) : (
-
-      history.predictions.map(
-        (prediction: any) => (
-
-          <div
-            key={prediction.id}
-            className="mt-3 p-4 border border-[#1e2535] rounded-xl"
-          >
-
-            <p>
-              Risk:
-              {" "}
-              {prediction.overall_risk}
-            </p>
-
-            <p>
-              Confidence:
-              {" "}
-              {prediction.confidence_score}
-            </p>
-
-            <p>
-              Clinical Score:
-              {" "}
-              {prediction.clinical_score}
-            </p>
-
-            <p>
-          Predicted:
-          {" "}
-          {new Date(prediction.predicted_at)
-            .toLocaleString()}
-        </p>
-
-          </div>
-
-        )
-      )
-
-    )}
-  </>
-
-)}
-
-{/* Alerts */}
-{history && (
-
-  <>
-    <h3 className="mt-6 text-lg font-semibold">
-      Alerts
-    </h3>
-
-    {history.alerts.length === 0 ? (
-
-      <p className="text-zinc-500 mt-2">
-        No alerts found
-      </p>
-
-    ) : (
-
-      history.alerts.map(
-        (alert: any) => (
-
-          <div
-            key={alert.id}
-            className="mt-3 p-4 border border-[#1e2535] rounded-xl"
-          >
-
-            <p>
-              {alert.alert_message}
-            </p>
-
-            <p>
-              Severity:
-              {" "}
-              {alert.severity}
-            </p>
-
-            <p>
-              Status:
-              {" "}
-              {alert.status}
-            </p>
-
-            <p>
-          Triggered:
-          {" "}
-          {new Date(alert.triggered_at)
-            .toLocaleString()}
-        </p>
-
-          </div>
-
-        )
-      )
-
-    )}
-  </>
-
-)}
-      </div>
+      )}
 
     </DashboardLayout>
   );
