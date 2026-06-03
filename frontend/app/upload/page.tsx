@@ -397,7 +397,7 @@ const [selectedPatient, setSelectedPatient] =
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
               <div className="bg-[#0a0d14] border border-[#141c28] rounded-lg p-3">
                 <p className="text-[10px] text-[#2d3a50] uppercase tracking-widest font-semibold mb-1">
-                  Anemia Risk
+                  ML Anemia Risk
                 </p>
                 <p className="text-[13px] font-semibold font-mono text-[#4a7fa8]">
                   {prediction?.patient_status?.anemia_risk ?? "—"}
@@ -405,7 +405,7 @@ const [selectedPatient, setSelectedPatient] =
               </div>
               <div className="bg-[#0a0d14] border border-[#141c28] rounded-lg p-3">
                 <p className="text-[10px] text-[#2d3a50] uppercase tracking-widest font-semibold mb-1">
-                  Hypertension Risk
+                  ML Hypertension Risk
                 </p>
                 <p className="text-[13px] font-semibold font-mono text-[#4a7fa8]">
                   {prediction?.patient_status?.hypertension_risk ?? "—"}
@@ -417,27 +417,27 @@ const [selectedPatient, setSelectedPatient] =
                     </p>
                     <p className="text-[13px] font-semibold font-mono text-[#4a7fa8]">
                       {prediction?.patient_status?.clinical_score != null
-                        ? `${prediction.patient_status.clinical_score} pts`
+                        ? `${prediction.patient_status.clinical_score} /8`
                         : "—"}
                     </p>
                     {prediction?.patient_status?.clinical_score != null && (
                       <p className={`text-[10px] font-bold tracking-widest uppercase mt-1 ${
-                        prediction.patient_status.clinical_score >= 2
+                        prediction.patient_status.clinical_score >= 6
                           ? "text-[#f06060]"
-                          : prediction.patient_status.clinical_score === 1
+                          : prediction.patient_status.clinical_score >= 3
                           ? "text-[#e0a040]"
                           : "text-[#40c070]"
                       }`}>
-                        {prediction.patient_status.clinical_score >= 2
+                        {prediction.patient_status.clinical_score >= 6
                           ? "High Risk"
-                          : prediction.patient_status.clinical_score === 1
+                          : prediction.patient_status.clinical_score >= 3
                           ? "Medium Risk"
                           : "Low Risk"}
                       </p>
                     )}
                     {/* Explainability tooltip */}
                     <div className="mt-2 pt-2 border-t border-[#1a2235]">
-                      <p className="text-[10px] text-[#2d3a50] mb-1">Calculated using:</p>
+                      <p className="text-[10px] text-[#2d3a50] mb-1">Risk factors evaluated:</p>
                       <div className="flex flex-col gap-0.5">
                         {["Hemoglobin", "Blood Pressure", "Blood Sugar", "Heart Rate"].map((factor) => (
                           <div key={factor} className="flex items-center gap-1.5">
@@ -484,7 +484,7 @@ const [selectedPatient, setSelectedPatient] =
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
               AI Summary
             </p>
-            <p className="text-[13px] text-[#4a5a72] leading-7">
+            <p className="text-[13px] text-[#4a5a72] leading-7 whitespace-pre-wrap">
               {prediction?.ai_summary ?? (
                 <span className="italic text-[#2a3a2a]">No summary yet.</span>
               )}

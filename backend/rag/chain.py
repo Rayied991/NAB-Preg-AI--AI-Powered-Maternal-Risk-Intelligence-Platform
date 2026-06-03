@@ -7,8 +7,8 @@ import os
 load_dotenv()
 
 print(
-    "Gemini key found:",
-    os.getenv("GEMINI_API_KEY") is not None
+    "Mistral API key found:",
+    os.getenv("MISTRAL_API_KEY") is not None
 )
 
 llm= ChatMistralAI(
