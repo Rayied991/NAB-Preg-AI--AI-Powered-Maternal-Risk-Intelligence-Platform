@@ -8,6 +8,9 @@ import {
 } from "@/services/alert.service";
 import { fetchAlerts } from "@/services/alerts.service";
 import { fetchAnalytics } from "@/services/analytics.service";
+import {
+  fetchInsights
+} from "@/services/insights.service";
 import { useEffect, useState } from "react";
 
 
@@ -28,6 +31,8 @@ export default function DashboardPage() {
 
   const [analytics, setAnalytics] =useState<any>(null);
   const [alerts, setAlerts] = useState<any[]>([]);
+  const [insights, setInsights] =
+  useState<string[]>([]);
 
   const handleResolve = async (
   alertId: string
@@ -56,14 +61,16 @@ export default function DashboardPage() {
   useEffect(() => {
   const loadData = async () => {
     try {
-      const [analyticsData, alertData] =
+      const [analyticsData, alertData,insightsData] =
         await Promise.all([
           fetchAnalytics(),
           fetchAlerts(),
+          fetchInsights()
         ]);
 
       setAnalytics(analyticsData);
       setAlerts(alertData);
+      setInsights(insightsData);
 
     } catch (error) {
       console.error(error);
@@ -180,17 +187,15 @@ export default function DashboardPage() {
 
     <div className="space-y-4 text-text-secondary transition-colors duration-300">
 
-      <p>
-        • 18% increase in hypertension risk cases this week.
+       {insights.map(
+    (insight, index) => (
+      <p key={index}>
+        • {insight}
       </p>
+    )
+  )}
 
-      <p>
-        • Most high-risk patients are from rural villages.
-      </p>
-
-      <p>
-        • Nutrition deficiencies strongly correlate with anemia.
-      </p>
+     
 
     </div>
   </div>
