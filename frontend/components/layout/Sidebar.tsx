@@ -13,12 +13,13 @@
  */
 
 import {
-    BarChart3,
-    Bell,
-    ClipboardClock,
-    LayoutDashboard,
-    Upload,
-    Users,
+  BarChart3,
+  Bell,
+  ClipboardClock,
+  Hospital,
+  LayoutDashboard,
+  Upload,
+  Users
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -55,6 +56,11 @@ const menuItems = [
     href: "/history",
     icon: ClipboardClock,
   },
+  {
+  name: "Clinical Assistant",
+  href: "/assistant",
+  icon: Hospital 
+  }
 ];
 
 export default function Sidebar() {

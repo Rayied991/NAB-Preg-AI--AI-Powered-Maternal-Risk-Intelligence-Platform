@@ -22,11 +22,7 @@ def ask_rag(question: str):
     docs = retriever.invoke(
         question
     )
-    print("\nRETRIEVED DOCUMENTS:")
-    for i, doc in enumerate(docs):
-        print(f"\n--- DOC {i+1} ---")
-        print(doc.page_content[:1000])
-
+  
     context = "\n\n".join(
         [doc.page_content for doc in docs]
     )
@@ -45,4 +41,19 @@ Question:
         prompt
     )
 
-    return response.content
+    sources = list(
+        set(
+            [
+                doc.metadata.get(
+                    "source",
+                    "Unknown"
+                )
+                for doc in docs
+            ]
+        )
+    )
+
+    return {
+        "answer": response.content,
+        "sources": sources,
+    }
