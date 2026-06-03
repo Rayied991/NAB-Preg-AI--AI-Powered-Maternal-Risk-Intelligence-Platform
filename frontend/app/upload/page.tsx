@@ -80,25 +80,121 @@ const [selectedPatient, setSelectedPatient] =
       const result = await handleFileUpload(file);
       await saveOCRReport(
         selectedPatient,
-      result.ocrData.raw_text,
-      result.ocrData
-    );
-      setOcrData(result.ocrData);
+        result.ocrData.raw_text || "",
+        result.ocrData
+      );
+      // Safe parsing helpers to handle LLM returning numbers, strings, or nested objects
+      const extractNum = (obj: any): number | null => {
+        if (!obj || typeof obj !== 'object') return null;
+        if (obj.value !== undefined) return Number(obj.value);
+        if (obj.level !== undefined) return Number(obj.level);
+        if (obj.fasting !== undefined) return Number(obj.fasting);
+        if (obj.result !== undefined) return Number(obj.result);
+        for (const key of Object.keys(obj)) {
+           if (typeof obj[key] === 'number') return obj[key];
+        }
+        return null;
+      };
 
-     const payload = {
+      const parseVal = (val: any) => {
+        if (typeof val === 'number') return val;
+        if (typeof val === 'string') {
+          const matched = val.match(/[\d.]+/);
+          return matched ? Number(matched[0]) : null;
+        }
+        if (val && typeof val === 'object') {
+          return extractNum(val);
+        }
+        return null;
+      };
+
+      const parseBloodSugar = (val: any) => {
+        let num = null;
+        let isMgDl = false;
+
+        if (typeof val === 'number') {
+          num = val;
+        } else if (typeof val === 'string') {
+          const matched = val.match(/[\d.]+/);
+          num = matched ? Number(matched[0]) : null;
+          if (val.toLowerCase().includes('mg')) isMgDl = true;
+        } else if (val && typeof val === 'object') {
+          num = extractNum(val);
+          if (val.type && String(val.type).toLowerCase().includes('mg')) isMgDl = true;
+          if (val.unit && String(val.unit).toLowerCase().includes('mg')) isMgDl = true;
+        }
+
+        if (num === null) return null;
+
+        // Convert if explicitly mg/dL or heuristically large (>30)
+        if (isMgDl || num > 30) {
+          return Number((num / 18.0).toFixed(2));
+        }
+        return num;
+      };
+
+      const parseHemoglobin = (val: any) => {
+        let num = null;
+        let isGl = false;
+
+        if (typeof val === 'number') {
+          num = val;
+        } else if (typeof val === 'string') {
+          const matched = val.match(/[\d.]+/);
+          num = matched ? Number(matched[0]) : null;
+          const lowerVal = val.toLowerCase();
+          if (lowerVal.includes('g/l') && !lowerVal.includes('g/dl')) isGl = true;
+        } else if (val && typeof val === 'object') {
+          num = extractNum(val);
+          const typeStr = (val.type || val.unit || '').toString().toLowerCase();
+          if (typeStr.includes('g/l') && !typeStr.includes('g/dl')) isGl = true;
+        }
+
+        if (num === null) return null;
+
+        // Convert if explicitly g/L or heuristically large (>30 means g/L because g/dL is rarely over 20)
+        if (isGl || num > 30) {
+          return Number((num / 10.0).toFixed(2));
+        }
+        return num;
+      };
+
+      const parseBp = (val: any) => {
+        if (val && typeof val === 'object') {
+          return { sys: val.systolic, dia: val.diastolic };
+        }
+        if (typeof val === 'string') {
+          const parts = val.split('/');
+          return { sys: parseInt(parts[0]), dia: parseInt(parts[1]) };
+        }
+        return { sys: null, dia: null };
+      };
+
+      const bp = parseBp(result.ocrData.blood_pressure);
+      const hemo = parseHemoglobin(result.ocrData.hemoglobin);
+      const sugar = parseBloodSugar(result.ocrData.blood_sugar);
+      const hr = parseVal(result.ocrData.heart_rate);
+
+      // Format clean strings for the UI to prevent React object child errors
+      const safeOcrData = {
+        hemoglobin: hemo ? `${hemo} g/dL` : null,
+        blood_pressure: bp.sys && bp.dia ? `${bp.sys}/${bp.dia}` : null,
+        blood_sugar: sugar ? `${sugar} mmol/L` : null,
+        heart_rate: hr ? `${hr} bpm` : null,
+        raw_text: result.ocrData.raw_text || ""
+      };
+
+      setOcrData(safeOcrData);
+
+      const payload = {
         patient_id: selectedPatient,
         // TODO: Extract age from OCR or collect manually
         age: 25,
-        hemoglobin:
-          Number(result.ocrData.hemoglobin?.replace(" g/dL", "")) || 12,
-        systolic_bp:
-          Number(result.ocrData.blood_pressure?.split("/")[0]) || 120,
-        diastolic_bp:
-          Number(result.ocrData.blood_pressure?.split("/")[1]) || 80,
-        blood_sugar:
-          Number(result.ocrData.blood_sugar?.replace(" mg/dL", "")) || 110,
-        heart_rate:
-          Number(result.ocrData.heart_rate?.replace(" bpm", "")) || 80,
+        hemoglobin: hemo || 12,
+        systolic_bp: bp.sys || 120,
+        diastolic_bp: bp.dia || 80,
+        blood_sugar: sugar || 110,
+        heart_rate: hr || 80,
         weight: 65,
         height_cm: 160,
         meals_per_day: 3,
