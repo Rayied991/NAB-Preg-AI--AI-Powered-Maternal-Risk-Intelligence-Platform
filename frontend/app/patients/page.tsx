@@ -2,6 +2,7 @@
 "use client";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { getCopilotSummary } from "@/services/copilot.service";
 import {
   createPatient,
 } from "@/services/create-patient.service";
@@ -115,6 +116,11 @@ export default function PatientsPage() {
 
   const [showModal, setShowModal] =
   useState(false);
+  const [copilotSummary, setCopilotSummary] =
+  useState<string>("");
+
+  const [loadingSummary, setLoadingSummary] =
+  useState(false);
 
 const [form, setForm] = useState({
   patient_code: "",
@@ -128,6 +134,27 @@ const [form, setForm] = useState({
   emergency_contact: "",
   height_cm: 0.0
 });
+
+const handleGenerateSummary = async (
+  patientId: string
+) => {
+  try {
+    setLoadingSummary(true);
+
+    const result =
+      await getCopilotSummary(
+        patientId
+      );
+
+    setCopilotSummary(
+      result.summary
+    );
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoadingSummary(false);
+  }
+};
 
 const handleCreatePatient =
   async () => {
@@ -343,6 +370,33 @@ if (createdPatient) {
                 </span>
               } />
             </div>
+
+            <div className="px-6 pb-4">
+            <button
+              onClick={() =>
+                handleGenerateSummary(
+                  history.patient.id
+                )
+              }
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+            >
+              {loadingSummary
+                ? "AI Analyzing Patient..."
+                : "Generate AI Summary"}
+            </button>
+          </div>
+
+          {copilotSummary && (
+            <div className="mx-6 mb-6 p-4 rounded-xl bg-[#0d1118] border border-[#1e2535]">
+            <h3 className="text-sm font-semibold text-white mb-3">
+              AI Clinical Summary
+            </h3>
+
+            <pre className="whitespace-pre-wrap text-sm text-[#c8d0e0]">
+              {copilotSummary}
+            </pre>
+          </div>
+        )}
           </SectionCard>
 
           {/* ── OCR Reports ── */}
@@ -639,7 +693,11 @@ if (createdPatient) {
             : "Create"}
         </button>
 
+        
+
       </div>
+
+      
 
     </div>
 
