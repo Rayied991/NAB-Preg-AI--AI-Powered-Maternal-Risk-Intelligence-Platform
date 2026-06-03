@@ -52,7 +52,7 @@ export default function RiskPieChart({ highRisk, mediumRisk, lowRisk }: RiskPieC
         const analyticsData = await fetchAnalytics();
 
         setData([
-          { name: "High Risk", value: analyticsData.high_risk },
+          { name: "High Risk", value: highRisk },
           { name: "Medium Risk", value: analyticsData.medium_risk },
           { name: "Low Risk", value: analyticsData.low_risk },
         ]);
@@ -70,7 +70,7 @@ export default function RiskPieChart({ highRisk, mediumRisk, lowRisk }: RiskPieC
     const intervalId = setInterval(loadAnalytics, 30000);
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [highRisk]);
 return (
   <div className="w-full h-full">
     {error && (
