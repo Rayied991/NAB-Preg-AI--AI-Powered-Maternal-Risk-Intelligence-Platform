@@ -5,6 +5,7 @@ import RiskPieChart from "@/components/charts/RiskPieChart";
 import VillageAnalyticsChart from "@/components/charts/VillageAnalyticsChart";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { fetchAnalytics } from "@/services/analytics.service";
+import { fetchAlerts } from "@/services/alerts.service";
 import { fetchVillageAnalytics } from "@/services/village-analytics.service";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
@@ -27,12 +28,17 @@ const VillageHeatmap = dynamic(
 export default function AnalyticsPage() {
  const [villages, setVillages] = useState<any[]>([]);
  const [analytics, setAnalytics] = useState<any>(null);
+ const [alerts, setAlerts] = useState<any[]>([]);
 
  useEffect(() => {
   const loadAnalytics = async () => {
     try {
-      const data = await fetchAnalytics();
-      setAnalytics(data);
+      const [analyticsData, alertData] = await Promise.all([
+          fetchAnalytics(),
+          fetchAlerts()
+        ]);
+      setAnalytics(analyticsData);
+      setAlerts(alertData);
     } catch (error) {
       console.error(error);
     }
@@ -54,7 +60,12 @@ useEffect(() => {
   };
 
   loadVillageAnalytics();
-}, []); 
+}, []);
+
+  const unresolvedHigh = alerts.filter(
+    (a) => a.severity?.toLowerCase().includes("high") && a.status !== "RESOLVED"
+  ).length;
+
   return (
     <DashboardLayout>
 
@@ -86,7 +97,7 @@ useEffect(() => {
             Risk Distribution
           </p>
           <RiskPieChart
-        highRisk={analytics?.high_risk || 0}
+        highRisk={unresolvedHigh}
         mediumRisk={analytics?.medium_risk || 0}
         lowRisk={analytics?.low_risk || 0}
       />

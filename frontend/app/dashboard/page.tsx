@@ -80,6 +80,9 @@ export default function DashboardPage() {
   loadData();
 }, []);
 
+  const unresolvedHigh = alerts.filter(
+    (a) => a.severity?.toLowerCase().includes("high") && a.status !== "RESOLVED"
+  ).length;
 
   return (
     <DashboardLayout>
@@ -87,7 +90,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
        <RiskCard
         title="High Risk Cases"
-        count={analytics?.high_risk || 0}
+        count={unresolvedHigh}
         color="red"
       />
 
@@ -109,7 +112,7 @@ export default function DashboardPage() {
           Risk Distribution
         </h2>
         <RiskPieChart
-          highRisk={analytics?.high_risk || 0}
+          highRisk={unresolvedHigh}
           mediumRisk={analytics?.medium_risk || 0}
           lowRisk={analytics?.low_risk || 0}
         />
