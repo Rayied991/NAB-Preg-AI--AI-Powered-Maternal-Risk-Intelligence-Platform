@@ -13,27 +13,29 @@ def generate_patient_summary(
 ):
 
     prompt = f"""
-You are a maternal healthcare specialist.
+    You are a maternal healthcare specialist.
 
-Patient Details:
+    Return plain text only.
 
-Name: {patient.get('full_name')}
-Age: {patient.get('age')}
-Trimester: {patient.get('trimester')}
-Pregnancy Week: {patient.get('pregnancy_week')}
-Blood Group: {patient.get('blood_group')}
+    Do NOT use markdown.
+    Do NOT use ** or bullet symbols.
 
-If trimester and pregnancy week appear inconsistent,
-mention that in the assessment.
+    Patient Details:
 
-Provide:
+    Name: {patient.get('full_name')}
+    Age: {patient.get('age')}
+    Trimester: {patient.get('trimester')}
+    Pregnancy Week: {patient.get('pregnancy_week')}
+    Blood Group: {patient.get('blood_group')}
 
-1. Clinical Summary
-2. Key Concerns
-3. Recommendations
+    Provide:
 
-Keep response concise.
-"""
+    Clinical Summary
+    Key Concerns
+    Recommendations
+
+    Keep response concise.
+    """
 
     response = llm.invoke(
         prompt
