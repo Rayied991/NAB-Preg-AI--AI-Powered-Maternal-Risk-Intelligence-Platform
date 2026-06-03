@@ -3,8 +3,16 @@
 import RiskCard from "@/components/cards/RiskCard";
 import RiskPieChart from "@/components/charts/RiskPieChart";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import {
+  resolveAlert,
+} from "@/services/alert.service";
+import { fetchAlerts } from "@/services/alerts.service";
 import { fetchAnalytics } from "@/services/analytics.service";
+import {
+  fetchInsights
+} from "@/services/insights.service";
 import { useEffect, useState } from "react";
+
 
 /**
  * DashboardPage Component
@@ -18,23 +26,59 @@ import { useEffect, useState } from "react";
  *    - High risk: `text-red-600 dark:text-red-400`
  *    - Medium risk: `text-amber-600 dark:text-yellow-300`
  */
+
 export default function DashboardPage() {
 
   const [analytics, setAnalytics] =useState<any>(null);
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [insights, setInsights] =
+  useState<string[]>([]);
 
+  const handleResolve = async (
+  alertId: string
+) => {
+
+  try {
+
+    await resolveAlert(alertId);
+
+    setAlerts((prev) =>
+      prev.map((alert) =>
+        alert.id === alertId
+          ? {
+              ...alert,
+              status: "RESOLVED",
+            }
+          : alert
+      )
+    );
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   useEffect(() => {
-    const loadData=async()=>{
-      try{
-        const data=await fetchAnalytics();
-        setAnalytics(data);
-      }
-      catch(error){
-        console.log(error);
-      }
-    };
-    loadData();
-  }, []);
+  const loadData = async () => {
+    try {
+      const [analyticsData, alertData,insightsData] =
+        await Promise.all([
+          fetchAnalytics(),
+          fetchAlerts(),
+          fetchInsights()
+        ]);
+
+      setAnalytics(analyticsData);
+      setAlerts(alertData);
+      setInsights(insightsData);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  loadData();
+}, []);
 
 
   return (
@@ -60,9 +104,16 @@ export default function DashboardPage() {
       />
       </div>
 
-      <div className="mt-10">
-        <RiskPieChart />
-      </div>
+      <div className="mt-6 bg-card border border-border-custom rounded-2xl p-6 shadow-premium">
+        <h2 className="text-xl font-semibold text-white mb-6">
+          Risk Distribution
+        </h2>
+        <RiskPieChart
+          highRisk={analytics?.high_risk || 0}
+          mediumRisk={analytics?.medium_risk || 0}
+          lowRisk={analytics?.low_risk || 0}
+        />
+</div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
 
   {/* Recent Alerts */}
@@ -72,29 +123,59 @@ export default function DashboardPage() {
       Recent Alerts
     </h2>
 
-    <div className="space-y-4">
+   <div className="space-y-4">
 
-      <div className="p-4 bg-panel border border-border-custom rounded-xl transition-all duration-300">
-        <p className="text-red-600 dark:text-red-400 font-semibold transition-colors duration-300">
-          High BP Detected
-        </p>
+  {alerts.map((alert) => (
 
-        <p className="text-text-muted text-sm mt-1 transition-colors duration-300">
-          Ayesha Rahman • Dhaka Rural
-        </p>
-      </div>
+    <div
+      key={alert.id}
+      className="p-4 bg-panel border border-border-custom rounded-xl transition-all duration-300"
+    >
 
-      <div className="p-4 bg-panel border border-border-custom rounded-xl transition-all duration-300">
-        <p className="text-amber-600 dark:text-yellow-300 font-semibold transition-colors duration-300">
-          Low Hemoglobin
-        </p>
+      <p className="text-red-600 dark:text-red-400 font-semibold transition-colors duration-300">
+        {alert.alert_message}
+      </p>
 
-        <p className="text-text-muted text-sm mt-1 transition-colors duration-300">
-          Fatema Noor • Khulna
-        </p>
-      </div>
+<p
+  className={`text-sm mt-1 font-medium transition-colors duration-300 ${
+    alert.status === "RESOLVED"
+      ? "text-green-500"
+      : "text-red-500"
+  }`}
+>
+  {alert.severity} • {alert.status}
+</p>
+
+<button
+  onClick={() =>
+    handleResolve(alert.id)
+  }
+  disabled={
+    alert.status === "RESOLVED"
+  }
+  className="
+    mt-3
+    px-3
+    py-1
+    rounded-lg
+    text-sm
+    bg-green-600
+    text-white
+    hover:bg-green-700
+    disabled:opacity-50
+    disabled:cursor-not-allowed
+  "
+>
+  {alert.status === "RESOLVED"
+    ? "Resolved"
+    : "Resolve"}
+</button>
 
     </div>
+
+  ))}
+
+</div> 
   </div>
 
   {/* AI Summary */}
@@ -106,17 +187,15 @@ export default function DashboardPage() {
 
     <div className="space-y-4 text-text-secondary transition-colors duration-300">
 
-      <p>
-        • 18% increase in hypertension risk cases this week.
+       {insights.map(
+    (insight, index) => (
+      <p key={index}>
+        • {insight}
       </p>
+    )
+  )}
 
-      <p>
-        • Most high-risk patients are from rural villages.
-      </p>
-
-      <p>
-        • Nutrition deficiencies strongly correlate with anemia.
-      </p>
+     
 
     </div>
   </div>

@@ -16,7 +16,7 @@ SUPABASE_KEY = os.getenv(
 )
 
 
-def save_prediction(result):
+def save_prediction( patient_id,result):
 
     headers = {
         "apikey": SUPABASE_KEY,
@@ -26,6 +26,7 @@ def save_prediction(result):
     }
 
     payload = {
+        "patient_id": patient_id,
         "overall_risk":
             result["patient_status"]["overall_risk"],
 

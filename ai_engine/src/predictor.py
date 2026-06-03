@@ -1,7 +1,6 @@
 from ai_engine.src.preprocessing import preprocess_input
 from ai_engine.src.inference import run_prediction
 from ai_engine.src.risk_rules import generate_risk_reason
-from backend.app.core.alert_storage import create_alert
 from ai_engine.src.recommendation_engine import generate_recommendation
 from ai_engine.src.constants import (
     MEDIUM_HB_THRESHOLD,
@@ -16,14 +15,9 @@ from ai_engine.src.constants import (
 
 def predict_maternal_risk(payload):
 
- 
     processed = preprocess_input(payload)
-    
-
 
     prediction, probability = run_prediction(processed)
-    
-
 
     reasons = generate_risk_reason(payload)
 
@@ -36,7 +30,7 @@ def predict_maternal_risk(payload):
             float(max(prob[0]))
         )
 
-    final_confidence = (sum(confidence_scores)/ len(confidence_scores))
+    final_confidence = (sum(confidence_scores) / len(confidence_scores))
 
     risk_mapping = {
         0: "LOW",
@@ -74,7 +68,7 @@ def predict_maternal_risk(payload):
 
     # Blood Sugar
     if payload["blood_sugar"] >= HIGH_BS:
-        risk_points += 1    
+        risk_points += 1
 
     # Heart Rate
     if payload["heart_rate"] >= HIGH_HR:
@@ -89,12 +83,6 @@ def predict_maternal_risk(payload):
 
     else:
         overall_risk = "LOW"
-    if overall_risk == "HIGH":
-     create_alert(
-        severity="HIGH",
-        alert_message="HIGH RISK MATERNAL CASE DETECTED",
-        status="OPEN"
-    )    
 
     anemia_risk = risk_mapping.get(
         int(predictions[1]),
@@ -140,13 +128,15 @@ def predict_maternal_risk(payload):
         summary_parts.append(
             "Elevated blood glucose detected."
         )
+
     if payload["heart_rate"] >= HIGH_HR:
         summary_parts.append(
-        "Elevated heart rate detected."
-    )    
+            "Elevated heart rate detected."
+        )
 
-    summary = " ".join(summary_parts) 
-    return {
+    summary = " ".join(summary_parts)
+
+    result = {
         "patient_status": {
             "overall_risk": overall_risk,
             "anemia_risk": anemia_risk,
@@ -164,3 +154,7 @@ def predict_maternal_risk(payload):
 
         "ai_summary": summary.strip()
     }
+
+
+
+    return result

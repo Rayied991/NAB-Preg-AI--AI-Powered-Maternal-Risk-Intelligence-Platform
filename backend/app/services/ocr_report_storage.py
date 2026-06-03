@@ -14,13 +14,11 @@ SUPABASE_KEY = os.getenv(
 )
 
 
-def create_alert(
+def save_ocr_report(
     patient_id,
-    severity,
-    alert_message,
-    status="OPEN"
+    extracted_text,
+    parsed_json,
 ):
-
     headers = {
         "apikey": SUPABASE_KEY,
         "Authorization": f"Bearer {SUPABASE_KEY}",
@@ -30,19 +28,19 @@ def create_alert(
 
     payload = {
         "patient_id": patient_id,
-        "severity": severity,
-        "alert_message": alert_message,
-        "status": status,
-        "triggered_at": datetime.utcnow().isoformat(),
+        "report_url": None,
+        "extracted_text": extracted_text,
+        "parsed_json": parsed_json,
+        "uploaded_at": datetime.utcnow().isoformat(),
     }
 
     response = requests.post(
-        f"{SUPABASE_URL}/rest/v1/alerts",
+        f"{SUPABASE_URL}/rest/v1/ocr_reports",
         headers=headers,
         json=payload,
     )
 
-    print("ALERT STATUS:", response.status_code)
-    print("ALERT BODY:", response.text)
+    print("OCR STATUS:", response.status_code)
+    print("OCR BODY:", response.text)
 
     return response

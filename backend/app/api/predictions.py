@@ -7,6 +7,13 @@ from ai_engine.src.predictor import (
 from backend.app.services.prediction_storage import (
     save_prediction
 )
+from backend.app.services.ocr_report_storage import (
+    save_ocr_report
+)
+from backend.app.services.village_analytics_storage import (
+    update_village_analytics
+)
+from backend.app.core.alert_storage import create_alert
 import os
 import requests
 from dotenv import load_dotenv
@@ -22,8 +29,13 @@ SUPABASE_KEY = os.getenv(
 )
 router = APIRouter()
 
-
+class OCRReportRequest(BaseModel):
+    patient_id: str
+    extracted_text: str
+    parsed_json: dict
+    
 class PredictionRequest(BaseModel):
+    patient_id: str
     age: int
     hemoglobin: float
     systolic_bp: float
@@ -35,7 +47,6 @@ class PredictionRequest(BaseModel):
     meals_per_day: int
     veg_freq: int
     
-    
 @router.post("/predict")
 async def predict(payload: PredictionRequest):
 
@@ -43,9 +54,27 @@ async def predict(payload: PredictionRequest):
         payload.dict()
     )
 
-    save_prediction(result)
+    save_prediction(
+        payload.patient_id,
+        result
+    )
+    update_village_analytics(
+    payload.patient_id,
+    result["patient_status"]["overall_risk"]
+    )
+    if (
+        result["patient_status"]["overall_risk"]
+        == "HIGH"
+    ):
+        create_alert(
+            patient_id=payload.patient_id,
+            severity="HIGH",
+            alert_message="HIGH RISK MATERNAL CASE DETECTED",
+            status="OPEN"
+        )
 
-    return result
+    return result    
+
 
 @router.get("/predictions")
 async def get_predictions():
@@ -63,3 +92,60 @@ async def get_predictions():
     )
 
     return response.json()
+
+@router.get("/alerts")
+async def get_alerts():
+
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+    }
+
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/alerts"
+        "?select=*"
+        "&order=triggered_at.desc"
+        "&limit=5",
+        headers=headers,
+    )
+
+    return response.json()
+
+@router.post("/ocr-report")
+async def save_report(
+    payload: OCRReportRequest
+):
+
+    save_ocr_report(
+        payload.patient_id,
+        payload.extracted_text,
+        payload.parsed_json,
+    )
+
+    return {
+        "message": "OCR report saved"
+    }
+
+@router.patch("/alerts/{alert_id}/resolve")
+async def resolve_alert(alert_id: str):
+
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/alerts?id=eq.{alert_id}",
+        headers=headers,
+        json={
+            "status": "RESOLVED"
+        },
+    )
+
+    print("RESOLVE STATUS:", response.status_code)
+    print("RESOLVE BODY:", response.text)
+
+    return {
+        "message": "Alert resolved"
+    }
