@@ -17,6 +17,7 @@ from backend.app.api.routes.heatmap import (
 from backend.app.api.routes.insights import (
     router as insights_router
 )
+from backend.app.api.routes import rag
 app = FastAPI(
     title="NAB Preg AI API"
 )
@@ -56,6 +57,10 @@ app.include_router(
 )
 app.include_router(
     insights_router,
+    prefix="/api"
+)
+app.include_router(
+    rag.router,
     prefix="/api"
 )
 
