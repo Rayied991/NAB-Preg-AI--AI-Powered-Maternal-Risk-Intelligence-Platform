@@ -14,6 +14,9 @@ from backend.app.api.routes.patient_history import (
 from backend.app.api.routes.heatmap import (
     router as heatmap_router
 )
+from backend.app.api.routes.insights import (
+    router as insights_router
+)
 app = FastAPI(
     title="NAB Preg AI API"
 )
@@ -49,6 +52,10 @@ app.include_router(
 )
 app.include_router(
     heatmap_router,
+    prefix="/api"
+)
+app.include_router(
+    insights_router,
     prefix="/api"
 )
 
