@@ -13,10 +13,8 @@ class AskRequest(BaseModel):
 async def ask_question(
     payload: AskRequest
 ):
-    answer = ask_rag(
+    result = ask_rag(
         payload.question
     )
 
-    return {
-        "answer": answer
-    }
+    return result

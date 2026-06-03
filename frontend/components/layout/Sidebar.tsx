@@ -1,11 +1,13 @@
 "use client";
 
 import {
-    BarChart3,
-    Bell,
-    LayoutDashboard,
-    Upload,
-    Users,
+  BarChart3,
+  Bell,
+  ClipboardClock,
+  Hospital,
+  LayoutDashboard,
+  Upload,
+  Users
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -37,6 +39,16 @@ const menuItems = [
     href: "/analytics",
     icon: BarChart3,
   },
+  {
+    name: "Prediction History",
+    href: "/history",
+    icon: ClipboardClock,
+  },
+  {
+  name: "Clinical Assistant",
+  href: "/assistant",
+  icon: Hospital 
+  }
 ];
 
 export default function Sidebar() {
