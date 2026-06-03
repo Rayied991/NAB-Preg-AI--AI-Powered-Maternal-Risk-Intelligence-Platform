@@ -109,47 +109,7 @@ return (
         </ResponsiveContainer>
       )}
 
-    <div className="w-full h-87.5">
-  {loading ? (
-    <div className="flex items-center justify-center h-full">
-      <p className="text-text-secondary">Loading...</p>
-    </div>
-  ) : (
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart>
-
-        <Pie
-          data={data}
-          cx="50%"
-          cy="50%"
-          outerRadius={120}
-          dataKey="value"
-          label={({ name, value }) => `${name}: ${value}`}
-        >
-          {data.map((entry, index) => (
-            <Cell
-              key={index}
-              fill={COLORS[index % COLORS.length]}
-            />
-          ))}
-        </Pie>
-
-        <Tooltip
-          contentStyle={{
-            backgroundColor: "var(--bg-card)",
-            borderColor: "var(--border-color)",
-            borderRadius: "12px",
-            color: "var(--text-main)",
-          }}
-          itemStyle={{
-            color: "var(--text-main)",
-          }}
-        />
-
-      </PieChart>
-    </ResponsiveContainer>
-  )}
-</div>
+    
 
     </div>
   </div>
