@@ -21,6 +21,23 @@ supabase
 requests
 
 # =========================
+# RAG / LANGCHAIN
+# =========================
+
+langchain
+langchain-community
+langchain-openai
+langchain-google-genai
+langchain-huggingface
+langchain-text-splitters
+langgraph
+chromadb
+sentence-transformers
+pypdf
+
+
+
+# =========================
 
 # AI / ML
 
