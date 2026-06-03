@@ -35,11 +35,14 @@ PDFS = [
 documents = []
 for pdf in PDFS:
 
-    loader = PyPDFLoader(pdf)
+        loader = PyPDFLoader(pdf)
 
-    documents.extend(
-        loader.load()
-    )
+        pages = loader.load()
+
+        # Skip cover pages
+        pages = pages[8:]
+
+        documents.extend(pages)
 
 print(f"Loaded {len(documents)} pages")
 splitter = RecursiveCharacterTextSplitter(
@@ -50,6 +53,29 @@ splitter = RecursiveCharacterTextSplitter(
 chunks = splitter.split_documents(
     documents
 )
+
+filtered_chunks = []
+
+for chunk in chunks:
+
+    text = chunk.page_content.lower()
+
+    if any(
+        bad in text
+        for bad in [
+            "copyright",
+            "published by",
+            "permission is required",
+            "all rights reserved",
+            "isbn",
+            "acknowledgements",
+        ]
+    ):
+        continue
+
+    filtered_chunks.append(chunk)
+
+chunks = filtered_chunks
 print(f"Created {len(chunks)} chunks")
 
 print("Generating embeddings...")
