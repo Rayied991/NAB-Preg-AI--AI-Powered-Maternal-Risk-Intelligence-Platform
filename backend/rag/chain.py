@@ -1,6 +1,4 @@
-
-
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_mistralai import ChatMistralAI
 from backend.rag.retriever import retriever
 
 from dotenv import load_dotenv
@@ -13,8 +11,9 @@ print(
     os.getenv("GEMINI_API_KEY") is not None
 )
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash"
+llm= ChatMistralAI(
+    model="mistral-small-latest",
+    temperature=0
 )
 
 def ask_rag(question: str):
@@ -37,23 +36,33 @@ Question:
 {question}
 """
 
-    response = llm.invoke(
-        prompt
-    )
-
     sources = list(
-        set(
-            [
-                doc.metadata.get(
-                    "source",
-                    "Unknown"
-                )
-                for doc in docs
-            ]
-        )
+    set(
+        [
+            doc.metadata.get(
+                "source",
+                "Unknown"
+            )
+            for doc in docs
+        ]
     )
+)
 
-    return {
-        "answer": response.content,
-        "sources": sources,
-    }
+    try:
+        response = llm.invoke(prompt)
+
+        return {
+            "answer": response.content,
+            "sources": sources,
+        }
+
+    except Exception as e:
+        print("RAG ERROR:", e)
+
+        return {
+            "answer": (
+                "AI service temporarily unavailable. "
+                "Please try again later."
+            ),
+            "sources": sources,
+        }
