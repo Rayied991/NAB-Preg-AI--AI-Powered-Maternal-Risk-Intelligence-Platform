@@ -2,8 +2,10 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from backend.app.services.chat_storage import save_chat
+
 from backend.app.services.patient_context import (
-    get_patient_context
+    get_patient_context,
+    get_patient_context_by_name,
 )
 
 from backend.rag.chain import ask_rag
@@ -24,23 +26,61 @@ async def ask_question(
 
     question = payload.question
 
-    # Detect PAT001, PAT002, PAT003 etc.
-    match = re.search(
+    context = None
+
+    # -----------------------------
+    # PATIENT CODE LOOKUP
+    # Example: PAT001
+    # -----------------------------
+
+    code_match = re.search(
         r"(PAT\d+)",
         question.upper()
     )
 
-    if match:
+    if code_match:
 
-        patient_code = match.group(1)
+        patient_code = code_match.group(1)
 
         context = get_patient_context(
             patient_code
         )
 
-        if context:
+    # -----------------------------
+    # PATIENT NAME LOOKUP
+    # Example:
+    # Analyze Raida
+    # Summarize Raida
+    # Risks for Raida
+    # Recommendations for Raida
+    # -----------------------------
 
-            question = f"""
+    else:
+
+        name_match = re.search(
+            r"(?:analyze|summarize|summary of|risk for|risks for|recommendations for|recommendation for)\s+(.+)",
+            question,
+            re.IGNORECASE,
+        )
+
+        if name_match:
+
+            patient_name = (
+                name_match.group(1)
+                .strip()
+            )
+
+            context = get_patient_context_by_name(
+                patient_name
+            )
+
+    # -----------------------------
+    # BUILD PATIENT-AWARE PROMPT
+    # -----------------------------
+
+    if context:
+
+        question = f"""
 You are a maternal healthcare clinical assistant.
 
 Patient Context:
@@ -50,14 +90,35 @@ Patient Context:
 User Question:
 {payload.question}
 
-Use the patient information above to answer accurately.
+Instructions:
+- Use the patient information above.
+- Explain risks clearly.
+- Provide recommendations.
+- Mention abnormal findings.
+- Keep response concise and clinical.
 """
 
-    result = ask_rag(question)
+    # -----------------------------
+    # ASK RAG
+    # -----------------------------
 
-    save_chat(
-        payload.question,
-        result["answer"]
+    result = ask_rag(
+        question
     )
+
+    # -----------------------------
+    # SAVE CHAT HISTORY
+    # -----------------------------
+
+    try:
+        save_chat(
+            payload.question,
+            result["answer"]
+        )
+    except Exception as e:
+        print(
+            "Failed to save chat:",
+            e
+        )
 
     return result

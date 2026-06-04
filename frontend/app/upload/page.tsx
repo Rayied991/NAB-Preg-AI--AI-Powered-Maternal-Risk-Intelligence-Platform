@@ -263,12 +263,12 @@ const [selectedPatient, setSelectedPatient] =
 
   const riskBadgeClass = (risk: string | undefined) => {
     if (risk === "HIGH")
-      return "bg-[#2a0e0e] text-[#f06060] border border-[#5a1a1a]";
+      return "bg-red-50 text-red-600 border-red-200 dark:bg-[#2a0e0e] dark:text-[#f06060] border dark:border-[#5a1a1a]";
     if (risk === "MEDIUM")
-      return "bg-[#2a1e06] text-[#e0a040] border border-[#5a3a10]";
+      return "bg-orange-50 text-orange-600 border-orange-200 dark:bg-[#2a1e06] dark:text-[#e0a040] border dark:border-[#5a3a10]";
     if (risk === "LOW")
-      return "bg-[#0a2010] text-[#40c070] border border-[#1a5030]";
-    return "bg-[#1a1e2a] text-[#3a5070] border border-[#1e2a40]";
+      return "bg-green-50 text-green-600 border-green-200 dark:bg-[#0a2010] dark:text-[#40c070] border dark:border-[#1a5030]";
+    return "bg-gray-100 text-gray-600 border-gray-200 dark:bg-[#1a1e2a] dark:text-[#3a5070] border dark:border-[#1e2a40]";
   };
 
   return (

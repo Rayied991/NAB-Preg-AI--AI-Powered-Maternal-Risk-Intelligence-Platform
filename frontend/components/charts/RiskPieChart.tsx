@@ -71,46 +71,47 @@ export default function RiskPieChart({ highRisk, mediumRisk, lowRisk }: RiskPieC
 
     return () => clearInterval(intervalId);
   }, [highRisk]);
-return (
-  <div className="w-full h-full">
-    {error && (
-      <div className="text-red-500 text-sm mb-4">{error}</div>
-    )}
-    <div className="w-full h-87.5">
-      {loading ? (
-        <div className="flex items-center justify-center h-full">
-          <p className="text-[#5a6478]">Loading...</p>
-        </div>
-      ) : (
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              outerRadius={120}
-              dataKey="value"
-              label
-            >
-              {data.map((entry, index) => (
-                <Cell key={index} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#131720",
-                borderColor: "#1e2535",
-                borderRadius: "12px",
-                color: "#f0f2f6",
-              }}
-              itemStyle={{ color: "#f0f2f6" }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
+  return (
+    <div className="w-full h-full">
+      {error && (
+        <div className="text-red-500 text-sm mb-4">{error}</div>
       )}
+      <div className="w-full h-87.5">
+        {loading ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-[#5a6478]">Loading...</p>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                outerRadius={120}
+                dataKey="value"
+                label
+              >
+                {data.map((entry, index) => (
+                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#131720",
+                  borderColor: "#1e2535",
+                  borderRadius: "12px",
+                  color: "#f0f2f6",
+                }}
+                itemStyle={{ color: "#f0f2f6" }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
 
-    
 
+
+      </div>
     </div>
-  </div>
-)};
+  )
+};
