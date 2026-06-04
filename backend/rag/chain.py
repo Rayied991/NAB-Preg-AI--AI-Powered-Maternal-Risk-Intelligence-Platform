@@ -6,63 +6,47 @@ import os
 
 load_dotenv()
 
-print(
-    "Mistral API key found:",
-    os.getenv("MISTRAL_API_KEY") is not None
-)
-
-llm= ChatMistralAI(
+llm = ChatMistralAI(
     model="mistral-small-latest",
     temperature=0
 )
 
 def ask_rag(question: str):
-
-    docs = retriever.invoke(
-        question
-    )
+    """Query the RAG system and return a clean answer with sources."""
+    docs = retriever.invoke(question)
   
     context = "\n\n".join(
         [doc.page_content for doc in docs]
     )
 
-    prompt = f"""
-Answer ONLY from the provided context.
+    prompt = f"""You are a maternal healthcare clinical assistant.
 
-Context:
+Context from WHO/UNICEF guidelines:
 {context}
 
-Question:
-{question}
-"""
+Question: {question}
+
+Provide a clear, concise answer using markdown formatting."""
 
     sources = list(
-    set(
-        [
-            doc.metadata.get(
-                "source",
-                "Unknown"
-            )
-            for doc in docs
-        ]
+        set(
+            [
+                doc.metadata.get("source", "Unknown")
+                for doc in docs
+            ]
+        )
     )
-)
 
     try:
         response = llm.invoke(prompt)
-
         return {
-            "answer": response.content,
+            "answer": response.content.strip(),
             "sources": sources,
         }
-
     except Exception as e:
-        print("RAG ERROR:", e)
-
+        import logging
+        logging.error(f"RAG Error: {e}")
         return {
-            "answer": (
-                "AI service temporarily unavailable. "
-                "Please try again later."
-            ),
-            "sources": sources,
+            "answer": "Unable to process your question. Please try again.",
+            "sources": [],
         }
