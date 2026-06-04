@@ -8,8 +8,17 @@ import {
 } from "@/services/create-patient.service";
 import { fetchPatientHistory } from "@/services/patient-history.service";
 import { fetchPatients } from "@/services/patient.service";
+import { getPatientTrends } from "@/services/trends.service";
 import { useEffect, useState } from "react";
-
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 // ── Helpers declared outside page component ───────────────────────────────────
 
 function RiskBadge({ risk }: { risk: string }) {
@@ -114,6 +123,7 @@ export default function PatientsPage() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [creating, setCreating] =
   useState(false);
+  const [trends, setTrends] = useState<any>(null);
 
   const [showModal, setShowModal] =
   useState(false);
@@ -229,19 +239,31 @@ if (createdPatient) {
     loadPatients();
   }, []);
 
-  const loadHistory = async (patientId: string) => {
-    setHistory(null);
-    if (!patientId) return;
-    setHistoryLoading(true);
-    try {
-      const data = await fetchPatientHistory(patientId);
-      setHistory(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setHistoryLoading(false);
-    }
-  };
+  const loadHistory = async (
+  patientId: string
+) => {
+  setHistory(null);
+
+  if (!patientId) return;
+
+  setHistoryLoading(true);
+
+  try {
+    const [historyData, trendData] =
+      await Promise.all([
+        fetchPatientHistory(patientId),
+        getPatientTrends(patientId),
+      ]);
+
+    setHistory(historyData);
+    setTrends(trendData);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setHistoryLoading(false);
+  }
+};
 
   const handleSelectChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = e.target.value;
@@ -368,6 +390,90 @@ if (createdPatient) {
       {history && (
         <div className="mt-6 flex flex-col gap-5">
 
+          {/* Trends Details */}
+          <SectionCard
+            title="Patient Trends"
+            icon={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+            }
+          >
+          <div className="p-6">
+
+              {trends?.error ? (
+
+                <div className="h-72 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-sm text-red-400">
+                      Unable to load patient trends
+                    </p>
+                    <p className="text-xs text-[#5a6478] mt-1">
+                      Please try again later.
+                    </p>
+                  </div>
+                </div>
+
+              ) : !trends?.hemoglobin?.length ? (
+
+                <div className="h-72 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-sm text-[#8b95a7]">
+                      No trend data available
+                    </p>
+                    <p className="text-xs text-[#5a6478] mt-1">
+                      Upload OCR reports to visualize patient trends.
+                    </p>
+                  </div>
+                </div>
+
+              ) : (
+
+            <div className="h-72">
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+              >
+                <LineChart
+                  data={trends.hemoglobin}
+                >
+                  <CartesianGrid stroke="#1e2535" />
+
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fill: "#5a6478" }}
+                    tickFormatter={(value) =>
+                      new Date(value).toLocaleDateString()
+                    }
+                  />
+
+                  <YAxis />
+
+                  <Tooltip />
+
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#ef4444"
+                    strokeWidth={2}
+                    name="Hemoglobin"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+          )}
+
+        </div>
+        </SectionCard>
           {/* ── Patient Details ── */}
           <SectionCard
             title="Patient Details"
