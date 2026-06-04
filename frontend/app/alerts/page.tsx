@@ -17,9 +17,9 @@ interface Alert {
 const severityConfig = (severity: string) => {
   if (severity === "HIGH")
     return {
-      badge: "bg-[#2a0e0e] text-[#f06060] border border-[#5a1a1a]",
+      badge: "bg-red-50 dark:bg-[#2a0e0e] text-red-600 dark:text-[#f06060] border border-red-200 dark:border-[#5a1a1a]",
       dot: "bg-[#f06060]",
-      ring: "border-[#3a1010]",
+      ring: "border-red-300 dark:border-[#3a1010] shadow-[0_0_10px_rgba(248,113,113,0.15)] dark:shadow-none",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
@@ -29,9 +29,9 @@ const severityConfig = (severity: string) => {
       ),
     };
   return {
-    badge: "bg-[#2a1e06] text-[#e0a040] border border-[#5a3a10]",
+    badge: "bg-orange-50 dark:bg-[#2a1e06] text-orange-600 dark:text-[#e0a040] border border-orange-200 dark:border-[#5a3a10]",
     dot: "bg-[#e0a040]",
-    ring: "border-[#3a2a08]",
+    ring: "border-orange-300 dark:border-[#3a2a08] shadow-[0_0_10px_rgba(251,146,60,0.15)] dark:shadow-none",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10"/>
