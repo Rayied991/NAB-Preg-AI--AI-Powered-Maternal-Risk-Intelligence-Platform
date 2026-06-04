@@ -27,6 +27,7 @@ from backend.app.api.routes.report import (
     router as report_router
 )
 from backend.app.api.routes import rag
+from backend.app.api.routes.ocr import router as ocr_router
 from backend.app.api.chat_history import router as chat_router
 app = FastAPI(
     title="NAB Preg AI API"
@@ -88,6 +89,10 @@ app.include_router(
 app.include_router(
     chat_router,
     prefix="/api"
+)
+app.include_router(
+    ocr_router,
+    prefix="/api/ocr"
 )
 
 @app.get("/")

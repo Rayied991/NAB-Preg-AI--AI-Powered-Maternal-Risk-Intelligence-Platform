@@ -5,7 +5,6 @@
  * Includes a robust fallback to local Tesseract.js if the cloud AI fails.
  */
 
-import { supabase } from '../lib/supabase';
 import Tesseract from 'tesseract.js';
 
 export interface OCRExtractedData {
@@ -238,15 +237,21 @@ export async function performOCR(file: File): Promise<OCRExtractedData> {
 
         console.log(`Sending ${base64Images.length} image(s) to Mistral API via Supabase Edge Function...`);
 
-        // 2. Call Supabase Edge Function
+        // 2. Call FastAPI Backend to Proxy Mistral Edge Function
         try {
-            const { data, error } = await supabase.functions.invoke('mistral-ocr', {
-                body: { images: base64Images }
+            const response = await fetch('http://127.0.0.1:8000/api/ocr/mistral', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ images: base64Images })
             });
 
-            if (error) {
-                throw error;
+            if (!response.ok) {
+                throw new Error(`Backend OCR API returned status ${response.status}`);
             }
+
+            const data = await response.json();
 
             // The Edge function should return the structured JSON data
             return data as OCRExtractedData;
