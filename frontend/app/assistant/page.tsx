@@ -4,6 +4,7 @@
 import { askAssistant } from "@/services/rag.service";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -29,7 +30,6 @@ export default function AssistantPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
- 
 
 
   // Auto-resize textarea
@@ -206,7 +206,15 @@ export default function AssistantPage() {
       : "bg-[#131720] border border-[#1e2535] text-[#c8d0e0] rounded-tl-sm"
     }`}
 >
-                <p>{msg.text}</p>
+                {msg.role === "assistant" ? (
+                  <div className="prose prose-invert max-w-none text-[#c8d0e0]">
+                    <ReactMarkdown>
+                      {msg.text}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <p>{msg.text}</p>
+                )}
 
                 {msg.role === "assistant" &&
                     msg.sources &&
