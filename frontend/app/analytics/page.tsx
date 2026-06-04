@@ -88,7 +88,7 @@ useEffect(() => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         {/* Risk Pie Chart */}
-        <div className="bg-[#131720] border border-[#1e2535] rounded-2xl p-6">
+        <div className="bg-white dark:bg-[#131720] border border-gray-200 dark:border-[#1e2535] rounded-2xl p-6 shadow-sm transition-colors duration-300">
           <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] mb-4 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
@@ -105,7 +105,7 @@ useEffect(() => {
         </div>
 
         {/* BP Trend Chart */}
-        <div className="bg-[#131720] border border-[#1e2535] rounded-2xl p-6">
+        <div className="bg-white dark:bg-[#131720] border border-gray-200 dark:border-[#1e2535] rounded-2xl p-6 shadow-sm transition-colors duration-300">
           <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] mb-4 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
@@ -118,7 +118,7 @@ useEffect(() => {
       </div>
 
       {/* ── Village Analytics ── */}
-      <div className="mt-5 mb-8 bg-[#131720] border border-[#1e2535] rounded-2xl p-6">
+      <div className="mt-5 mb-8 bg-white dark:bg-[#131720] border border-gray-200 dark:border-[#1e2535] rounded-2xl p-6 shadow-sm transition-colors duration-300">
         <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] mb-4 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="20" x2="18" y2="10"/>
@@ -135,7 +135,7 @@ useEffect(() => {
   <table className="w-full text-sm">
 
     <thead>
-      <tr className="border-b border-[#1e2535]">
+      <tr className="border-b border-gray-200 dark:border-[#1e2535] text-gray-700 dark:text-gray-300">
         <th className="text-left p-2">Village</th>
         <th className="text-left p-2">High Risk</th>
         <th className="text-left p-2">Medium Risk</th>
@@ -149,22 +149,22 @@ useEffect(() => {
 
         <tr
           key={village.id}
-          className="border-b border-[#1e2535]"
+          className="border-b border-gray-200 dark:border-[#1e2535] text-gray-800 dark:text-gray-200"
         >
 
           <td className="p-2">
             {village.village_name}
           </td>
 
-          <td className="p-2 text-red-400">
+          <td className="p-2 text-red-600 dark:text-red-400">
             {village.high_risk_cases}
           </td>
 
-          <td className="p-2 text-yellow-400">
+          <td className="p-2 text-yellow-600 dark:text-yellow-400">
             {village.medium_risk_cases}
           </td>
 
-          <td className="p-2 text-green-400">
+          <td className="p-2 text-green-600 dark:text-green-400">
             {village.low_risk_cases}
           </td>
 
@@ -176,7 +176,7 @@ useEffect(() => {
 
   </table>
 
-  <div className="mt-6 bg-[#131720] border border-[#1e2535] rounded-2xl p-6">
+  <div className="mt-6 bg-white dark:bg-[#131720] border border-gray-200 dark:border-[#1e2535] rounded-2xl p-6 shadow-sm transition-colors duration-300">
   <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] mb-4">
     Village Risk Heatmap
   </p>
