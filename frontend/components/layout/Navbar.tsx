@@ -12,7 +12,7 @@
  *    - Icon and text labels mapped to `text-text-primary`, `text-text-secondary`, and `text-text-muted`.
  */
 
-import { Bell, Search, UserCircle2, Sun, Moon } from "lucide-react";
+import { Search, Sun, Moon } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 
 export default function Navbar() {
@@ -61,19 +61,6 @@ export default function Navbar() {
           )}
         </button>
 
-        <button className="relative p-1 hover:bg-item-hover rounded-lg transition-colors duration-300">
-          <Bell className="text-text-secondary hover:text-text-primary transition-colors duration-300" />
-
-          <span className="
-            absolute top-1 right-1
-            w-2 h-2 bg-red-500 rounded-full
-          " />
-        </button>
-
-        <UserCircle2
-          size={34}
-          className="text-text-secondary hover:text-text-primary cursor-pointer transition-colors duration-300"
-        />
       </div>
     </header>
   );
