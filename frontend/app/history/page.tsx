@@ -58,26 +58,26 @@ useEffect(() => {
           <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] mb-1">
             Maternal Health AI
           </p>
-          <h1 className="text-[26px] font-semibold text-[#f0f2f6] leading-tight">
+          <h1 className="text-[26px] font-semibold text-text-primary leading-tight transition-colors duration-300">
             Prediction History
           </h1>
-          <p className="text-[13px] text-[#5a6478] mt-1">
+          <p className="text-[13px] text-text-muted mt-1 transition-colors duration-300">
             Past maternal risk assessments
           </p>
         </div>
 
         {/* ── Table Section ── */}
-        <div className="bg-[#131720] border border-[#1e2535] rounded-2xl overflow-hidden mb-8">
+        <div className="bg-white dark:bg-[#131720] border border-gray-200 dark:border-[#1e2535] rounded-2xl overflow-hidden mb-8 shadow-sm transition-colors duration-300">
 
           {/* Section label */}
-          <div className="px-6 py-4 border-b border-[#1e2535] flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-[#1e2535] flex items-center justify-between">
             <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
               </svg>
               All Records
             </p>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#0f1f32] border border-[#1e3350] text-[#4a6fa0] text-[11px] font-bold font-mono">
+            <span className="px-2.5 py-0.5 rounded-full bg-white dark:bg-[#0f1f32] border border-blue-200 dark:border-[#1e3350] text-blue-600 dark:text-[#4a6fa0] text-[11px] font-bold font-mono shadow-sm transition-colors duration-300">
               {predictions.length}
             </span>
           </div>
@@ -85,7 +85,7 @@ useEffect(() => {
           {/* Loading */}
           {loading && (
             <div className="text-center py-16">
-              <p className="text-[13px] text-[#3d4e68] animate-pulse">
+              <p className="text-[13px] text-gray-500 dark:text-[#3d4e68] animate-pulse">
                 Loading prediction history...
               </p>
             </div>
@@ -94,7 +94,7 @@ useEffect(() => {
           {/* Empty */}
           {!loading && predictions.length === 0 && (
             <div className="text-center py-16">
-              <p className="text-[13px] text-[#2a3548] italic">
+              <p className="text-[13px] text-gray-400 dark:text-[#2a3548] italic">
                 No prediction records found.
               </p>
             </div>
@@ -106,17 +106,17 @@ useEffect(() => {
               <table className="w-full">
 
                 <thead>
-                  <tr className="bg-[#0d1118]">
-                    <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">
+                  <tr className="bg-gray-50 dark:bg-[#0d1118]">
+                    <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-gray-500 dark:text-[#2d3a50]">
                       Date & Time
                     </th>
-                    <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">
+                    <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-gray-500 dark:text-[#2d3a50]">
                       Overall Risk
                     </th>
-                    <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">
+                    <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-gray-500 dark:text-[#2d3a50]">
                       Confidence
                     </th>
-                    <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">
+                    <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-gray-500 dark:text-[#2d3a50]">
                       Clinical Score
                     </th>
                   </tr>
@@ -129,13 +129,13 @@ useEffect(() => {
                     return (
                       <tr
                         key={prediction.id}
-                        className={`border-t border-[#1a2235] transition-colors duration-150 hover:bg-[#0f1520] ${
-                          index % 2 === 0 ? "bg-[#0d1118]" : "bg-[#0b0f16]"
+                        className={`border-t border-gray-200 dark:border-[#1a2235] transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-[#0f1520] ${
+                          index % 2 === 0 ? "bg-white dark:bg-[#0d1118]" : "bg-gray-50 dark:bg-[#0b0f16]"
                         }`}
                       >
                         {/* Date */}
                         <td className="px-6 py-4">
-                          <span className="text-[13px] font-mono text-[#5a6a84]">
+                          <span className="text-[13px] font-mono text-gray-800 dark:text-[#5a6a84]">
                             {new Date(prediction.predicted_at).toLocaleString()}
                           </span>
                         </td>
