@@ -114,6 +114,18 @@ function MetaRow({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+function formatOcrValue(val: any): string {
+  if (val === null || val === undefined) return "—";
+  if (typeof val === 'string' || typeof val === 'number') return String(val);
+  if (typeof val === 'object') {
+    if (val.systolic && val.diastolic) return `${val.systolic}/${val.diastolic} ${val.unit || ''}`.trim();
+    if (val.sys && val.dia) return `${val.sys}/${val.dia} ${val.unit || ''}`.trim();
+    if (val.value) return `${val.value} ${val.unit || ''}`.trim();
+    return JSON.stringify(val);
+  }
+  return "—";
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function PatientsPage() {
@@ -554,15 +566,15 @@ if (createdPatient) {
                 <div key={report.id} className="px-6 py-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div>
                     <p className="text-[11px] text-[#3a4a68] mb-1.5">Hemoglobin</p>
-                    <p className="text-[14px] font-semibold text-[#c8d0e0]">{report.parsed_json?.hemoglobin ?? "—"}</p>
+                    <p className="text-[14px] font-semibold text-[#c8d0e0]">{formatOcrValue(report.parsed_json?.hemoglobin)}</p>
                   </div>
                   <div>
                     <p className="text-[11px] text-[#3a4a68] mb-1.5">Blood pressure</p>
-                    <p className="text-[14px] font-semibold text-[#c8d0e0]">{report.parsed_json?.blood_pressure ?? "—"}</p>
+                    <p className="text-[14px] font-semibold text-[#c8d0e0]">{formatOcrValue(report.parsed_json?.blood_pressure)}</p>
                   </div>
                   <div>
                     <p className="text-[11px] text-[#3a4a68] mb-1.5">Blood sugar</p>
-                    <p className="text-[14px] font-semibold text-[#c8d0e0]">{report.parsed_json?.blood_sugar ?? "—"}</p>
+                    <p className="text-[14px] font-semibold text-[#c8d0e0]">{formatOcrValue(report.parsed_json?.blood_sugar)}</p>
                   </div>
                   <div>
                     <p className="text-[11px] text-[#3a4a68] mb-1.5">Uploaded</p>
