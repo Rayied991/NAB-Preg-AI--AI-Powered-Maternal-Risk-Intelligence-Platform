@@ -17,7 +17,7 @@ interface Alert {
 const severityConfig = (severity: string) => {
   if (severity === "HIGH")
     return {
-      badge: "bg-red-50 dark:bg-[#2a0e0e] text-red-600 dark:text-[#f06060] border border-red-200 dark:border-[#5a1a1a]",
+      badge: "bg-white dark:bg-[#2a0e0e] text-red-600 dark:text-[#f06060] border border-red-500 dark:border-[#5a1a1a]",
       dot: "bg-[#f06060]",
       ring: "border-red-300 dark:border-[#3a1010] shadow-[0_0_10px_rgba(248,113,113,0.15)] dark:shadow-none",
       icon: (
@@ -29,9 +29,9 @@ const severityConfig = (severity: string) => {
       ),
     };
   return {
-    badge: "bg-orange-50 dark:bg-[#2a1e06] text-orange-600 dark:text-[#e0a040] border border-orange-200 dark:border-[#5a3a10]",
+    badge: "bg-white dark:bg-[#2a1e06] text-yellow-600 dark:text-[#e0a040] border border-yellow-500 dark:border-[#5a3a10]",
     dot: "bg-[#e0a040]",
-    ring: "border-orange-300 dark:border-[#3a2a08] shadow-[0_0_10px_rgba(251,146,60,0.15)] dark:shadow-none",
+    ring: "border-yellow-300 dark:border-[#3a2a08] shadow-[0_0_10px_rgba(253,224,71,0.15)] dark:shadow-none",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10"/>

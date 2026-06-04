@@ -8,16 +8,16 @@ import { useEffect, useState } from "react";
 const riskConfig = (risk: string) => {
   if (risk === "HIGH")
     return {
-      badge: "bg-[#2a0e0e] text-[#f06060] border border-[#5a1a1a]",
+      badge: "bg-white dark:bg-[#2a0e0e] text-red-600 dark:text-[#f06060] border border-red-500 dark:border-[#5a1a1a]",
       dot: "bg-[#f06060]",
     };
   if (risk === "MEDIUM")
     return {
-      badge: "bg-[#2a1e06] text-[#e0a040] border border-[#5a3a10]",
+      badge: "bg-white dark:bg-[#2a1e06] text-yellow-600 dark:text-[#e0a040] border border-yellow-500 dark:border-[#5a3a10]",
       dot: "bg-[#e0a040]",
     };
   return {
-    badge: "bg-[#0a2010] text-[#40c070] border border-[#1a5030]",
+    badge: "bg-white dark:bg-[#0a2010] text-green-600 dark:text-[#40c070] border border-green-500 dark:border-[#1a5030]",
     dot: "bg-[#40c070]",
   };
 };
@@ -156,7 +156,7 @@ useEffect(() => {
                             <span className="text-[13px] font-semibold font-mono text-[#3a6a9a] w-12">
                               {prediction.confidence_score}%
                             </span>
-                            <div className="w-20 h-1 bg-[#0f1620] rounded-full overflow-hidden">
+                            <div className="w-20 h-1 bg-gray-200 dark:bg-[#0f1620] rounded-full overflow-hidden">
                               <div
                                 className="h-full rounded-full bg-[#1a4fa8]"
                                 style={{ width: `${prediction.confidence_score}%` }}
