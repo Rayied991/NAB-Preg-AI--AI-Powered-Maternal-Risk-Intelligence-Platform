@@ -495,32 +495,43 @@ if (createdPatient) {
               } />
             </div>
 
-            <div className="px-6 pb-4">
-            <button
-              onClick={() =>
-                handleGenerateSummary(
-                  history.patient.id
-                )
-              }
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-            >
-              {loadingSummary
-                ? "AI Analyzing Patient..."
-                : "Generate AI Summary"}
-            </button>
-          </div>
+            <div className="px-6 pb-4 flex gap-3">
+                  <button
+                    onClick={() =>
+                      window.open(
+                        `http://127.0.0.1:8000/api/report/${history.patient.id}`
+                      )
+                    }
+                    className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    Download Clinical Report
+                  </button>
 
-          {copilotSummary && (
-            <div className="mx-6 mb-6 p-4 rounded-xl bg-[#0d1118] border border-[#1e2535]">
-            <h3 className="text-sm font-semibold text-white mb-3">
-              AI Clinical Summary
-            </h3>
+                  <button
+                    onClick={() =>
+                      handleGenerateSummary(
+                        history.patient.id
+                      )
+                    }
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                  >
+                    {loadingSummary
+                      ? "AI Analyzing Patient..."
+                      : "Generate AI Summary"}
+                  </button>
+                </div>
 
-            <pre className="whitespace-pre-wrap text-sm text-[#c8d0e0]">
-              {copilotSummary}
-            </pre>
-          </div>
-        )}
+                {copilotSummary && (
+                  <div className="mx-6 mb-6 p-4 rounded-xl bg-[#0d1118] border border-[#1e2535]">
+                    <h3 className="text-sm font-semibold text-white mb-3">
+                      AI Clinical Summary
+                    </h3>
+
+                    <pre className="whitespace-pre-wrap text-sm text-[#c8d0e0]">
+                      {copilotSummary}
+                    </pre>
+                  </div>
+                )}
           </SectionCard>
 
           {/* ── OCR Reports ── */}
