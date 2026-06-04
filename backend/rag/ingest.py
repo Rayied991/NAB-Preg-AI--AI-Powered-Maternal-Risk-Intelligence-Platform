@@ -1,30 +1,31 @@
 from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_huggingface import HuggingFaceEmbeddings
 
-from langchain_text_splitters import (
-    RecursiveCharacterTextSplitter
-)
-
-from langchain_community.vectorstores import Chroma
-
-from langchain_huggingface import (
-    HuggingFaceEmbeddings
-)
+from supabase import create_client
 
 from dotenv import load_dotenv
+
+import uuid
 import os
 
 load_dotenv()
 
-HF_ACCESS_TOKEN = os.getenv(
-    "HF_ACCESS_TOKEN"
+SUPABASE_URL = os.getenv(
+    "NEXT_PUBLIC_SUPABASE_URL"
 )
 
-print(
-    "HF TOKEN FOUND:",
-    HF_ACCESS_TOKEN is not None
+SUPABASE_KEY = os.getenv(
+    "NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY"
+)
+
+supabase = create_client(
+    SUPABASE_URL,
+    SUPABASE_KEY
 )
 
 print("Loading PDFs...")
+
 PDFS = [
     "backend/knowledge/WHO_Maternal_Health.pdf",
     "backend/knowledge/WHO_Anemia_Guidelines.pdf",
@@ -33,18 +34,21 @@ PDFS = [
 ]
 
 documents = []
+
 for pdf in PDFS:
 
-        loader = PyPDFLoader(pdf)
+    loader = PyPDFLoader(pdf)
 
-        pages = loader.load()
+    pages = loader.load()
 
-        # Skip cover pages
-        pages = pages[8:]
+    pages = pages[8:]
 
-        documents.extend(pages)
+    documents.extend(pages)
 
-print(f"Loaded {len(documents)} pages")
+print(
+    f"Loaded {len(documents)} pages"
+)
+
 splitter = RecursiveCharacterTextSplitter(
     chunk_size=1000,
     chunk_overlap=200,
@@ -76,23 +80,53 @@ for chunk in chunks:
     filtered_chunks.append(chunk)
 
 chunks = filtered_chunks
-print(f"Created {len(chunks)} chunks")
-
-print("Generating embeddings...")
-embedding_model = HuggingFaceEmbeddings(
-    model_name="all-MiniLM-L6-v2",
-    model_kwargs={
-        "token": HF_ACCESS_TOKEN
-    }
-)
-print("Saving to ChromaDB...")
-vectorstore = Chroma.from_documents(
-    documents=chunks,
-    embedding=embedding_model,
-    persist_directory="backend/chroma_db"
-)
 
 print(
-    f"Stored {len(chunks)} chunks"
+    f"Created {len(chunks)} chunks"
 )
+
+embedding_model = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
+
+print("Generating embeddings...")
+
+rows = []
+
+for chunk in chunks:
+
+    embedding = embedding_model.embed_query(
+        chunk.page_content
+    )
+
+    rows.append(
+        {
+            "id": str(uuid.uuid4()),
+            "content": chunk.page_content,
+            "source": chunk.metadata.get(
+                "source",
+                "Unknown"
+            ),
+            "embedding": embedding,
+        }
+    )
+
+print(
+    f"Inserting {len(rows)} rows..."
+)
+
+batch_size = 100
+
+for i in range(
+    0,
+    len(rows),
+    batch_size
+):
+
+    supabase.table(
+        "healthcare_embeddings"
+    ).insert(
+        rows[i:i+batch_size]
+    ).execute()
+
 print("Done!")

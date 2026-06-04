@@ -1,12 +1,23 @@
 import os
 import requests
+
 from datetime import datetime
-from dotenv import load_dotenv,find_dotenv
+from pathlib import Path
 
-load_dotenv()
+from dotenv import load_dotenv
 
+env_path = (
+    Path(__file__)
+    .resolve()
+    .parents[2]
+    / ".env"
+)
 
-print("ENV FILE:", find_dotenv())
+if env_path.exists():
+    load_dotenv(env_path)
+    print("ENV FILE:", env_path)
+else:
+    print("ENV FILE NOT FOUND:", env_path)
 SUPABASE_URL = os.getenv(
     "NEXT_PUBLIC_SUPABASE_URL"
 )

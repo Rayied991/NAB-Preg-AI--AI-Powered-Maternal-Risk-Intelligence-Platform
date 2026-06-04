@@ -1,7 +1,11 @@
 from langchain_mistralai import ChatMistralAI
-from backend.rag.retriever import retriever
+
+from backend.rag.retriever import (
+    retrieve_documents
+)
 
 from dotenv import load_dotenv
+
 import os
 
 load_dotenv()
@@ -11,23 +15,31 @@ print(
     os.getenv("MISTRAL_API_KEY") is not None
 )
 
-llm= ChatMistralAI(
+llm = ChatMistralAI(
     model="mistral-small-latest",
     temperature=0
 )
 
+
 def ask_rag(question: str):
 
-    docs = retriever.invoke(
+    docs = retrieve_documents(
         question
     )
-  
+
     context = "\n\n".join(
-        [doc.page_content for doc in docs]
+        [
+            doc["content"]
+            for doc in docs
+        ]
     )
 
     prompt = f"""
 Answer ONLY from the provided context.
+
+If the answer is not in the context,
+say:
+"I could not find this information in the knowledge base."
 
 Context:
 {context}
@@ -37,19 +49,19 @@ Question:
 """
 
     sources = list(
-    set(
-        [
-            doc.metadata.get(
-                "source",
-                "Unknown"
-            )
-            for doc in docs
-        ]
+        set(
+            [
+                doc["source"]
+                for doc in docs
+            ]
+        )
     )
-)
 
     try:
-        response = llm.invoke(prompt)
+
+        response = llm.invoke(
+            prompt
+        )
 
         return {
             "answer": response.content,
@@ -57,12 +69,14 @@ Question:
         }
 
     except Exception as e:
-        print("RAG ERROR:", e)
+
+        print(
+            "RAG ERROR:",
+            e
+        )
 
         return {
-            "answer": (
-                "AI service temporarily unavailable. "
-                "Please try again later."
-            ),
+            "answer":
+                "AI service temporarily unavailable.",
             "sources": sources,
         }
