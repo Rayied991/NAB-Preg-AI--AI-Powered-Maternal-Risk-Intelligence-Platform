@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import RiskTrendChart from "@/components/charts/RiskTrendChart";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getCopilotSummary } from "@/services/copilot.service";
 import {
@@ -8,6 +9,9 @@ import {
 } from "@/services/create-patient.service";
 import { fetchPatientHistory } from "@/services/patient-history.service";
 import { fetchPatients } from "@/services/patient.service";
+import {
+  getRiskTrend,
+} from "@/services/riskTrend.service";
 import { getPatientTrends } from "@/services/trends.service";
 import { useEffect, useState } from "react";
 import {
@@ -74,7 +78,7 @@ function SectionCard({
   children,
 }: {
   title: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   count?: number;
   empty?: boolean;
   emptyLabel?: string;
@@ -144,6 +148,13 @@ export default function PatientsPage() {
 
   const [loadingSummary, setLoadingSummary] =
   useState(false);
+type TrendPoint = {
+  clinical_score: number;
+  predicted_at: string;
+};
+
+const [trendData, setTrendData] =
+  useState<TrendPoint[]>([]);
 
 const [form, setForm] = useState({
   patient_code: "",
@@ -250,6 +261,21 @@ if (createdPatient) {
     };
     loadPatients();
   }, []);
+
+ useEffect(() => {
+  if (!selectedPatient) return;
+
+  async function loadTrend() {
+    try {
+      const data = await getRiskTrend(selectedPatient); // was: selectedPatient.id
+      setTrendData(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  loadTrend();
+}, [selectedPatient]);
 
   const loadHistory = async (
   patientId: string
@@ -544,6 +570,16 @@ if (createdPatient) {
                     </pre>
                   </div>
                 )}
+          </SectionCard>
+
+          <SectionCard
+            title="Risk Timeline"
+          >
+            <div className="p-4">
+              <RiskTrendChart
+                data={trendData}
+              />
+            </div>
           </SectionCard>
 
           {/* ── OCR Reports ── */}
