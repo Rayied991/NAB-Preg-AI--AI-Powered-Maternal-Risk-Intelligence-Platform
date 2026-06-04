@@ -72,22 +72,22 @@ function SectionCard({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="bg-[#131720] border border-[#1e2535] rounded-2xl overflow-hidden">
+    <div className="bg-white dark:bg-[#131720] border border-gray-200 dark:border-[#1e2535] rounded-2xl overflow-hidden shadow-sm">
       {/* card header */}
-      <div className="px-6 py-4 border-b border-[#1e2535] flex items-center justify-between">
+      <div className="px-6 py-4 border-b border-gray-200 dark:border-[#1e2535] flex items-center justify-between">
         <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] flex items-center gap-2">
           {icon}
           {title}
         </p>
         {count !== undefined && (
-          <span className="px-2.5 py-0.5 rounded-full bg-[#0f1f32] border border-[#1e3350] text-[#4a6fa0] text-[11px] font-bold font-mono">
+          <span className="px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-[#0f1f32] border border-blue-100 dark:border-[#1e3350] text-[#4a6fa0] text-[11px] font-bold font-mono">
             {count}
           </span>
         )}
       </div>
       {empty ? (
         <div className="px-6 py-10 text-center">
-          <p className="text-[13px] text-[#2d3a50] italic">{emptyLabel}</p>
+          <p className="text-[13px] text-gray-500 dark:text-[#2d3a50] italic">{emptyLabel}</p>
         </div>
       ) : (
         children
@@ -98,9 +98,9 @@ function SectionCard({
 
 function MetaRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-[#181f30] last:border-0">
-      <span className="text-[12px] text-[#3a4a68] w-28 shrink-0 pt-0.5">{label}</span>
-      <span className="text-[13px] text-[#c8d0e0] font-medium">{value ?? "—"}</span>
+    <div className="flex items-start gap-3 py-3 border-b border-gray-100 dark:border-[#181f30] last:border-0">
+      <span className="text-[12px] text-gray-500 dark:text-[#3a4a68] w-28 shrink-0 pt-0.5">{label}</span>
+      <span className="text-[13px] text-gray-800 dark:text-[#c8d0e0] font-medium">{value ?? "—"}</span>
     </div>
   );
 }
@@ -312,11 +312,11 @@ if (createdPatient) {
         }
       >
         {/* Dropdown selector */}
-        <div className="px-6 py-4 border-b border-[#1e2535]">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-[#1e2535]">
           <select
             value={selectedPatient}
             onChange={handleSelectChange}
-            className="w-full sm:w-72 bg-[#0d1118] border border-[#1e2535] hover:border-[#2a3650] focus:border-[#1a4fa8] focus:outline-none text-[#c8d0e0] text-[13px] rounded-xl px-4 py-2 transition-all duration-200"
+            className="w-full sm:w-72 bg-white dark:bg-[#0d1118] border border-gray-200 dark:border-[#1e2535] hover:border-gray-300 dark:hover:border-[#2a3650] focus:border-[#1a4fa8] focus:outline-none text-gray-800 dark:text-[#c8d0e0] text-[13px] rounded-xl px-4 py-2 transition-all duration-200"
           >
             <option value="">Select a patient to view history</option>
             {patients.map((p) => (
@@ -330,10 +330,10 @@ if (createdPatient) {
         {/* Table */}
         <table className="w-full">
           <thead>
-            <tr className="bg-[#0d1118]">
-              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">Patient</th>
-              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">Village</th>
-              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-[#2d3a50]">Patient Code</th>
+            <tr className="bg-gray-50 dark:bg-[#0d1118]">
+              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-gray-500 dark:text-[#2d3a50]">Patient</th>
+              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-gray-500 dark:text-[#2d3a50]">Village</th>
+              <th className="text-left px-6 py-3 text-[11px] font-semibold tracking-widest uppercase text-gray-500 dark:text-[#2d3a50]">Patient Code</th>
             </tr>
           </thead>
           <tbody>
@@ -341,13 +341,13 @@ if (createdPatient) {
               <tr
                 key={p.id}
                 onClick={() => handleRowClick(p.id)}
-                className={`border-t border-[#1a2235] cursor-pointer transition-colors duration-150
-                  ${selectedPatient === p.id ? "bg-[#0f1f38]" : "hover:bg-[#0d1520]"}`}
+                className={`border-t border-gray-100 dark:border-[#1a2235] cursor-pointer transition-colors duration-150
+                  ${selectedPatient === p.id ? "bg-blue-50 dark:bg-[#0f1f38]" : "hover:bg-gray-50 dark:hover:bg-[#0d1520]"}`}
               >
-                <td className="px-6 py-4 text-[13px] text-[#c8d0e0] font-medium">{p.full_name}</td>
-                <td className="px-6 py-4 text-[13px] text-[#5a6478]">{p.village}</td>
+                <td className="px-6 py-4 text-[13px] text-gray-800 dark:text-[#c8d0e0] font-medium">{p.full_name}</td>
+                <td className="px-6 py-4 text-[13px] text-gray-600 dark:text-[#5a6478]">{p.village}</td>
                 <td className="px-6 py-4">
-                  <span className="px-2 py-0.5 rounded bg-[#0f1f32] border border-[#1e3350] text-[#4a7fa8] text-[11px] font-mono">
+                  <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-[#0f1f32] border border-blue-100 dark:border-[#1e3350] text-[#4a7fa8] text-[11px] font-mono">
                     {p.patient_code}
                   </span>
                 </td>
@@ -359,7 +359,7 @@ if (createdPatient) {
 
       {/* ── Loading state ── */}
       {historyLoading && (
-        <div className="mt-6 bg-[#131720] border border-[#1e2535] rounded-2xl px-6 py-12 text-center">
+        <div className="mt-6 bg-white dark:bg-[#131720] border border-gray-200 dark:border-[#1e2535] rounded-2xl px-6 py-12 text-center shadow-sm">
           <p className="text-[13px] text-[#4a7fa8] animate-pulse">Loading patient history…</p>
         </div>
       )}
@@ -383,7 +383,7 @@ if (createdPatient) {
               <MetaRow label="Village"      value={history.patient.village} />
               <MetaRow label="Age"          value={history.patient.age ? `${history.patient.age} yrs` : undefined} />
               <MetaRow label="Patient code" value={
-                <span className="px-2 py-0.5 rounded bg-[#0f1f32] border border-[#1e3350] text-[#4a7fa8] font-mono text-[11px]">
+                <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-[#0f1f32] border border-blue-100 dark:border-[#1e3350] text-[#4a7fa8] font-mono text-[11px]">
                   {history.patient.patient_code}
                 </span>
               } />
@@ -405,12 +405,12 @@ if (createdPatient) {
           </div>
 
           {copilotSummary && (
-            <div className="mx-6 mb-6 p-4 rounded-xl bg-[#0d1118] border border-[#1e2535]">
-            <h3 className="text-sm font-semibold text-white mb-3">
+            <div className="mx-6 mb-6 p-4 rounded-xl bg-gray-50 dark:bg-[#0d1118] border border-gray-200 dark:border-[#1e2535]">
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-white mb-3">
               AI Clinical Summary
             </h3>
 
-            <pre className="whitespace-pre-wrap text-sm text-[#c8d0e0]">
+            <pre className="whitespace-pre-wrap text-sm text-gray-700 dark:text-[#c8d0e0] font-sans">
               {copilotSummary}
             </pre>
           </div>
@@ -432,24 +432,24 @@ if (createdPatient) {
               </svg>
             }
           >
-            <div className="divide-y divide-[#1a2235]">
+            <div className="divide-y divide-gray-100 dark:divide-[#1a2235]">
               {history.ocr_reports.map((report: any) => (
                 <div key={report.id} className="px-6 py-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div>
-                    <p className="text-[11px] text-[#3a4a68] mb-1.5">Hemoglobin</p>
-                    <p className="text-[14px] font-semibold text-[#c8d0e0]">{report.parsed_json?.hemoglobin ?? "—"}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-[#3a4a68] mb-1.5">Hemoglobin</p>
+                    <p className="text-[14px] font-semibold text-gray-800 dark:text-[#c8d0e0]">{report.parsed_json?.hemoglobin ?? "—"}</p>
                   </div>
                   <div>
-                    <p className="text-[11px] text-[#3a4a68] mb-1.5">Blood pressure</p>
-                    <p className="text-[14px] font-semibold text-[#c8d0e0]">{report.parsed_json?.blood_pressure ?? "—"}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-[#3a4a68] mb-1.5">Blood pressure</p>
+                    <p className="text-[14px] font-semibold text-gray-800 dark:text-[#c8d0e0]">{report.parsed_json?.blood_pressure ?? "—"}</p>
                   </div>
                   <div>
-                    <p className="text-[11px] text-[#3a4a68] mb-1.5">Blood sugar</p>
-                    <p className="text-[14px] font-semibold text-[#c8d0e0]">{report.parsed_json?.blood_sugar ?? "—"}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-[#3a4a68] mb-1.5">Blood sugar</p>
+                    <p className="text-[14px] font-semibold text-gray-800 dark:text-[#c8d0e0]">{report.parsed_json?.blood_sugar ?? "—"}</p>
                   </div>
                   <div>
-                    <p className="text-[11px] text-[#3a4a68] mb-1.5">Uploaded</p>
-                    <p className="text-[12px] text-[#5a6478]">{new Date(report.uploaded_at).toLocaleString()}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-[#3a4a68] mb-1.5">Uploaded</p>
+                    <p className="text-[12px] text-gray-500 dark:text-[#5a6478]">{new Date(report.uploaded_at).toLocaleString()}</p>
                   </div>
                 </div>
               ))}
@@ -468,31 +468,31 @@ if (createdPatient) {
               </svg>
             }
           >
-            <div className="divide-y divide-[#1a2235]">
+            <div className="divide-y divide-gray-100 dark:divide-[#1a2235]">
               {history.predictions.map((pred: any) => (
                 <div key={pred.id} className="px-6 py-4 flex flex-wrap items-center gap-6">
                   <div className="min-w-27.5">
-                    <p className="text-[11px] text-[#3a4a68] mb-1.5">Overall risk</p>
+                    <p className="text-[11px] text-gray-500 dark:text-[#3a4a68] mb-1.5">Overall risk</p>
                     <RiskBadge risk={pred.overall_risk} />
                   </div>
                   <div className="min-w-27.5">
-                    <p className="text-[11px] text-[#3a4a68] mb-1">Confidence</p>
-                    <p className="text-[15px] font-semibold text-[#c8d0e0]">
+                    <p className="text-[11px] text-gray-500 dark:text-[#3a4a68] mb-1">Confidence</p>
+                    <p className="text-[15px] font-semibold text-gray-800 dark:text-[#c8d0e0]">
                       {pred.confidence_score != null ? `${pred.confidence_score}%` : "—"}
                     </p>
                     {pred.confidence_score != null && (
-                      <div className="mt-1.5 h-1 w-20 bg-[#1e2535] rounded-full overflow-hidden">
+                      <div className="mt-1.5 h-1 w-20 bg-gray-200 dark:bg-[#1e2535] rounded-full overflow-hidden">
                         <div className="h-full bg-[#1a4fa8] rounded-full transition-all duration-700" style={{ width: `${pred.confidence_score}%` }} />
                       </div>
                     )}
                   </div>
                   <div className="min-w-27.5">
-                    <p className="text-[11px] text-[#3a4a68] mb-1">Clinical score</p>
-                    <p className="text-[15px] font-semibold text-[#c8d0e0]">{pred.clinical_score ?? "—"}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-[#3a4a68] mb-1">Clinical score</p>
+                    <p className="text-[15px] font-semibold text-gray-800 dark:text-[#c8d0e0]">{pred.clinical_score ?? "—"}</p>
                   </div>
                   <div className="min-w-35 ml-auto">
-                    <p className="text-[11px] text-[#3a4a68] mb-1">Predicted at</p>
-                    <p className="text-[12px] text-[#5a6478]">{new Date(pred.predicted_at).toLocaleString()}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-[#3a4a68] mb-1">Predicted at</p>
+                    <p className="text-[12px] text-gray-500 dark:text-[#5a6478]">{new Date(pred.predicted_at).toLocaleString()}</p>
                   </div>
                 </div>
               ))}
@@ -513,17 +513,17 @@ if (createdPatient) {
               </svg>
             }
           >
-            <div className="divide-y divide-[#1a2235]">
+            <div className="divide-y divide-gray-100 dark:divide-[#1a2235]">
               {history.alerts.map((alert: any) => (
                 <div key={alert.id} className="px-6 py-4">
                   <div className="flex flex-wrap items-center gap-2 mb-2.5">
                     <SeverityBadge severity={alert.severity} />
                     <StatusBadge   status={alert.status} />
                   </div>
-                  <p className="text-[13px] text-[#c8d0e0] leading-relaxed mb-2">
+                  <p className="text-[13px] text-gray-800 dark:text-[#c8d0e0] leading-relaxed mb-2">
                     {alert.alert_message}
                   </p>
-                  <p className="text-[12px] text-[#3a4a68]">
+                  <p className="text-[12px] text-gray-500 dark:text-[#3a4a68]">
                     Triggered: {new Date(alert.triggered_at).toLocaleString()}
                   </p>
                 </div>
