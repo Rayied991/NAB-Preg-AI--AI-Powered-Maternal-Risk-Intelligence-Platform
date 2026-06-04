@@ -19,6 +19,7 @@ passlib[bcrypt]
 python-jose[cryptography]
 supabase
 requests
+reportlab
 
 # =========================
 # RAG / LANGCHAIN

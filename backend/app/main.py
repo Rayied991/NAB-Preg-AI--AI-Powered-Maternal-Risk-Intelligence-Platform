@@ -23,8 +23,8 @@ from backend.app.api.routes.copilot import (
 from backend.app.api.routes.patient_trends import (
     router as patient_trends_router
 )
-from backend.app.api.routes.clinical_assistant import (
-    router as clinical_assistant_router
+from backend.app.api.routes.report import (
+    router as report_router
 )
 from backend.app.api.routes import rag
 app = FastAPI(
@@ -81,9 +81,10 @@ app.include_router(
     prefix="/api"
 )
 app.include_router(
-    clinical_assistant_router,
+    report_router,
     prefix="/api"
 )
+
 @app.get("/")
 def root():
     return {
