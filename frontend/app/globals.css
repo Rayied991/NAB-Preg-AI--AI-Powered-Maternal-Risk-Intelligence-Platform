@@ -1,5 +1,28 @@
 @import "tailwindcss";
 
+/**
+ * globals.css
+ * 
+ * Group Project Documentation:
+ * This CSS file implements the global theme design system for NAB Preg AI.
+ * It uses standard CSS Custom Properties (variables) that automatically swap when the '.dark' class is present on <html>.
+ * These variables are mapped inside the Tailwind CSS v4 @theme directive to make semantic utility classes available.
+ * 
+ * Design Decision:
+ * 1. Instead of using hardcoded colors across components, we define semantic variables:
+ *    - bg-background (app body)
+ *    - bg-panel (sidebar and navbar header panels)
+ *    - bg-card (content cards)
+ *    - border-custom (standard component borders)
+ *    - border-dashed (dashed borders for file uploads)
+ *    - text-text-primary (primary headers)
+ *    - text-text-secondary (body lists and paragraphs)
+ *    - text-text-muted (supporting details, timestamps, placeholder text)
+ * 2. Light mode is configured with soft, neutral, high-contrast slate and grey shades to preserve high readability for healthcare workers.
+ * 3. Dark mode restores the application's original dark theme styling.
+ */
+
+/* Class-based Dark Mode configuration for Tailwind CSS v4 */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {

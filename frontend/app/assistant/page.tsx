@@ -3,7 +3,6 @@
 import { askAssistant } from "@/services/rag.service";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -185,12 +184,11 @@ export default function AssistantPage() {
             className={`flex gap-3 max-w-3xl ${msg.role === "user" ? "ml-auto flex-row-reverse" : ""}`}
           >
             {/* Avatar */}
-            <div
-              className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-bold
-                ${msg.role === "user"
-                  ? "bg-[#1a4fa8] text-[#d8e8ff]"
-                  : "bg-[#e6f0fa] dark:bg-[#0f1f32] border border-[#cce0f5] dark:border-[#1e3350] text-[#4a7fa8]"
-                }`}
+            <div className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-bold
+              ${msg.role === "user"
+                ? "bg-[#1a4fa8] text-[#d8e8ff]"
+                : "bg-[#e6f0fa] dark:bg-[#0f1f32] border border-[#cce0f5] dark:border-[#1e3350] text-[#4a7fa8]"
+              }`}
             >
               {msg.role === "user" ? "YOU" : "AI"}
             </div>
@@ -204,27 +202,26 @@ export default function AssistantPage() {
                     : "bg-white dark:bg-[#131720] border border-[#e2e8f0] dark:border-[#1e2535] text-slate-800 dark:text-[#c8d0e0] rounded-tl-sm"
                   }`}
               >
-                {msg.role === "assistant" ? (
-                  <div className="prose prose-slate dark:prose-invert max-w-none text-slate-800 dark:text-[#c8d0e0]">
-                    <ReactMarkdown>{msg.text}</ReactMarkdown>
-                  </div>
-                ) : (
-                  <p>{msg.text}</p>
-                )}
+                <p>{msg.text}</p>
 
                 {msg.role === "assistant" &&
                   msg.sources &&
                   msg.sources.length > 0 && (
                     <div className="mt-3 pt-3 border-t border-[#f1f5f9] dark:border-[#2a3345]">
-                      <p className="text-[11px] text-[#4a7fa8] mb-1">Sources</p>
-                      {msg.sources.map((source, index) => (
-                        <p
-                          key={index}
-                          className="text-[11px] text-[#64748b] dark:text-[#7a8aa5]"
-                        >
-                          {source.split("/").pop()}
-                        </p>
-                      ))}
+                      <p className="text-[11px] text-[#4a7fa8] mb-1">
+                        Sources
+                      </p>
+
+                      {msg.sources.map(
+                        (source, index) => (
+                          <p
+                            key={index}
+                            className="text-[11px] text-[#64748b] dark:text-[#7a8aa5]"
+                          >
+                            {source.split("/").pop()}
+                          </p>
+                        )
+                      )}
                     </div>
                   )}
               </div>
