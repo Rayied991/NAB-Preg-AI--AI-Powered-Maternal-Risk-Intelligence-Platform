@@ -1,10 +1,10 @@
 /**
  * OCRService - Handles image and PDF text extraction using Mistral Pixtral via Supabase Edge Functions.
  * 
- * For PDF support: converts PDF pages to Base64 images, then sends them to the Edge Function.
+ * Includes a robust fallback to local Tesseract.js if the cloud AI fails.
  */
 
-import { supabase } from '../lib/supabase'; // Adjust this import based on where your supabase client is
+import { supabase } from '../lib/supabase';
 import Tesseract from 'tesseract.js';
 
 export interface OCRExtractedData {
@@ -46,8 +46,6 @@ async function loadPdfJs(): Promise<any> {
 
 /**
  * Extract images from a PDF file by rendering pages to canvas and converting to Base64
- * @param pdfFile - The PDF file
- * @returns Promise<string[]> - Array of Base64 image strings
  */
 async function extractImagesFromPDF(pdfFile: File): Promise<string[]> {
     return new Promise(async (resolve, reject) => {
@@ -100,31 +98,118 @@ async function extractImagesFromPDF(pdfFile: File): Promise<string[]> {
 }
 
 /**
+ * Parse extracted text to find medical values (From Main Branch)
+ */
+function parseTextForMedicalData(text: string): OCRExtractedData {
+    const data: OCRExtractedData = {
+        hemoglobin: null,
+        blood_pressure: null,
+        blood_sugar: null,
+        heart_rate: null,
+        raw_text: text,
+    };
+
+    // Hemoglobin patterns
+    const hemoglobinPatterns = [
+        /hemoglobin[:\s]+(\d+\.?\d*)\s*(?:g\/dL|g\/L)?/gi,
+        /hb[:\s]+(\d+\.?\d*)\s*(?:g\/dL|g\/L)?/gi,
+    ];
+
+    for (const pattern of hemoglobinPatterns) {
+        const match = text.match(pattern);
+        if (match) {
+            const valueMatch = match[0].match(/(\d+\.?\d*)/);
+            if (valueMatch) {
+                // Determine if it was g/L from the original match to preserve units for the frontend auto-converter
+                const isGl = match[0].toLowerCase().includes('g/l') && !match[0].toLowerCase().includes('g/dl');
+                data.hemoglobin = valueMatch[1] + (isGl ? ' g/L' : ' g/dL');
+                break;
+            }
+        }
+    }
+
+    // Blood Pressure patterns
+    const bpPatterns = [
+        /(?:blood pressure|bp)[:\s]+(\d+)\s*\/\s*(\d+)/gi,
+        /(\d+)\s*\/\s*(\d+)\s*(?:mmHg)?/gi,
+    ];
+
+    for (const pattern of bpPatterns) {
+        const match = text.match(pattern);
+        if (match) {
+            const systolicMatch = match[0].match(/(\d+)\s*\/\s*(\d+)/);
+            if (systolicMatch) {
+                data.blood_pressure = `${systolicMatch[1]}/${systolicMatch[2]}`;
+                break;
+            }
+        }
+    }
+
+    // Blood Sugar patterns
+    const bloodSugarPatterns = [
+        /blood sugar[:\s]+(\d+\.?\d*)\s*(?:mg\/dL|mmol\/L)?/gi,
+        /bs[:\s]+(\d+\.?\d*)\s*(?:mg\/dL|mmol\/L)?/gi,
+        /glucose[:\s]+(\d+\.?\d*)\s*(?:mg\/dL|mmol\/L)?/gi,
+    ];
+
+    for (const pattern of bloodSugarPatterns) {
+        const match = text.match(pattern);
+        if (match) {
+            const valueMatch = match[0].match(/(\d+\.?\d*)/);
+            if (valueMatch) {
+                const isMmol = match[0].toLowerCase().includes('mmol/l');
+                data.blood_sugar = valueMatch[1] + (isMmol ? ' mmol/L' : ' mg/dL');
+                break;
+            }
+        }
+    }
+
+    // Heart Rate patterns
+    const heartRatePatterns = [
+        /heart rate[:\s]+(\d+\.?\d*)\s*(?:bpm)?/gi,
+        /hr[:\s]+(\d+\.?\d*)\s*(?:bpm)?/gi,
+        /pulse[:\s]+(\d+\.?\d*)\s*(?:bpm)?/gi,
+    ];
+
+    for (const pattern of heartRatePatterns) {
+        const match = text.match(pattern);
+        if (match) {
+            const valueMatch = match[0].match(/(\d+\.?\d*)/);
+            if (valueMatch) {
+                data.heart_rate = valueMatch[1] + ' bpm';
+                break;
+            }
+        }
+    }
+
+    return data;
+}
+
+/**
  * Fallback Tesseract OCR function
  */
-async function performTesseractFallback(base64Image: string): Promise<OCRExtractedData> {
+async function performTesseractFallback(base64Images: string[]): Promise<OCRExtractedData> {
     console.log("Falling back to local Tesseract.js...");
     try {
         const worker = await Tesseract.createWorker('eng');
         await worker.setParameters({
+            // Use the whitelist from ocrfix.md for better accuracy
             tessedit_char_whitelist: '0123456789./mgdLBPHRFSabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ: '
         });
-        const ret = await worker.recognize(base64Image);
-        const text = ret.data.text;
+
+        let fullText = "";
+
+        // Process all extracted pages with Tesseract
+        for (let i = 0; i < base64Images.length; i++) {
+            const ret = await worker.recognize(base64Images[i]);
+            fullText += ret.data.text + "\n";
+        }
+        
         await worker.terminate();
 
-        const extract = (regex: RegExp) => {
-            const match = text.match(regex);
-            return match ? match[1].trim() : null;
-        };
+        // Use the robust parser from the main branch
+        return parseTextForMedicalData(fullText);
 
-        return {
-            hemoglobin: extract(/(?:hemoglobin|hb)[\s:]*([\d.]+\s*(?:g\/dl|g\/l))/i),
-            blood_pressure: extract(/(?:blood pressure|bp)[\s:]*(\d{2,3}\/\d{2,3})/i),
-            blood_sugar: extract(/(?:blood sugar|fbs|rbs)[\s:]*([\d.]+\s*(?:mg\/dl|mmol\/l))/i),
-            heart_rate: extract(/(?:heart rate|hr|pulse)[\s:]*(\d{2,3}\s*bpm)/i),
-            raw_text: text
-        };
     } catch (error) {
         console.error("Tesseract Fallback Error:", error);
         throw new Error('Both Cloud AI and Local OCR failed to process the image.');
@@ -166,7 +251,7 @@ export async function performOCR(file: File): Promise<OCRExtractedData> {
             return data as OCRExtractedData;
         } catch (mistralError) {
             console.warn('Mistral Edge Function Error. Falling back to local OCR.', mistralError);
-            return await performTesseractFallback(base64Images[0]);
+            return await performTesseractFallback(base64Images);
         }
         
     } catch (error) {

@@ -170,10 +170,45 @@ const [selectedPatient, setSelectedPatient] =
         return { sys: null, dia: null };
       };
 
-      const bp = parseBp(result.ocrData.blood_pressure);
-      const hemo = parseHemoglobin(result.ocrData.hemoglobin);
-      const sugar = parseBloodSugar(result.ocrData.blood_sugar);
-      const hr = parseVal(result.ocrData.heart_rate);
+      // Recursive helper to find a key anywhere in the deeply nested Mistral JSON, case and space insensitive
+      const findKeyInObj = (obj: any, keys: string[]): any => {
+        if (!obj || typeof obj !== 'object') return undefined;
+        
+        const objKeys = Object.keys(obj);
+        for (const targetKey of keys) {
+          const normalizedTarget = targetKey.toLowerCase().replace(/[^a-z0-9]/g, '');
+          for (const actualKey of objKeys) {
+            if (actualKey.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedTarget) {
+              if (obj[actualKey] !== null && obj[actualKey] !== undefined) {
+                return obj[actualKey];
+              }
+            }
+          }
+        }
+        
+        for (const val of Object.values(obj)) {
+          if (typeof val === 'object') {
+            const found = findKeyInObj(val, keys);
+            if (found !== undefined) return found;
+          }
+        }
+        return undefined;
+      };
+
+      let parsedOcrData = result.ocrData;
+      if (typeof parsedOcrData === 'string') {
+        try { parsedOcrData = JSON.parse(parsedOcrData); } catch(e) {}
+      }
+
+      const bpData = findKeyInObj(parsedOcrData, ['blood_pressure', 'bloodpressure', 'bp']);
+      const hemoData = findKeyInObj(parsedOcrData, ['hemoglobin', 'hb', 'hgb']);
+      const sugarData = findKeyInObj(parsedOcrData, ['blood_sugar', 'bloodsugar', 'glucose', 'bs', 'fbs', 'rbs']);
+      const hrData = findKeyInObj(parsedOcrData, ['heart_rate', 'heartrate', 'hr', 'pulse']);
+
+      const bp = parseBp(bpData);
+      const hemo = parseHemoglobin(hemoData);
+      const sugar = parseBloodSugar(sugarData);
+      const hr = parseVal(hrData);
 
       // Format clean strings for the UI to prevent React object child errors
       const safeOcrData = {
@@ -185,6 +220,7 @@ const [selectedPatient, setSelectedPatient] =
       };
 
       setOcrData(safeOcrData);
+      console.log("SAFE OCR DATA GENERATED:", safeOcrData);
 
       const payload = {
         patient_id: selectedPatient,
@@ -215,7 +251,7 @@ const [selectedPatient, setSelectedPatient] =
       const errorMessage =
         err instanceof Error ? err.message : "Failed to process file";
       setError(errorMessage);
-      setOcrData(null);
+      // Removed setOcrData(null) so we can see what was parsed even if prediction fails
       console.error("File upload error:", err);
     } finally {
       setOcrLoading(false);
