@@ -20,6 +20,9 @@ from backend.app.api.routes.insights import (
 from backend.app.api.routes.copilot import (
     router as copilot_router
 )
+from backend.app.api.routes.patient_trends import (
+    router as patient_trends_router
+)
 from backend.app.api.routes import rag
 app = FastAPI(
     title="NAB Preg AI API"
@@ -68,6 +71,10 @@ app.include_router(
 )
 app.include_router(
     copilot_router,
+    prefix="/api"
+)
+app.include_router(
+    patient_trends_router,
     prefix="/api"
 )
 @app.get("/")
