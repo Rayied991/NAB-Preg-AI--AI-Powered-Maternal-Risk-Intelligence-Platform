@@ -45,12 +45,21 @@ def predict_maternal_risk(payload):
         "UNKNOWN"
     )
     risk_points = 0
-
+    hb=payload["hemoglobin"]
     # Anemia
-    if payload["hemoglobin"] < HIGH_HB_THRESHOLD:
+    # if payload < HIGH_HB_THRESHOLD:
+    #     risk_points += 3
+
+    # elif payload["hemoglobin"] < MEDIUM_HB_THRESHOLD:
+    #     risk_points += 1
+
+    if hb < 8:
         risk_points += 3
 
-    elif payload["hemoglobin"] < MEDIUM_HB_THRESHOLD:
+    elif hb < 10:
+        risk_points += 2
+
+    elif hb < 11:
         risk_points += 1
 
     # Hypertension
@@ -75,10 +84,10 @@ def predict_maternal_risk(payload):
         risk_points += 1
 
     # Final Clinical Risk
-    if risk_points >= 4:
+    if risk_points >= 6:
         overall_risk = "HIGH"
 
-    elif risk_points >= 2:
+    elif risk_points >= 3:
         overall_risk = "MEDIUM"
 
     else:
@@ -98,12 +107,12 @@ def predict_maternal_risk(payload):
 
     if overall_risk == "HIGH":
         summary_parts.append(
-            "Patient presents multiple high-risk maternal indicators."
+            "Patient presents high maternal health risk requiring close monitoring"
         )
 
     elif overall_risk == "MEDIUM":
         summary_parts.append(
-            "Patient presents moderate maternal health concerns."
+            "Patient presents moderate maternal health risk requiring follow-up."
         )
 
     else:
@@ -111,49 +120,74 @@ def predict_maternal_risk(payload):
             "Patient presents low maternal health risk."
         )
 
-    if payload["hemoglobin"] < MEDIUM_HB_THRESHOLD:
-        summary_parts.append(
-            "Anemia indicators detected."
-        )
+    # if payload["hemoglobin"] < MEDIUM_HB_THRESHOLD:
+    #     summary_parts.append(
+    #         "Anemia indicators detected."
+    #     )
 
-    if (
-        payload["systolic_bp"] >= HIGH_SYS_BP
-        or payload["diastolic_bp"] >= HIGH_DIA_BP
-    ):
-        summary_parts.append(
-            "Hypertension indicators detected."
-        )
+    # if (
+    #     payload["systolic_bp"] >= HIGH_SYS_BP
+    #     or payload["diastolic_bp"] >= HIGH_DIA_BP
+    # ):
+    #     summary_parts.append(
+    #         "Hypertension indicators detected."
+    #     )
 
-    if payload["blood_sugar"] >= HIGH_BS:
-        summary_parts.append(
-            "Elevated blood glucose detected."
-        )
+    # if payload["blood_sugar"] >= HIGH_BS:
+    #     summary_parts.append(
+    #         "Elevated blood glucose detected."
+    #     )
 
-    if payload["heart_rate"] >= HIGH_HR:
-        summary_parts.append(
-            "Elevated heart rate detected."
-        )
+    # if payload["heart_rate"] >= HIGH_HR:
+    #     summary_parts.append(
+    #         "Elevated heart rate detected."
+    #     )
+    summary_parts.extend(reasons)
 
-    summary = " ".join(summary_parts)
+    summary = "\n".join(summary_parts)
 
+    # result = {
+    #     "patient_status": {
+    #         "overall_risk": overall_risk,
+    #         "anemia_risk": anemia_risk,
+    #         "hypertension_risk": hypertension_risk,
+    #         "confidence_score": round(
+    #             final_confidence * 100,
+    #             2
+    #         ),
+    #         "clinical_score": risk_points,
+    #     },
+
+    #     "clinical_findings": reasons,
+
+    #     "ai_recommendations": recommendations,
+
+    #     "ai_summary": summary.strip()
+    # }
+    
     result = {
-        "patient_status": {
-            "overall_risk": overall_risk,
-            "anemia_risk": anemia_risk,
-            "hypertension_risk": hypertension_risk,
-            "confidence_score": round(
-                final_confidence * 100,
-                2
-            ),
-            "clinical_score": risk_points,
-        },
+    "patient_status": {
+        "overall_risk": overall_risk,
+        "anemia_risk": anemia_risk,
+        "hypertension_risk": hypertension_risk,
+        "confidence_score": round(
+            final_confidence * 100,
+            2
+        ),
+        "clinical_score": risk_points,
+    },
 
-        "clinical_findings": reasons,
+    "clinical_findings": reasons,
 
-        "ai_recommendations": recommendations,
+    "risk_explanation": {
+        "clinical_score": risk_points,
+        "risk_drivers": reasons
+    },
 
-        "ai_summary": summary.strip()
-    }
+    "ai_recommendations": recommendations,
+
+    "ai_summary": summary.strip()
+}
 
 
 

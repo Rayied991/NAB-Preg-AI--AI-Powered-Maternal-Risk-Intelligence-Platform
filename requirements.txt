@@ -19,6 +19,25 @@ passlib[bcrypt]
 python-jose[cryptography]
 supabase
 requests
+reportlab
+
+# =========================
+# RAG / LANGCHAIN
+# =========================
+
+langchain
+langchain-community
+langchain-openai
+langchain-google-genai
+langchain-mistralai
+langchain-huggingface
+langchain-text-splitters
+langgraph
+chromadb
+sentence-transformers
+pypdf
+
+
 
 # =========================
 

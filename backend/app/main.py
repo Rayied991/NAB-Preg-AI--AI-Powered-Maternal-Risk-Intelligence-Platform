@@ -17,6 +17,17 @@ from backend.app.api.routes.heatmap import (
 from backend.app.api.routes.insights import (
     router as insights_router
 )
+from backend.app.api.routes.copilot import (
+    router as copilot_router
+)
+from backend.app.api.routes.patient_trends import (
+    router as patient_trends_router
+)
+from backend.app.api.routes.report import (
+    router as report_router
+)
+from backend.app.api.routes import rag
+from backend.app.api.chat_history import router as chat_router
 app = FastAPI(
     title="NAB Preg AI API"
 )
@@ -56,6 +67,26 @@ app.include_router(
 )
 app.include_router(
     insights_router,
+    prefix="/api"
+)
+app.include_router(
+    rag.router,
+    prefix="/api"
+)
+app.include_router(
+    copilot_router,
+    prefix="/api"
+)
+app.include_router(
+    patient_trends_router,
+    prefix="/api"
+)
+app.include_router(
+    report_router,
+    prefix="/api"
+)
+app.include_router(
+    chat_router,
     prefix="/api"
 )
 

@@ -1,4 +1,5 @@
 from ai_engine.src.constants import (
+    HIGH_HB_THRESHOLD,
     MEDIUM_HB_THRESHOLD,
     HIGH_SYS_BP,
     HIGH_DIA_BP,
@@ -8,29 +9,36 @@ from ai_engine.src.constants import (
 def generate_risk_reason(data):
     reasons = []
 
-    if data["hemoglobin"] < MEDIUM_HB_THRESHOLD:
+    hb=data["hemoglobin"]
+    
+    if hb < HIGH_HB_THRESHOLD:
         reasons.append(
-        "Hemoglobin below normal range indicates anemia risk."
+            f"Severe anemia detected (Hemoglobin {hb} g/dL)."
+    )
+    elif hb <  10:
+        reasons.append(
+            f"Moderate anemia detected (Hemoglobin {hb} g/dL)."
+        )
+            
+    elif hb < MEDIUM_HB_THRESHOLD:
+        reasons.append(
+             f"Mild Anemia detected (Hemoglobin {hb} g/dL)."
+        )    
+
+    if (data["systolic_bp"] >= HIGH_SYS_BP or data["diastolic_bp"] >= HIGH_DIA_BP):
+        reasons.append(
+        f"Hypertension detected ({data['systolic_bp']}/{data['diastolic_bp']} mmHg)."
     )
 
-    if data["systolic_bp"] >= HIGH_SYS_BP:
-        reasons.append(
-        "High systolic blood pressure detected."
-    )
-
-    if data["diastolic_bp"] >= HIGH_DIA_BP:
-        reasons.append(
-        "High diastolic blood pressure detected."
-    )
 
     if data["heart_rate"] >= HIGH_HR:
         reasons.append(
-        "Elevated heart rate detected."
+        f"Elevated heart rate detected ({data['heart_rate']} bpm)."
     )
 
     if data["blood_sugar"] >= HIGH_BS:
         reasons.append(
-        "Elevated blood sugar level detected."
+        f"Elevated blood sugar detected ({data['blood_sugar']} mg/dL)."
     )
 
     return reasons

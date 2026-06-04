@@ -2,13 +2,23 @@
 "use client";
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { getCopilotSummary } from "@/services/copilot.service";
 import {
   createPatient,
 } from "@/services/create-patient.service";
 import { fetchPatientHistory } from "@/services/patient-history.service";
 import { fetchPatients } from "@/services/patient.service";
+import { getPatientTrends } from "@/services/trends.service";
 import { useEffect, useState } from "react";
-
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 // ── Helpers declared outside page component ───────────────────────────────────
 
 function RiskBadge({ risk }: { risk: string }) {
@@ -113,8 +123,14 @@ export default function PatientsPage() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [creating, setCreating] =
   useState(false);
+  const [trends, setTrends] = useState<any>(null);
 
   const [showModal, setShowModal] =
+  useState(false);
+  const [copilotSummary, setCopilotSummary] =
+  useState<string>("");
+
+  const [loadingSummary, setLoadingSummary] =
   useState(false);
 
 const [form, setForm] = useState({
@@ -129,6 +145,27 @@ const [form, setForm] = useState({
   emergency_contact: "",
   height_cm: 0.0
 });
+
+const handleGenerateSummary = async (
+  patientId: string
+) => {
+  try {
+    setLoadingSummary(true);
+
+    const result =
+      await getCopilotSummary(
+        patientId
+      );
+
+    setCopilotSummary(
+      result.summary
+    );
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoadingSummary(false);
+  }
+};
 
 const handleCreatePatient =
   async () => {
@@ -202,19 +239,31 @@ if (createdPatient) {
     loadPatients();
   }, []);
 
-  const loadHistory = async (patientId: string) => {
-    setHistory(null);
-    if (!patientId) return;
-    setHistoryLoading(true);
-    try {
-      const data = await fetchPatientHistory(patientId);
-      setHistory(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setHistoryLoading(false);
-    }
-  };
+  const loadHistory = async (
+  patientId: string
+) => {
+  setHistory(null);
+
+  if (!patientId) return;
+
+  setHistoryLoading(true);
+
+  try {
+    const [historyData, trendData] =
+      await Promise.all([
+        fetchPatientHistory(patientId),
+        getPatientTrends(patientId),
+      ]);
+
+    setHistory(historyData);
+    setTrends(trendData);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setHistoryLoading(false);
+  }
+};
 
   const handleSelectChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = e.target.value;
@@ -341,6 +390,90 @@ if (createdPatient) {
       {history && (
         <div className="mt-6 flex flex-col gap-5">
 
+          {/* Trends Details */}
+          <SectionCard
+            title="Patient Trends"
+            icon={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+            }
+          >
+          <div className="p-6">
+
+              {trends?.error ? (
+
+                <div className="h-72 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-sm text-red-400">
+                      Unable to load patient trends
+                    </p>
+                    <p className="text-xs text-[#5a6478] mt-1">
+                      Please try again later.
+                    </p>
+                  </div>
+                </div>
+
+              ) : !trends?.hemoglobin?.length ? (
+
+                <div className="h-72 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-sm text-[#8b95a7]">
+                      No trend data available
+                    </p>
+                    <p className="text-xs text-[#5a6478] mt-1">
+                      Upload OCR reports to visualize patient trends.
+                    </p>
+                  </div>
+                </div>
+
+              ) : (
+
+            <div className="h-72">
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+              >
+                <LineChart
+                  data={trends.hemoglobin}
+                >
+                  <CartesianGrid stroke="#1e2535" />
+
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fill: "#5a6478" }}
+                    tickFormatter={(value) =>
+                      new Date(value).toLocaleDateString()
+                    }
+                  />
+
+                  <YAxis />
+
+                  <Tooltip />
+
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#ef4444"
+                    strokeWidth={2}
+                    name="Hemoglobin"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+          )}
+
+        </div>
+        </SectionCard>
           {/* ── Patient Details ── */}
           <SectionCard
             title="Patient Details"
@@ -361,6 +494,44 @@ if (createdPatient) {
                 </span>
               } />
             </div>
+
+            <div className="px-6 pb-4 flex gap-3">
+                  <button
+                    onClick={() =>
+                      window.open(
+                        `http://127.0.0.1:8000/api/report/${history.patient.id}`
+                      )
+                    }
+                    className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    Download Clinical Report
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      handleGenerateSummary(
+                        history.patient.id
+                      )
+                    }
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                  >
+                    {loadingSummary
+                      ? "AI Analyzing Patient..."
+                      : "Generate AI Summary"}
+                  </button>
+                </div>
+
+                {copilotSummary && (
+                  <div className="mx-6 mb-6 p-4 rounded-xl bg-[#0d1118] border border-[#1e2535]">
+                    <h3 className="text-sm font-semibold text-white mb-3">
+                      AI Clinical Summary
+                    </h3>
+
+                    <pre className="whitespace-pre-wrap text-sm text-[#c8d0e0]">
+                      {copilotSummary}
+                    </pre>
+                  </div>
+                )}
           </SectionCard>
 
           {/* ── OCR Reports ── */}
@@ -657,7 +828,11 @@ if (createdPatient) {
             : "Create"}
         </button>
 
+        
+
       </div>
+
+      
 
     </div>
 

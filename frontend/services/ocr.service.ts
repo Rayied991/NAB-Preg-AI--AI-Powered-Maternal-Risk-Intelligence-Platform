@@ -1,3 +1,4 @@
+
 /**
  * OCRService - Handles image and PDF text extraction using Mistral Pixtral via Supabase Edge Functions.
  * 
