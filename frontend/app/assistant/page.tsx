@@ -1,5 +1,6 @@
 "use client";
 
+
 import { askAssistant } from "@/services/rag.service";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -13,6 +14,7 @@ type Message = {
   ts: Date;
   sources?: string[];
 };
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function AssistantPage() {
@@ -26,6 +28,9 @@ export default function AssistantPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+ 
+
 
   // Auto-resize textarea
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
