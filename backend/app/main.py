@@ -11,6 +11,9 @@ from backend.app.api.routes.patients import (
 from backend.app.api.routes.patient_history import (
     router as patient_history_router
 )
+from backend.app.api.routes.village_hotspots import (
+    router as village_hotspots_router
+)
 from backend.app.api.routes.heatmap import (
     router as heatmap_router
 )
@@ -107,6 +110,10 @@ app.include_router(
 )
 app.include_router(
     risk_progression_router,
+    prefix="/api"
+)
+app.include_router(
+    village_hotspots_router,
     prefix="/api"
 )
 
