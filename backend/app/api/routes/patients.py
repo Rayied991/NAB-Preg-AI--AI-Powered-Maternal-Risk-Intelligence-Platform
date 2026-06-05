@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 from backend.app.services.village_analytics_storage import (
     get_patient_village
 )
-from backend.app.core.village_coordinates import (
-    DISTRICT_COORDINATES
+from backend.app.services.geocoder import(
+    get_coordinates
 )
 load_dotenv()
 
@@ -66,7 +66,8 @@ async def create_patient(
     payload: CreatePatientRequest
 ):
 
-    coords = DISTRICT_COORDINATES.get(
+    
+    coords=get_coordinates(
         payload.village
     )
 
