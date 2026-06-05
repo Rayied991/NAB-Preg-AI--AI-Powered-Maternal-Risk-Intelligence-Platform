@@ -39,10 +39,9 @@ async def get_village_ai_reports():
             "village_data": village
         })
 
-        reports.append(
-            json.loads(
-                result["summary"]
-            )
-        )
+        print("GRAPH RESULT:")
+        print(result)
+
+        reports.append(result)
 
     return reports

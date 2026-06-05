@@ -2,10 +2,12 @@
 "use client";
 
 import RiskPieChart from "@/components/charts/RiskPieChart";
+import VillageAIReportCard from "@/components/charts/VillageAIReportCard";
 import VillageHotspotCard from "@/components/charts/VillageHotspotCard";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { fetchAlerts } from "@/services/alerts.service";
 import { fetchAnalytics } from "@/services/analytics.service";
+import { fetchVillageAIReports } from "@/services/village-ai-reports.service";
 import { fetchVillageAnalytics } from "@/services/village-analytics.service";
 import { fetchVillageHotspots } from "@/services/village-hotspots.service";
 import dynamic from "next/dynamic";
@@ -32,6 +34,8 @@ export default function AnalyticsPage() {
   const [alerts, setAlerts] = useState<any[]>([]);
   const [hotspots, setHotspots] =
   useState<any[]>([]);
+  const [aiReports, setAiReports] =
+  useState<any[]>([]);
   useEffect(() => {
     const loadAnalytics = async () => {
       try {
@@ -47,6 +51,33 @@ export default function AnalyticsPage() {
     };
     loadAnalytics();
   }, []);
+
+  useEffect(() => {
+
+  const loadReports = async () => {
+
+    try {
+
+      const data =
+        await fetchVillageAIReports();
+
+      console.log(
+        "AI REPORTS",
+        data
+      );
+
+      setAiReports(data);
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+  };
+
+  loadReports();
+
+}, []);
 
   useEffect(() => {
 
@@ -214,6 +245,51 @@ rounded-2xl p-6 shadow-sm">
 
 </div>
 
+<div
+  className="
+  mt-6
+  bg-white dark:bg-[#131720]
+  border border-gray-200 dark:border-[#1e2535]
+  rounded-2xl
+  p-6"
+>
+
+  <h2
+    className="
+    text-lg
+    font-semibold
+    mb-4"
+  >
+    AI Village Intelligence
+  </h2>
+
+  <div
+    className="
+    grid
+    grid-cols-1
+    md:grid-cols-2
+    gap-4"
+  >
+
+    {aiReports.map((report,index) => (
+
+      <VillageAIReportCard
+        key={`${report.village}-${index}`}
+        village={report.village}
+        status={report.status}
+        confidence={report.confidence}
+        forecast={report.forecast}
+        drivers={report.drivers}
+        recommendation={
+          report.recommendation
+        }
+      />
+
+    ))}
+
+  </div>
+
+</div>
 {/* Heatmap */}
 
 <div className="mt-6 bg-white dark:bg-[#131720]
