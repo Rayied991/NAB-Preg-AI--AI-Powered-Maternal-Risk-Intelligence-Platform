@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import RiskProgressionCard from "@/components/cards/RiskProgressionCard";
 import RiskTrendChart from "@/components/charts/RiskTrendChart";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getCopilotSummary } from "@/services/copilot.service";
@@ -9,6 +10,7 @@ import {
 } from "@/services/create-patient.service";
 import { fetchPatientHistory } from "@/services/patient-history.service";
 import { fetchPatients } from "@/services/patient.service";
+import { fetchRiskProgression } from "@/services/riskProgression.service";
 import {
   getRiskTrend,
 } from "@/services/riskTrend.service";
@@ -140,7 +142,8 @@ export default function PatientsPage() {
   const [creating, setCreating] =
   useState(false);
   const [trends, setTrends] = useState<any>(null);
-
+  const [progression, setProgression] =
+  useState<any>(null);
   const [showModal, setShowModal] =
   useState(false);
   const [copilotSummary, setCopilotSummary] =
@@ -168,6 +171,25 @@ const [form, setForm] = useState({
   emergency_contact: "",
   height_cm: 0.0
 });
+
+useEffect(() => {
+  if (!selectedPatient) return;
+
+  async function loadProgression() {
+    try {
+      const data =
+        await fetchRiskProgression(
+          selectedPatient
+        );
+
+      setProgression(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  loadProgression();
+}, [selectedPatient]);
 
 const handleGenerateSummary = async (
   patientId: string
@@ -428,6 +450,15 @@ if (createdPatient) {
       {history && (
         <div className="mt-6 flex flex-col gap-5">
 
+        {progression && (
+  <RiskProgressionCard
+    trend={progression.trend}
+    change={progression.change}
+    latestScore={progression.latest_score}
+    averageScore={progression.average_score}
+    alert={progression.alert}
+  />
+)}
           {/* Trends Details */}
           <SectionCard
             title="Patient Trends"
@@ -511,7 +542,11 @@ if (createdPatient) {
           )}
 
         </div>
+
+       
         </SectionCard>
+
+        
           {/* ── Patient Details ── */}
           <SectionCard
             title="Patient Details"
