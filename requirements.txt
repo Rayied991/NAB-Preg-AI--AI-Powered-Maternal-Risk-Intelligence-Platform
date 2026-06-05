@@ -37,6 +37,7 @@ chromadb
 sentence-transformers
 pypdf
 langgraph
+graphify
 
 
 # =========================
