@@ -29,6 +29,9 @@ from backend.app.api.routes.report import (
 from backend.app.api.routes.risk_trend import (
     router as risk_trend_router
 )
+from backend.app.api.routes.risk_progression import (
+    router as risk_progression_router
+)
 from backend.app.api.routes import rag
 from backend.app.api.routes.ocr import router as ocr_router
 from backend.app.api.chat_history import router as chat_router
@@ -101,6 +104,10 @@ app.include_router(
     risk_trend_router,
     prefix="/api",
     tags=["Risk Trend"]
+)
+app.include_router(
+    risk_progression_router,
+    prefix="/api"
 )
 
 @app.get("/")
