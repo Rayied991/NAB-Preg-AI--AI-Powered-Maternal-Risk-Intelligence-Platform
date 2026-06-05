@@ -2,10 +2,12 @@
 "use client";
 
 import RiskPieChart from "@/components/charts/RiskPieChart";
+import VillageHotspotCard from "@/components/charts/VillageHotspotCard";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { fetchAlerts } from "@/services/alerts.service";
 import { fetchAnalytics } from "@/services/analytics.service";
 import { fetchVillageAnalytics } from "@/services/village-analytics.service";
+import { fetchVillageHotspots } from "@/services/village-hotspots.service";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
@@ -28,7 +30,8 @@ export default function AnalyticsPage() {
   const [villages, setVillages] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState<any>(null);
   const [alerts, setAlerts] = useState<any[]>([]);
-
+  const [hotspots, setHotspots] =
+  useState<any[]>([]);
   useEffect(() => {
     const loadAnalytics = async () => {
       try {
@@ -44,6 +47,33 @@ export default function AnalyticsPage() {
     };
     loadAnalytics();
   }, []);
+
+  useEffect(() => {
+
+  const loadHotspots = async () => {
+
+    try {
+
+      const data =
+        await fetchVillageHotspots();
+
+      console.log(
+        "HOTSPOTS",
+        data
+      );
+
+      setHotspots(data);
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+  };
+
+  loadHotspots();
+
+}, []);
 
   useEffect(() => {
     const loadVillageAnalytics = async () => {
@@ -105,19 +135,6 @@ export default function AnalyticsPage() {
 
       </div>
 
-      {/* ── Village Analytics ── */}
-      {/* <div className="mt-5 mb-8 bg-white dark:bg-[#131720] border border-gray-200 dark:border-[#1e2535] rounded-2xl p-6 shadow-sm transition-colors duration-300">
-        <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] mb-4 flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="20" x2="18" y2="10" />
-            <line x1="12" y1="20" x2="12" y2="4" />
-            <line x1="6" y1="20" x2="6" y2="14" />
-          </svg>
-          Village-Level Analytics
-        </p>
-        <VillageAnalyticsChart data={villages} />
-      </div> */}
-
       <div className="mt-6 overflow-x-auto">
 
         <table className="w-full text-sm">
@@ -169,9 +186,49 @@ export default function AnalyticsPage() {
             Village Risk Heatmap
           </p>
 
-          <VillageHeatmap />
-        </div>
+{/* Hotspots */}
 
+<div className="mt-6 bg-white dark:bg-[#131720]
+border border-gray-200 dark:border-[#1e2535]
+rounded-2xl p-6 shadow-sm">
+
+  <h2 className="text-lg font-semibold mb-4">
+    AI Village Hotspots
+  </h2>
+
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+    {hotspots.map((item) => (
+
+      <VillageHotspotCard
+        key={item.village}
+        village={item.village}
+        status={item.status}
+        high_risk_cases={item.high_risk_cases}
+        medium_risk_cases={item.medium_risk_cases}
+      />
+
+    ))}
+
+  </div>
+
+</div>
+
+{/* Heatmap */}
+
+<div className="mt-6 bg-white dark:bg-[#131720]
+border border-gray-200 dark:border-[#1e2535]
+rounded-2xl p-6 shadow-sm">
+
+  <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] mb-4">
+    Village Risk Heatmap
+  </p>
+
+  <VillageHeatmap />
+
+</div>
+
+</div>
       </div>
 
     </DashboardLayout>

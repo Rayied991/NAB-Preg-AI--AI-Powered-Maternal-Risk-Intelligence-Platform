@@ -132,6 +132,25 @@ export default function VillageHeatmap() {
     );
   })}
       </MapContainer>
+
+      <div className="flex gap-6 mt-4 text-sm">
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 rounded-full bg-red-500" />
+    High Risk
+  </div>
+
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 rounded-full bg-yellow-500" />
+    Medium Risk
+  </div>
+
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 rounded-full bg-green-500" />
+    Low Risk
+  </div>
+</div>
     </div>
+
+    
   );
 }
