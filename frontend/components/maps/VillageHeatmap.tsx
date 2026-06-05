@@ -32,25 +32,30 @@ interface HeatmapPoint {
   latitude: number;
   longitude: number;
   high_risk_cases: number;
+  medium_risk_cases: number;
+  low_risk_cases: number;
 }
 export default function VillageHeatmap() {
   const [data, setData] = useState<HeatmapPoint[]>([]);
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const result = await fetchHeatmap();
-        setData(result);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  const loadData = async () => {
+    try {
+      const result = await fetchHeatmap();
 
-    loadData();
-  }, []);
+      console.log("HEATMAP DATA", result);
+
+      setData(result);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  loadData();
+}, []);
 
   return (
-    <div className="h-125 w-full rounded-2xl overflow-hidden">
+    <div className="h-150 w-full rounded-2xl overflow-hidden">
       <MapContainer
         center={[23.685, 90.3563]}
         zoom={7}
@@ -60,66 +65,72 @@ export default function VillageHeatmap() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {data
+       {data
   .filter(
     (point) =>
       point.latitude != null &&
       point.longitude != null
   )
-  .map((point, index) => (
-    <CircleMarker
-      key={index}
-      center={[
-        point.latitude,
-        point.longitude,
-      ]}
-           radius={
-  Math.min(
-    Math.max(point.high_risk_cases * 2, 8),
-    30
-  )
-}
-    pathOptions={{
-  color:
-    point.high_risk_cases > 10
-      ? "#ef4444"
-      : point.high_risk_cases > 5
-      ? "#f59e0b"
-      : "#22c55e",
+  .map((point, index) => {
 
-  fillColor:
-    point.high_risk_cases > 10
-      ? "#ef4444"
-      : point.high_risk_cases > 5
-      ? "#f59e0b"
-      : "#22c55e",
+    const riskLevel =
+      point.high_risk_cases > 0
+        ? "HIGH"
+        : point.medium_risk_cases > 0
+        ? "MEDIUM"
+        : "LOW";
 
-  fillOpacity: 0.7,
-}}
-          >
-          <Popup>
-  <div>
-    <strong>{point.village}</strong>
+    const color =
+      riskLevel === "HIGH"
+        ? "#ef4444"
+        : riskLevel === "MEDIUM"
+        ? "#f59e0b"
+        : "#22c55e";
 
-    <br />
+    return (
+      <CircleMarker
+        key={index}
+        center={[
+          point.latitude,
+          point.longitude,
+        ]}
+        radius={
+          riskLevel === "HIGH"
+            ? 18
+            : riskLevel === "MEDIUM"
+            ? 14
+            : 10
+        }
+        pathOptions={{
+          color,
+          fillColor: color,
+          fillOpacity: 0.8,
+        }}
+      >
+        <Popup>
+          <div>
+            <strong>{point.village}</strong>
 
-    High Risk Cases:
-    {" "}
-    {point.high_risk_cases}
+            <br />
 
-    <br />
+            Risk Level: {riskLevel}
 
-    Risk Level:
-    {" "}
-    {point.high_risk_cases > 10
-      ? "High"
-      : point.high_risk_cases > 5
-      ? "Medium"
-      : "Low"}
-  </div>
-</Popup>
-          </CircleMarker>
-        ))}
+            <br />
+
+            High Risk: {point.high_risk_cases}
+
+            <br />
+
+            Medium Risk: {point.medium_risk_cases}
+
+            <br />
+
+            Low Risk: {point.low_risk_cases}
+          </div>
+        </Popup>
+      </CircleMarker>
+    );
+  })}
       </MapContainer>
     </div>
   );

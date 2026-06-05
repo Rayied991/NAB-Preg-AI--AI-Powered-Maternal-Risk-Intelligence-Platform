@@ -34,7 +34,7 @@ async def get_heatmap():
     # Village risk counts
     villages_response = requests.get(
         f"{SUPABASE_URL}/rest/v1/village_analytics"
-        "?select=village_name,high_risk_cases",
+        "?select=village_name,high_risk_cases,medium_risk_cases,low_risk_cases",
         headers=headers,
     )
 
@@ -70,17 +70,13 @@ async def get_heatmap():
             None,
         )
 
-        result.append(
-            {
-                "village": village_name,
-                "latitude": patient["latitude"],
-                "longitude": patient["longitude"],
-                "high_risk_cases": (
-                    analytics["high_risk_cases"]
-                    if analytics
-                    else 0
-                ),
-            }
-        )
+        result.append({
+            "village": village_name,
+            "latitude": patient["latitude"],
+            "longitude": patient["longitude"],
+            "high_risk_cases": analytics["high_risk_cases"] if analytics else 0,
+            "medium_risk_cases": analytics["medium_risk_cases"] if analytics else 0,
+            "low_risk_cases": analytics["low_risk_cases"] if analytics else 0,
+})
 
     return result

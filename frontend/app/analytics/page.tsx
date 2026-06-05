@@ -2,10 +2,9 @@
 "use client";
 
 import RiskPieChart from "@/components/charts/RiskPieChart";
-import VillageAnalyticsChart from "@/components/charts/VillageAnalyticsChart";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { fetchAnalytics } from "@/services/analytics.service";
 import { fetchAlerts } from "@/services/alerts.service";
+import { fetchAnalytics } from "@/services/analytics.service";
 import { fetchVillageAnalytics } from "@/services/village-analytics.service";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
@@ -107,7 +106,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* ── Village Analytics ── */}
-      <div className="mt-5 mb-8 bg-white dark:bg-[#131720] border border-gray-200 dark:border-[#1e2535] rounded-2xl p-6 shadow-sm transition-colors duration-300">
+      {/* <div className="mt-5 mb-8 bg-white dark:bg-[#131720] border border-gray-200 dark:border-[#1e2535] rounded-2xl p-6 shadow-sm transition-colors duration-300">
         <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] mb-4 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="20" x2="18" y2="10" />
@@ -117,7 +116,7 @@ export default function AnalyticsPage() {
           Village-Level Analytics
         </p>
         <VillageAnalyticsChart data={villages} />
-      </div>
+      </div> */}
 
       <div className="mt-6 overflow-x-auto">
 
