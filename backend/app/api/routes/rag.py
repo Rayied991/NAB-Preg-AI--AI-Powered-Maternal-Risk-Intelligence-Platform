@@ -1,11 +1,14 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-
+from backend.app.services.language_detector import (
+    detect_language,
+)
 from backend.app.services.chat_storage import save_chat
 
 from backend.app.services.patient_context import (
     get_patient_context,
     get_patient_context_by_name,
+    find_patient_in_text,
 )
 
 from backend.app.services.session_memory import (
@@ -31,6 +34,71 @@ async def ask_question(
 ):
     question = payload.question
     q = question.lower()
+    
+    language = detect_language(
+    question
+    )
+    
+    # Hindi keywords
+    if any(
+        word in q
+        for word in [
+            "kya",
+            "ka",
+            "ki",
+            "hai",
+            "risk kya hai",
+            "salah",
+            "uska",
+            "uski",
+        ]
+    ):
+        language = "hi"
+
+    # Bengali keywords
+    elif any(
+        word in q
+        for word in [
+            "বাংলায়",
+            "সারাংশ",
+            "ঝুঁকি",
+            "তার",
+            "কি",
+            "দাও",
+        ]
+    ):
+        language = "bn"
+    print(
+    "Detected Language:",
+    language
+)
+    
+    
+    #-----------------------------
+    # Language
+    #-------------------------------
+    
+    language_instruction = ""
+
+    if language == "bn":
+
+        language_instruction = """
+    Respond entirely in Bengali.
+    Use natural healthcare terminology.
+    """
+
+    elif language == "hi":
+
+        language_instruction = """
+    Respond entirely in Hindi.
+    Use simple medical language.
+    """
+
+    else:
+
+        language_instruction = """
+    Respond entirely in English.
+    """
 
     context = None
     metric_focus = None
@@ -41,38 +109,52 @@ async def ask_question(
     # --------------------------------
 
     if any(
-        word in q
-        for word in [
-            "risk",
-            "risks",
-            "danger",
-            "high risk",
-            "risk level",
-        ]
-    ):
+    word in q
+    for word in [
+        "risk",
+        "risks",
+        "danger",
+        "high risk",
+        "risk level",
+
+        "khatra",
+        "risk kya hai",
+        "joakhim",
+        "ঝুঁকি",
+    ]
+):
         intent = "risk"
 
     elif any(
-        word in q
-        for word in [
-            "recommend",
-            "recommendation",
-            "treatment",
-            "advice",
-            "management",
-        ]
-    ):
+    word in q
+    for word in [
+        "recommend",
+        "recommendation",
+        "treatment",
+        "advice",
+        "management",
+
+        "salah",
+        "treatment kya",
+        "পরামর্শ",
+    ]
+):
         intent = "recommendation"
 
     elif any(
-        word in q
-        for word in [
-            "summary",
-            "summarize",
-            "overview",
-            "patient summary",
-        ]
-    ):
+    word in q
+    for word in [
+        "summary",
+        "summarize",
+        "overview",
+        "patient summary",
+
+        "saransh",
+        "summary do",
+        "সারাংশ",
+        "বাংলায়",
+    ]
+):
         intent = "summary"
 
     # --------------------------------
@@ -80,43 +162,53 @@ async def ask_question(
     # --------------------------------
 
     if any(
-        k in q
-        for k in [
-            "blood pressure",
-            "bp",
-            "pressure",
-        ]
-    ):
+    k in q
+    for k in [
+        "blood pressure",
+        "bp",
+        "pressure",
+        "रक्तचाप",
+        "ব্লাড প্রেসার",
+    ]
+):
         metric_focus = "blood_pressure"
 
     elif any(
-        k in q
-        for k in [
-            "hemoglobin",
-            "hb",
-            "haemoglobin",
-        ]
-    ):
+    k in q
+    for k in [
+        "hemoglobin",
+        "hb",
+        "haemoglobin",
+        "হিমোগ্লোবিন",
+        "हीमोग्लोबिन",
+    ]
+):
         metric_focus = "hemoglobin"
 
     elif any(
-        k in q
-        for k in [
-            "blood sugar",
-            "sugar",
-            "glucose",
-        ]
-    ):
+    k in q
+    for k in [
+        "blood sugar",
+        "sugar",
+        "glucose",
+        "গ্লুকোজ",
+        "শর্করা",
+        "ग्लूकोज",
+    ]
+):
         metric_focus = "blood_sugar"
 
     elif any(
-        k in q
-        for k in [
-            "heart rate",
-            "pulse",
-            "hr",
-        ]
-    ):
+    k in q
+    for k in [
+        "heart rate",
+        "pulse",
+        "hr",
+        "নাড়ির গতি",
+        "পালস",
+        "नाड़ी",
+    ]
+):
         metric_focus = "heart_rate"
 
     # --------------------------------
@@ -124,11 +216,20 @@ async def ask_question(
     # --------------------------------
 
     follow_up_keywords = [
-        "her",
-        "his",
-        "what about",
-        "and",
-    ]
+    "her",
+    "his",
+    "what about",
+    "and",
+
+    # Hindi
+    "uska",
+    "uski",
+    "kya hai",
+
+    # Bengali
+    "তার",
+    "কি",
+]
 
     remembered = get_last_patient()
 
@@ -164,33 +265,27 @@ async def ask_question(
                     context
                 )
 
-    # --------------------------------
-    # Patient Name Lookup
-    # --------------------------------
+# --------------------------------
+# Patient Name Lookup
+# --------------------------------
 
     if context is None:
 
-        name_match = re.search(
-            r"(?:analyze|summarize|summary of|overview of|risk level of|risk of|risks for|recommendations for|recommendation for)\s+(.+)",
-            question,
-            re.IGNORECASE,
+        patient = find_patient_in_text(
+            question
         )
 
-        if name_match:
+        if patient:
+            print(
+    "PATIENT FOUND:",
+    patient["patient"]["full_name"]
+)
 
-            patient_name = (
-                name_match.group(1)
-                .strip()
+            context = patient
+
+            set_last_patient(
+                patient
             )
-
-            context = get_patient_context_by_name(
-                patient_name
-            )
-
-            if context:
-                set_last_patient(
-                    context
-                )
 
     # --------------------------------
     # Prompt Building
@@ -206,6 +301,8 @@ async def ask_question(
 
             question = f"""
 You are a maternal healthcare clinical assistant.
+
+{language_instruction}
 
 Patient Data:
 {context}
@@ -248,6 +345,7 @@ Format:
             question = f"""
 You are a maternal healthcare clinical assistant.
 
+{language_instruction}
 Patient Data:
 {context}
 
@@ -278,6 +376,7 @@ Format:
             question = f"""
 You are a maternal healthcare clinical assistant.
 
+{language_instruction}
 Patient Data:
 {context}
 
@@ -308,6 +407,7 @@ Format:
             question = f"""
 You are a maternal healthcare clinical assistant.
 
+{language_instruction}
 Patient Data:
 {context}
 

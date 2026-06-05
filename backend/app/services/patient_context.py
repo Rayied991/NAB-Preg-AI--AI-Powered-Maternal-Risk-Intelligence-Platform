@@ -115,3 +115,46 @@ def get_patient_context_by_name(
         "report": report[0] if report else {},
         "alerts": alerts,
     }    
+    
+    
+def find_patient_in_text(
+    question: str
+):
+
+    words = question.split()
+
+    suffixes = [
+        "এর",
+        "র",
+        "কে",
+        "'s",
+    ]
+
+    for word in words:
+
+        cleaned = (
+            word.replace("?", "")
+            .replace(",", "")
+            .replace(".", "")
+            .strip()
+        )
+
+        for suffix in suffixes:
+
+            if cleaned.endswith(
+                suffix
+            ):
+                cleaned = cleaned[
+                    :-len(suffix)
+                ]
+
+        patient = (
+            get_patient_context_by_name(
+                cleaned
+            )
+        )
+
+        if patient:
+            return patient
+
+    return None    
