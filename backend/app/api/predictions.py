@@ -62,14 +62,12 @@ async def predict(payload: PredictionRequest):
     payload.patient_id,
     result["patient_status"]["overall_risk"]
     )
-    if (
-        result["patient_status"]["overall_risk"]
-        == "HIGH"
-    ):
+    overall_risk = result["patient_status"]["overall_risk"]
+    if overall_risk in ["HIGH", "MEDIUM", "LOW"]:
         create_alert(
             patient_id=payload.patient_id,
-            severity="HIGH",
-            alert_message="HIGH RISK MATERNAL CASE DETECTED",
+            severity=overall_risk,
+            alert_message=f"{overall_risk} RISK MATERNAL CASE DETECTED",
             status="OPEN"
         )
 
