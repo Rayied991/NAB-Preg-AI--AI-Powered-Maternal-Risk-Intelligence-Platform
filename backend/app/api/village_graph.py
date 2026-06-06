@@ -35,22 +35,25 @@ async def get_village_graph():
         if village not in node_set:
             nodes.append({
                 "id": village,
-                "label": village
+                "label": village,
+                "type":"village"
             })
             node_set.add(village)
 
         if target not in node_set:
             nodes.append({
                 "id": target,
-                "label": target
+                "label": target,
+                "type":rel_type.lower()
             })
             node_set.add(target)
 
         edges.append({
-            "source": village,
-            "target": target,
-            "label": rel_type
-        })
+    "id": f"{village}-{rel_type}-{target}",
+    "source": village,
+    "target": target,
+    "label": rel_type
+})
 
     return {
         "nodes": nodes,
