@@ -515,7 +515,10 @@ export default function PatientsPage() {
                     <LineChart
                       data={trends.hemoglobin}
                     >
-                      <CartesianGrid stroke="#1e2535" />
+                      <CartesianGrid
+                        stroke="var(--border-color)"
+                        strokeDasharray="3 3"
+                      />
 
                       <XAxis
                         dataKey="date"
@@ -527,7 +530,14 @@ export default function PatientsPage() {
 
                       <YAxis />
 
-                      <Tooltip />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "var(--bg-card)",
+                          borderColor: "var(--border-color)",
+                          color: "var(--text-main)",
+                          borderRadius: "0.5rem",
+                        }}
+                      />
 
                       <Line
                         type="monotone"
