@@ -31,8 +31,8 @@ const NODE_WIDTH = 220;
 const NODE_HEIGHT = 80;
 
 // Determine node type from label
-function getNodeType(n: GraphNodeResponse): string {
-  const label = n.label.toLowerCase();
+function getNodeType(node: GraphNodeResponse): string {
+  const label = node.label.toLowerCase();
   if (["stable", "hotspot", "watchlist"].includes(label)) return "status";
   if (label.includes("risk") || label.includes("driver")) return "driver";
   if (label.includes("monitor") || label.includes("recommend")) return "recommendation";
@@ -42,11 +42,11 @@ function getNodeType(n: GraphNodeResponse): string {
 
 // Node style per type
 const TYPE_STYLES: Record<string, { bg: string; border: string; badge: string }> = {
-  village:        { bg: "#1e3a5f", border: "#3b82f6", badge: "#3b82f6" },
-  status:         { bg: "#064e3b", border: "#10b981", badge: "#10b981" },
-  driver:         { bg: "#451a03", border: "#f59e0b", badge: "#f59e0b" },
+  village: { bg: "#1e3a5f", border: "#3b82f6", badge: "#3b82f6" },
+  status: { bg: "#064e3b", border: "#10b981", badge: "#10b981" },
+  driver: { bg: "#451a03", border: "#f59e0b", badge: "#f59e0b" },
   recommendation: { bg: "#2e1065", border: "#8b5cf6", badge: "#8b5cf6" },
-  forecast:       { bg: "#1c1917", border: "#f97316", badge: "#f97316" },
+  forecast: { bg: "#1c1917", border: "#f97316", badge: "#f97316" },
 };
 
 // Build ReactFlow nodes and edges with Dagre layout
@@ -56,12 +56,10 @@ function buildLayout(
 ): { nodes: Node[]; edges: Edge[] } {
   const seenIds = new Map<string, number>();
 
-  // Map nodes
   const mappedNodes: Node[] = rawNodes.map((n) => {
     const count = seenIds.get(n.id) ?? 0;
     seenIds.set(n.id, count + 1);
     const nodeId = count === 0 ? n.id : `${n.id}__${count}`;
-
     const type = getNodeType(n);
     const style = TYPE_STYLES[type] ?? TYPE_STYLES.village;
 
@@ -88,7 +86,6 @@ function buildLayout(
     };
   });
 
-  // Map original node id → unique id
   const idMap = new Map<string, string>();
   rawNodes.forEach((n, idx) => {
     if (!idMap.has(n.id)) {
@@ -96,7 +93,6 @@ function buildLayout(
     }
   });
 
-  // Map edges
   const mappedEdges: Edge[] = rawEdges.map((e, idx) => {
     const sourceId = idMap.get(e.source) ?? e.source;
     const targetId = idMap.get(e.target) ?? e.target;
@@ -138,15 +134,13 @@ function buildLayout(
 function GraphInner() {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [loading, setLoading] = useState(true);
   const { fitView } = useReactFlow();
 
   useEffect(() => {
     fetchVillageGraph().then((data) => {
-      const { nodes: n, edges: e } = buildLayout(
-        data.nodes as GraphNodeResponse[],
-        data.edges as GraphEdgeResponse[]
-      );
+      const { nodes: n, edges: e } = buildLayout(data.nodes, data.edges);
       setNodes(n);
       setEdges(e);
       setLoading(false);
@@ -179,6 +173,7 @@ function GraphInner() {
         minZoom={0.2}
         maxZoom={2}
         proOptions={{ hideAttribution: true }}
+        onNodeClick={(_, node) => setSelectedNode(node)}
       >
         <Background
           variant={BackgroundVariant.Dots}
@@ -203,6 +198,29 @@ function GraphInner() {
           maskColor="#0f172a99"
         />
       </ReactFlow>
+
+      {/* Node Details Panel */}
+      {selectedNode && (
+        <div className="absolute top-4 right-4 w-80 bg-slate-900 border border-slate-700 rounded-xl p-4 shadow-xl">
+          <div className="flex justify-between items-center">
+            <h3 className="font-bold text-white">Node Details</h3>
+            <button
+              onClick={() => setSelectedNode(null)}
+              className="text-slate-400 hover:text-white"
+            >
+              ✕
+            </button>
+          </div>
+          <p className="mt-3 text-slate-300">{selectedNode.data.label}</p>
+          <p className="text-slate-500 text-sm mt-2">
+            Type:{" "}
+            {selectedNode.data.type
+              ? selectedNode.data.type.charAt(0).toUpperCase() +
+                selectedNode.data.type.slice(1)
+              : "N/A"}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
