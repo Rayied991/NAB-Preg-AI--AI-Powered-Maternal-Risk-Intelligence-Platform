@@ -16,6 +16,7 @@ import {
   BarChart3,
   Bell,
   ClipboardClock,
+  GitGraph,
   Hospital,
   LayoutDashboard,
   Upload,
@@ -60,6 +61,11 @@ const menuItems = [
   name: "Clinical Assistant",
   href: "/assistant",
   icon: Hospital 
+  },
+  {
+    name:"Knowledge Graph",
+    href:"/graph",
+    icon: GitGraph 
   }
 ];
 
