@@ -3,25 +3,27 @@ from backend.app.langgraph.llm import llm
 def summary_agent(state):
 
     prompt = f"""
-Create a final village intelligence report.
+You are a maternal health intelligence assistant.
 
-Risk:
-{state['risk_analysis']}
+Village Data:
+{state['village_data']}
 
-Nutrition:
-{state['nutrition_analysis']}
+Task:
+- Analyze maternal health risk.
+- Determine concise status: STABLE, WATCHLIST, or HOTSPOT.
+- Assign confidence score 0-100.
+- Provide short forecast summary (1 line).
+- List top risk drivers as an array.
+- List recommended interventions as an array.
 
-Forecast:
-{state['forecast']}
-
-Return ONLY valid JSON:
+Return only JSON in this format:
 
 {{
-  "status":"",
-  "confidence":0,
-  "forecast":"",
-  "drivers":"",
-  "recommendation":""
+    "status": "...",
+    "confidence": ...,
+    "forecast": "...",
+    "drivers": ["...", "..."],
+    "recommendations": ["...", "..."]
 }}
 """
 

@@ -8,6 +8,7 @@ from backend.app.api.routes.village_analytics import router as village_router
 from backend.app.api.routes.patients import (
     router as patient_router
 )
+
 from backend.app.api.routes.patient_history import (
     router as patient_history_router
 )
@@ -35,12 +36,20 @@ from backend.app.api.routes.risk_trend import (
 from backend.app.api.routes.risk_progression import (
     router as risk_progression_router
 )
+from backend.app.api.village_graph import (
+    router as village_graph_router
+)
 from backend.app.api.routes.village_ai_reports import (
     router as village_ai_reports_router
 )
+from backend.app.api.routes import (
+    village_relationships
+)
+
 from backend.app.api.routes import rag
 from backend.app.api.routes.ocr import router as ocr_router
 from backend.app.api.chat_history import router as chat_router
+
 app = FastAPI(
     title="NAB Preg AI API"
 )
@@ -121,6 +130,16 @@ app.include_router(
 )
 app.include_router(
     village_ai_reports_router,
+    prefix="/api"
+)
+app.include_router(
+    village_graph_router,
+    prefix="/api"
+)
+
+
+app.include_router(
+    village_relationships.router,
     prefix="/api"
 )
 

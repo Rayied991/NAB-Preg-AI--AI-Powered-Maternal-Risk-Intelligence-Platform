@@ -12,34 +12,14 @@
  *    - Icon and text labels mapped to `text-text-primary`, `text-text-secondary`, and `text-text-muted`.
  */
 
-import { Search, Sun, Moon } from "lucide-react";
+import { Sun, Moon } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="w-full h-20 border-b border-border-custom bg-panel px-6 flex items-center justify-between transition-colors duration-300">
-
-      {/* Search */}
-      <div className="flex items-center gap-3 bg-input-bg border border-border-custom px-4 py-2 rounded-xl w-80 transition-colors duration-300">
-        <Search size={18} className="text-text-muted transition-colors duration-300" />
-
-        <input
-          type="text"
-          placeholder="Search patients..."
-          className="
-            bg-transparent
-            outline-none
-            text-sm
-            text-text-primary
-            placeholder:text-text-muted
-            w-full
-            transition-colors
-            duration-300
-          "
-        />
-      </div>
+    <header className="w-full h-20 border-b border-border-custom bg-panel px-6 flex items-center justify-end transition-colors duration-300">
 
       {/* Right Section */}
       <div className="flex items-center gap-5">

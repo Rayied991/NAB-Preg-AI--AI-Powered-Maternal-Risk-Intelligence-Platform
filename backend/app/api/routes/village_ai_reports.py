@@ -2,9 +2,15 @@ from fastapi import APIRouter
 import requests
 import os
 import json
-from backend.app.services.village_ai_report_storage import save_village_ai_report
+from backend.app.services.village_ai_report_storage import (
+    save_village_ai_report,
+    clear_village_ai_report,
+)
 from backend.app.langgraph.village_graph import graph
-from backend.app.services.village_relationship_storage import save_relationship
+from backend.app.services.village_relationship_storage import (
+    save_relationship,
+    clear_village_relationships
+)
 
 router = APIRouter()
 
@@ -13,6 +19,7 @@ SUPABASE_KEY = os.getenv("NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY")
 
 @router.get("/village-ai-reports")
 async def get_village_ai_reports():
+
     headers = {
         "apikey": SUPABASE_KEY,
         "Authorization": f"Bearer {SUPABASE_KEY}",
@@ -27,54 +34,42 @@ async def get_village_ai_reports():
     reports = []
 
     for village in villages:
+
+        # Clear previous relationships
+        clear_village_relationships(village["village_name"])
+
+        # Generate AI summary using LangGraph
         result = graph.invoke({"village_data": village})
-        summary_text = result["summary"]
-        summary_text = summary_text.replace("```json", "").replace("```", "").strip()
+        summary_text = result["summary"].replace("```json", "").replace("```", "").strip()
         summary = json.loads(summary_text)
 
-        # Save graph relationships to Supabase
-        relationships = {
-            "STATUS": summary["status"],
-            "FORECAST": summary["forecast"],
-            "DRIVER": summary["drivers"],
-            "RECOMMENDATION": summary["recommendation"]
-        }
+        # Save relationships
+        save_relationship(village["village_name"], "STATUS", summary["status"])
+        save_relationship(village["village_name"], "FORECAST", summary["forecast"])
+        for driver in summary["drivers"]:
+            save_relationship(village["village_name"], "DRIVER", driver)
+        for recommendation in summary["recommendations"]:
+            save_relationship(village["village_name"], "RECOMMENDATION", recommendation)
 
-        for rel_type, rel_value in relationships.items():
-            save_relationship(
-                village["village_name"],
-                rel_type,
-                rel_value
-            )
-
-        # Save AI report
+        # Clear previous AI report and save new
+        clear_village_ai_report(village["village_name"])
         save_village_ai_report({
             "village_name": village["village_name"],
             "status": summary["status"],
             "confidence": summary["confidence"],
             "forecast": summary["forecast"],
-            "key_drivers": summary["drivers"],
-            "recommendation": summary["recommendation"],
+            "key_drivers": json.dumps(summary["drivers"]),
+            "recommendation": json.dumps(summary["recommendations"]),
         })
 
+        # Append to response
         reports.append({
-    "village":
-        village["village_name"],
-
-    "status":
-        summary["status"],
-
-    "confidence":
-        summary["confidence"],
-
-    "forecast":
-        summary["forecast"],
-
-    "drivers":
-        summary["drivers"],
-
-    "recommendation":
-        summary["recommendation"],
-})
+            "village": village["village_name"],
+            "status": summary["status"],
+            "confidence": summary["confidence"],
+            "forecast": summary["forecast"],
+            "drivers": summary["drivers"],
+            "recommendations": summary["recommendations"],
+        })
 
     return reports

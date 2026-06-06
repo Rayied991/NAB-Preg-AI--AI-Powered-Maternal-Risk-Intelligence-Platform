@@ -480,7 +480,6 @@ export default function PatientsPage() {
             <div className="p-6">
 
               {trends?.error ? (
-
                 <div className="h-72 flex items-center justify-center">
                   <div className="text-center">
                     <p className="text-sm text-red-500 dark:text-red-400 transition-colors duration-300">
@@ -491,9 +490,7 @@ export default function PatientsPage() {
                     </p>
                   </div>
                 </div>
-
               ) : (!trends?.hemoglobin?.length && !trends?.blood_pressure?.length && !trends?.blood_sugar?.length && !trends?.heart_rate?.length) ? (
-
                 <div className="h-72 flex items-center justify-center">
                   <div className="text-center">
                     <p className="text-sm text-gray-500 dark:text-[#8b95a7] transition-colors duration-300">
@@ -504,9 +501,7 @@ export default function PatientsPage() {
                     </p>
                   </div>
                 </div>
-
               ) : (
-
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Hemoglobin */}
                   <div className="bg-white dark:bg-[#0d1118] border border-gray-200 dark:border-[#1e2535] rounded-xl p-4 transition-colors duration-300">
@@ -589,11 +584,9 @@ export default function PatientsPage() {
                     </div>
                   </div>
                 </div>
-
               )}
 
             </div>
-
 
           </SectionCard>
 
