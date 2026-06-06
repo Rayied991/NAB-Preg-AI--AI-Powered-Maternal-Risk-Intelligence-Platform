@@ -66,7 +66,29 @@ export default function AnalyticsPage() {
         data
       );
 
-      setAiReports(data);
+      const normalized = data.map(
+  (report: any) => ({
+    village:
+      report.village || "Unknown",
+
+    status:
+      report.status || "STABLE",
+
+    confidence:
+      report.confidence || 0,
+
+    forecast:
+      report.forecast || "",
+
+    drivers:
+      report.drivers || "",
+
+    recommendation:
+      report.recommendation || "",
+  })
+);
+
+setAiReports(normalized);
 
     } catch (error) {
 
@@ -274,16 +296,14 @@ rounded-2xl p-6 shadow-sm">
     {aiReports.map((report,index) => (
 
       <VillageAIReportCard
-        key={`${report.village}-${index}`}
-        village={report.village}
-        status={report.status}
-        confidence={report.confidence}
-        forecast={report.forecast}
-        drivers={report.drivers}
-        recommendation={
-          report.recommendation
-        }
-      />
+  key={`${report.village}-${index}`}
+  village={report.village}
+  status={report.status}
+  confidence={report.confidence}
+  forecast={report.forecast}
+  drivers={report.drivers}
+  recommendation={report.recommendation}
+/>
 
     ))}
 
