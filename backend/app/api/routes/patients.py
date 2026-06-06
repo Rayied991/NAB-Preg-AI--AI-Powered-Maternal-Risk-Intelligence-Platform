@@ -24,6 +24,17 @@ class CreatePatientRequest(BaseModel):
     contact_number: str
     emergency_contact: str
     height_cm: float
+
+class UpdatePatientRequest(BaseModel):
+    full_name: str | None = None
+    age: int | None = None
+    trimester: int | None = None
+    pregnancy_week: int | None = None
+    village: str | None = None
+    blood_group: str | None = None
+    contact_number: str | None = None
+    emergency_contact: str | None = None
+    height_cm: float | None = None
     
 SUPABASE_URL = os.getenv(
     "NEXT_PUBLIC_SUPABASE_URL"
@@ -96,3 +107,50 @@ async def create_patient(
     )
 
     return response.json()    
+
+@router.patch("/patients/{patient_id}")
+async def update_patient(
+    patient_id: str,
+    payload: UpdatePatientRequest
+):
+    update_data = payload.dict(exclude_unset=True)
+    
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json",
+        "Prefer": "return=representation",
+    }
+    
+    if "village" in update_data:
+        # Fetch current to see if village changed
+        current_res = requests.get(
+            f"{SUPABASE_URL}/rest/v1/patients?id=eq.{patient_id}",
+            headers=headers
+        )
+        if current_res.status_code == 200 and current_res.json():
+            current_village = current_res.json()[0].get("village")
+            
+            if update_data["village"] != current_village:
+                coords = get_coordinates(update_data["village"])
+                if coords:
+                    update_data["latitude"] = coords["latitude"]
+                    update_data["longitude"] = coords["longitude"]
+                else:
+                    # Clear coordinates so it doesn't show in the old location
+                    update_data["latitude"] = None
+                    update_data["longitude"] = None
+        else:
+            # Fallback if we couldn't fetch current
+            coords = get_coordinates(update_data["village"])
+            if coords:
+                update_data["latitude"] = coords["latitude"]
+                update_data["longitude"] = coords["longitude"]
+
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/patients?id=eq.{patient_id}",
+        headers=headers,
+        json=update_data
+    )
+
+    return response.json()
