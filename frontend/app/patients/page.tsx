@@ -479,7 +479,6 @@ if (createdPatient) {
           <div className="p-6">
 
               {trends?.error ? (
-
                 <div className="h-72 flex items-center justify-center">
                   <div className="text-center">
                     <p className="text-sm text-red-400">
@@ -490,9 +489,7 @@ if (createdPatient) {
                     </p>
                   </div>
                 </div>
-
-              ) : !trends?.hemoglobin?.length ? (
-
+              ) : (!trends?.hemoglobin?.length && !trends?.blood_pressure?.length && !trends?.blood_sugar?.length && !trends?.heart_rate?.length) ? (
                 <div className="h-72 flex items-center justify-center">
                   <div className="text-center">
                     <p className="text-sm text-[#8b95a7]">
@@ -503,43 +500,90 @@ if (createdPatient) {
                     </p>
                   </div>
                 </div>
-
               ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Hemoglobin */}
+                  <div className="bg-[#0d1118] border border-[#1e2535] rounded-xl p-4">
+                    <h3 className="text-sm font-semibold text-[#c8d0e0] mb-4">Hemoglobin (g/dL)</h3>
+                    <div className="h-48">
+                      {!trends.hemoglobin?.length ? (
+                        <div className="h-full flex items-center justify-center text-xs text-[#5a6478]">No data available</div>
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={trends.hemoglobin}>
+                            <CartesianGrid stroke="#1e2535" strokeDasharray="3 3" vertical={false} />
+                            <XAxis dataKey="date" tick={{ fill: "#5a6478", fontSize: 10 }} tickFormatter={(v) => new Date(v).toLocaleDateString()} />
+                            <YAxis tick={{ fill: "#5a6478", fontSize: 10 }} width={30} />
+                            <Tooltip contentStyle={{ backgroundColor: "#131720", borderColor: "#1e2535", borderRadius: "8px" }} />
+                            <Line type="monotone" dataKey="value" stroke="#ef4444" strokeWidth={2} name="Hemoglobin" dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      )}
+                    </div>
+                  </div>
 
-            <div className="h-72">
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-              >
-                <LineChart
-                  data={trends.hemoglobin}
-                >
-                  <CartesianGrid stroke="#1e2535" />
+                  {/* Blood Pressure */}
+                  <div className="bg-[#0d1118] border border-[#1e2535] rounded-xl p-4">
+                    <h3 className="text-sm font-semibold text-[#c8d0e0] mb-4">Blood Pressure (mmHg)</h3>
+                    <div className="h-48">
+                      {!trends.blood_pressure?.length ? (
+                        <div className="h-full flex items-center justify-center text-xs text-[#5a6478]">No data available</div>
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={trends.blood_pressure}>
+                            <CartesianGrid stroke="#1e2535" strokeDasharray="3 3" vertical={false} />
+                            <XAxis dataKey="date" tick={{ fill: "#5a6478", fontSize: 10 }} tickFormatter={(v) => new Date(v).toLocaleDateString()} />
+                            <YAxis tick={{ fill: "#5a6478", fontSize: 10 }} width={30} />
+                            <Tooltip contentStyle={{ backgroundColor: "#131720", borderColor: "#1e2535", borderRadius: "8px" }} />
+                            <Line type="monotone" dataKey="systolic" stroke="#ef4444" strokeWidth={2} name="Systolic" dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                            <Line type="monotone" dataKey="diastolic" stroke="#3b82f6" strokeWidth={2} name="Diastolic" dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      )}
+                    </div>
+                  </div>
 
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fill: "#5a6478" }}
-                    tickFormatter={(value) =>
-                      new Date(value).toLocaleDateString()
-                    }
-                  />
+                  {/* Blood Sugar */}
+                  <div className="bg-[#0d1118] border border-[#1e2535] rounded-xl p-4">
+                    <h3 className="text-sm font-semibold text-[#c8d0e0] mb-4">Blood Sugar (mg/dL)</h3>
+                    <div className="h-48">
+                      {!trends.blood_sugar?.length ? (
+                        <div className="h-full flex items-center justify-center text-xs text-[#5a6478]">No data available</div>
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={trends.blood_sugar}>
+                            <CartesianGrid stroke="#1e2535" strokeDasharray="3 3" vertical={false} />
+                            <XAxis dataKey="date" tick={{ fill: "#5a6478", fontSize: 10 }} tickFormatter={(v) => new Date(v).toLocaleDateString()} />
+                            <YAxis tick={{ fill: "#5a6478", fontSize: 10 }} width={30} />
+                            <Tooltip contentStyle={{ backgroundColor: "#131720", borderColor: "#1e2535", borderRadius: "8px" }} />
+                            <Line type="monotone" dataKey="value" stroke="#f59e0b" strokeWidth={2} name="Blood Sugar" dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      )}
+                    </div>
+                  </div>
 
-                  <YAxis />
-
-                  <Tooltip />
-
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#ef4444"
-                    strokeWidth={2}
-                    name="Hemoglobin"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-
-          )}
+                  {/* Heart Rate */}
+                  <div className="bg-[#0d1118] border border-[#1e2535] rounded-xl p-4">
+                    <h3 className="text-sm font-semibold text-[#c8d0e0] mb-4">Heart Rate (bpm)</h3>
+                    <div className="h-48">
+                      {!trends.heart_rate?.length ? (
+                        <div className="h-full flex items-center justify-center text-xs text-[#5a6478]">No data available</div>
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={trends.heart_rate}>
+                            <CartesianGrid stroke="#1e2535" strokeDasharray="3 3" vertical={false} />
+                            <XAxis dataKey="date" tick={{ fill: "#5a6478", fontSize: 10 }} tickFormatter={(v) => new Date(v).toLocaleDateString()} />
+                            <YAxis tick={{ fill: "#5a6478", fontSize: 10 }} width={30} />
+                            <Tooltip contentStyle={{ backgroundColor: "#131720", borderColor: "#1e2535", borderRadius: "8px" }} />
+                            <Line type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2} name="Heart Rate" dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
 
         </div>
 

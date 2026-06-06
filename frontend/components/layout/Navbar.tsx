@@ -19,7 +19,7 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="w-full h-20 border-b border-border-custom bg-panel px-6 flex items-center justify-between transition-colors duration-300">
+    <header className="w-full h-20 border-b border-border-custom bg-panel px-6 flex items-center justify-end transition-colors duration-300">
 
       {/* Right Section */}
       <div className="flex items-center gap-5">
