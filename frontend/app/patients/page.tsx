@@ -292,68 +292,6 @@ export default function PatientsPage() {
         setCreating(false);
       }
     };
-    }
-  };
-
-  const handleCreatePatient =
-    async () => {
-      if (
-        !form.patient_code ||
-        !form.full_name ||
-        !form.village
-      ) {
-        alert(
-          "Please fill all required fields"
-        );
-        return;
-      }
-
-      setCreating(true);
-      try {
-
-        await createPatient(form);
-
-        const updatedPatients =
-          await fetchPatients();
-
-        setPatients(updatedPatients);
-        const createdPatient =
-          updatedPatients.find(
-            (p: any) =>
-              p.patient_code === form.patient_code
-          );
-
-        if (createdPatient) {
-          setSelectedPatient(
-            createdPatient.id
-          );
-
-          await loadHistory(
-            createdPatient.id
-          );
-        }
-
-        setShowModal(false);
-        setForm({
-          patient_code: "",
-          full_name: "",
-          age: 0,
-          trimester: 1,
-          pregnancy_week: 1,
-          village: "",
-          blood_group: "",
-          contact_number: "",
-          emergency_contact: "",
-          height_cm: 0,
-        });
-
-      } catch (error) {
-        console.error(error);
-      }
-      finally {
-        setCreating(false);
-      }
-    };
 
   useEffect(() => {
     const loadPatients = async () => {
