@@ -2,6 +2,7 @@
 
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { fetchAlerts } from "@/services/alerts.service";
+import { resolveAlert } from "@/services/alert.service";
 import { useEffect, useState } from "react";
 
 interface Alert {
@@ -28,15 +29,26 @@ const severityConfig = (severity: string) => {
         </svg>
       ),
     };
+  if (severity === "MEDIUM")
+    return {
+      badge: "bg-white dark:bg-[#2a1e06] text-yellow-600 dark:text-[#e0a040] border border-yellow-500 dark:border-[#5a3a10]",
+      dot: "bg-[#e0a040]",
+      ring: "border-yellow-300 dark:border-[#3a2a08] shadow-[0_0_10px_rgba(253,224,71,0.15)] dark:shadow-none",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      ),
+    };
   return {
-    badge: "bg-white dark:bg-[#2a1e06] text-yellow-600 dark:text-[#e0a040] border border-yellow-500 dark:border-[#5a3a10]",
-    dot: "bg-[#e0a040]",
-    ring: "border-yellow-300 dark:border-[#3a2a08] shadow-[0_0_10px_rgba(253,224,71,0.15)] dark:shadow-none",
+    badge: "bg-white dark:bg-[#0e2a14] text-green-600 dark:text-[#60f080] border border-green-500 dark:border-[#1a5a22]",
+    dot: "bg-[#60f080]",
+    ring: "border-green-300 dark:border-[#103a16] shadow-[0_0_10px_rgba(74,222,128,0.15)] dark:shadow-none",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="12" y1="8" x2="12" y2="12"/>
-        <line x1="12" y1="16" x2="12.01" y2="16"/>
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>
       </svg>
     ),
   };
@@ -44,27 +56,39 @@ const severityConfig = (severity: string) => {
 
 export default function AlertsPage() {
 
-  const [alerts, setAlerts] =
-    useState<Alert[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [activeTab, setActiveTab] = useState("All");
 
   useEffect(() => {
-
     const loadAlerts = async () => {
       try {
-
-        const data =
-          await fetchAlerts();
-
+        const data = await fetchAlerts();
         setAlerts(data);
-
       } catch (error) {
         console.error(error);
       }
     };
-
     loadAlerts();
-
   }, []);
+
+  const handleResolve = async (alertId: string) => {
+    try {
+      await resolveAlert(alertId);
+      setAlerts((prev) =>
+        prev.map((alert) =>
+          alert.id === alertId ? { ...alert, status: "RESOLVED" } : alert
+        )
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const activeAlerts = alerts.filter((a) => a.status === "OPEN");
+  const filteredAlerts = activeAlerts.filter((a) => {
+    if (activeTab === "All") return true;
+    return a.severity === activeTab.toUpperCase();
+  });
   return (
     <DashboardLayout>
 
@@ -84,23 +108,37 @@ export default function AlertsPage() {
       {/* ── Alerts Section ── */}
       <div className="bg-white dark:bg-[#131720] border border-gray-200 dark:border-[#1e2535] rounded-2xl p-6 shadow-sm transition-colors duration-300">
 
-        <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] mb-4 flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          Active Alerts
-          <span className="ml-1 px-2 py-0.5 rounded-full bg-white dark:bg-[#2a0e0e] text-red-600 dark:text-[#f06060] border border-red-200 dark:border-[#5a1a1a] text-[10px] font-bold tracking-wider shadow-sm">
-            {
-  alerts.filter(
-    (a) => a.status === "OPEN"
-  ).length
-}
-          </span>
-        </p>
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            Active Alerts
+            <span className="ml-1 px-2 py-0.5 rounded-full bg-white dark:bg-[#2a0e0e] text-red-600 dark:text-[#f06060] border border-red-200 dark:border-[#5a1a1a] text-[10px] font-bold tracking-wider shadow-sm">
+              {activeAlerts.length}
+            </span>
+          </p>
+
+          <div className="flex bg-gray-100 dark:bg-[#0d1118] p-1 rounded-xl">
+            {["All", "High", "Medium", "Low"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  activeTab === tab
+                    ? "bg-white dark:bg-[#1e2535] text-text-primary shadow-sm"
+                    : "text-text-muted hover:text-text-primary"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className="flex flex-col gap-3">
-          {alerts.map((alert) => {
+          {filteredAlerts.map((alert) => {
             const config = severityConfig(alert.severity);
             return (
               <div
@@ -140,13 +178,23 @@ export default function AlertsPage() {
 
                   </div>
 
-                  {/* Right — severity badge */}
-                  <span
-                    className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-widest uppercase ${config.badge}`}
-                  >
-                    {config.icon}
-                    {alert.severity}
-                  </span>
+                  {/* Right — severity badge and resolve button */}
+                  <div className="shrink-0 flex flex-col items-end gap-2">
+                    <span
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-widest uppercase ${config.badge}`}
+                    >
+                      {config.icon}
+                      {alert.severity}
+                    </span>
+                    {alert.severity === "HIGH" && (
+                      <button
+                        onClick={() => handleResolve(alert.id)}
+                        className="px-3 py-1 text-xs font-semibold rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors shadow-sm"
+                      >
+                        Resolve
+                      </button>
+                    )}
+                  </div>
 
                 </div>
               </div>
