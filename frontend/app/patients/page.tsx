@@ -9,7 +9,7 @@ import {
   createPatient,
 } from "@/services/create-patient.service";
 import { fetchPatientHistory } from "@/services/patient-history.service";
-import { fetchPatients } from "@/services/patient.service";
+import { fetchPatients, updatePatient } from "@/services/patient.service";
 import { fetchRiskProgression } from "@/services/riskProgression.service";
 import {
   getRiskTrend,
@@ -148,6 +148,8 @@ export default function PatientsPage() {
   useState(false);
   const [copilotSummary, setCopilotSummary] =
   useState<string>("");
+  const [modalMode, setModalMode] = useState<"CREATE" | "EDIT">("CREATE");
+  const [editingPatientId, setEditingPatientId] = useState<string | null>(null);
 
   const [loadingSummary, setLoadingSummary] =
   useState(false);
@@ -171,6 +173,42 @@ const [form, setForm] = useState({
   emergency_contact: "",
   height_cm: 0.0
 });
+
+  const resetForm = () => {
+    setForm({
+      patient_code: "",
+      full_name: "",
+      age: 0,
+      trimester: 1,
+      pregnancy_week: 1,
+      village: "",
+      blood_group: "",
+      contact_number: "",
+      emergency_contact: "",
+      height_cm: 0.0
+    });
+    setModalMode("CREATE");
+    setEditingPatientId(null);
+  };
+
+  const handleEditClick = () => {
+    if (!history?.patient) return;
+    setModalMode("EDIT");
+    setEditingPatientId(history.patient.id);
+    setForm({
+      patient_code: history.patient.patient_code || "",
+      full_name: history.patient.full_name || "",
+      age: history.patient.age || 0,
+      trimester: history.patient.trimester || 1,
+      pregnancy_week: history.patient.pregnancy_week || 1,
+      village: history.patient.village || "",
+      blood_group: history.patient.blood_group || "",
+      contact_number: history.patient.contact_number || "",
+      emergency_contact: history.patient.emergency_contact || "",
+      height_cm: history.patient.height_cm || 0,
+    });
+    setShowModal(true);
+  };
 
 useEffect(() => {
   if (!selectedPatient) return;
@@ -212,7 +250,7 @@ const handleGenerateSummary = async (
   }
 };
 
-const handleCreatePatient =
+const handleSavePatient =
   async () => {
     if (
   !form.patient_code ||
@@ -228,41 +266,25 @@ const handleCreatePatient =
   setCreating(true);
     try {
 
-      await createPatient(form);
+      if (modalMode === "CREATE") {
+        await createPatient(form);
+        const updatedPatients = await fetchPatients();
+        setPatients(updatedPatients);
+        const createdPatient = updatedPatients.find((p: any) => p.patient_code === form.patient_code);
 
-      const updatedPatients =
-        await fetchPatients();
-
-      setPatients(updatedPatients);
-      const createdPatient =
-  updatedPatients.find(
-    (p: any) =>
-      p.patient_code === form.patient_code
-  );
-
-if (createdPatient) {
-  setSelectedPatient(
-    createdPatient.id
-  );
-
-  await loadHistory(
-    createdPatient.id
-  );
-}
+        if (createdPatient) {
+          setSelectedPatient(createdPatient.id);
+          await loadHistory(createdPatient.id);
+        }
+      } else if (modalMode === "EDIT" && editingPatientId) {
+        await updatePatient(editingPatientId, form);
+        const updatedPatients = await fetchPatients();
+        setPatients(updatedPatients);
+        await loadHistory(editingPatientId);
+      }
 
       setShowModal(false);
-     setForm({
-  patient_code: "",
-  full_name: "",
-  age: 0,
-  trimester: 1,
-  pregnancy_week: 1,
-  village: "",
-  blood_group: "",
-  contact_number: "",
-  emergency_contact: "",
-  height_cm: 0,
-});
+      resetForm();
 
     } catch (error) {
       console.error(error);
@@ -357,7 +379,10 @@ if (createdPatient) {
 
 
     <button
-  onClick={() => setShowModal(true)}
+  onClick={() => {
+    resetForm();
+    setShowModal(true);
+  }}
   className="flex items-center gap-2 bg-[#1a4fa8] hover:bg-[#2060c8] active:scale-95 text-[#d8e8ff] text-[13px] font-semibold tracking-wide px-5 py-2.5 rounded-xl transition-all duration-200"
 >
   <svg
@@ -625,6 +650,13 @@ if (createdPatient) {
                   </button>
 
                   <button
+                    onClick={handleEditClick}
+                    className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+                  >
+                    Edit Patient
+                  </button>
+
+                  <button
                     onClick={() =>
                       handleGenerateSummary(
                         history.patient.id
@@ -784,7 +816,7 @@ if (createdPatient) {
     <div className="bg-[#131720] border border-[#1e2535] rounded-2xl p-6 w-full max-w-lg">
 
       <h2 className="text-xl text-white font-semibold mb-4">
-        Create Patient
+        {modalMode === "CREATE" ? "Create Patient" : "Edit Patient"}
       </h2>
 
       <div className="space-y-3">
@@ -920,19 +952,7 @@ if (createdPatient) {
         <button
   onClick={() => {
     setShowModal(false);
-
-    setForm({
-  patient_code: "",
-  full_name: "",
-  age: 0,
-  trimester: 1,
-  pregnancy_week: 1,
-  village: "",
-  blood_group: "",
-  contact_number: "",
-  emergency_contact: "",
-  height_cm: 0,
-});
+    resetForm();
   }}
   className="px-4 py-2 rounded-lg bg-zinc-700"
 >
@@ -940,7 +960,7 @@ if (createdPatient) {
 </button>
 
        <button
-          onClick={handleCreatePatient}
+          onClick={handleSavePatient}
           disabled={creating}
           className="
             px-4 py-2
@@ -951,8 +971,8 @@ if (createdPatient) {
           "
         >
           {creating
-            ? "Creating..."
-            : "Create"}
+            ? "Saving..."
+            : "Save"}
         </button>
 
         
