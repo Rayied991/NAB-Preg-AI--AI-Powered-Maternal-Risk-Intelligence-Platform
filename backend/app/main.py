@@ -45,7 +45,9 @@ from backend.app.api.routes.village_ai_reports import (
 from backend.app.api.routes import (
     village_relationships
 )
-
+from backend.app.api.routes.ai_interventions import (
+    router as intervention_router
+)
 from backend.app.api.routes import rag
 from backend.app.api.routes.ocr import router as ocr_router
 from backend.app.api.chat_history import router as chat_router
@@ -136,7 +138,10 @@ app.include_router(
     village_graph_router,
     prefix="/api"
 )
-
+app.include_router(
+    intervention_router,
+    prefix="/api"
+)
 
 app.include_router(
     village_relationships.router,

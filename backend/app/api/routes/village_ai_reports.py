@@ -11,30 +11,30 @@ from backend.app.services.village_relationship_storage import (
     save_relationship,
     clear_village_relationships
 )
+from backend.app.langgraph.agents.intervention_agent import intervention_agent
 
 router = APIRouter()
 
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY")
 
+
 @router.get("/village-ai-reports")
 async def get_village_ai_reports():
-
     headers = {
         "apikey": SUPABASE_KEY,
         "Authorization": f"Bearer {SUPABASE_KEY}",
     }
 
+    # Fetch village analytics from Supabase
     response = requests.get(
         f"{SUPABASE_URL}/rest/v1/village_analytics?select=*",
         headers=headers,
     )
-
     villages = response.json()
     reports = []
 
     for village in villages:
-
         # Clear previous relationships
         clear_village_relationships(village["village_name"])
 
@@ -42,6 +42,12 @@ async def get_village_ai_reports():
         result = graph.invoke({"village_data": village})
         summary_text = result["summary"].replace("```json", "").replace("```", "").strip()
         summary = json.loads(summary_text)
+
+        # Store summary in result state for Intervention Agent
+        result["summary_json"] = summary
+
+        # Trigger interventions (HOTSPOT detection + recommendations)
+        intervention_agent(result)
 
         # Save relationships
         save_relationship(village["village_name"], "STATUS", summary["status"])
@@ -62,7 +68,7 @@ async def get_village_ai_reports():
             "recommendation": json.dumps(summary["recommendations"]),
         })
 
-        # Append to response
+        # Append to API response
         reports.append({
             "village": village["village_name"],
             "status": summary["status"],
