@@ -6,11 +6,13 @@ import InterventionList from "@/components/cards/InterventionList";
 import VillageKnowledgeGraph from "@/components/graph/villageKnowledgeGraph";
 
 const LEGEND = [
-  { label: "Village", color: "#3b82f6" },
-  { label: "Status", color: "#10b981" },
-  { label: "Risk Driver", color: "#f59e0b" },
+  { label: "Village",        color: "#3b82f6" },
+  { label: "Status",         color: "#10b981" },
+  { label: "Risk Driver",    color: "#f59e0b" },
   { label: "Recommendation", color: "#8b5cf6" },
-  { label: "Forecast", color: "#f97316" },
+  { label: "Forecast",       color: "#f97316" },
+  { label: "Intervention",   color: "#818cf8" },  
+  { label: "Alert",          color: "#ef4444" },  
 ];
 
 export default function GraphPage() {
