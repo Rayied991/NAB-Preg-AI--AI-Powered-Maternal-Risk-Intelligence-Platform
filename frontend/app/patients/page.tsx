@@ -884,7 +884,8 @@ export default function PatientsPage() {
               <input
                 value={form.village}
                 placeholder="Village"
-                className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border border-gray-200 dark:border-transparent focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                disabled={modalMode === "EDIT"}
+                className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border border-gray-200 dark:border-transparent focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 disabled:opacity-60 disabled:cursor-not-allowed"
                 onChange={(e) =>
                   setForm({
                     ...form,
