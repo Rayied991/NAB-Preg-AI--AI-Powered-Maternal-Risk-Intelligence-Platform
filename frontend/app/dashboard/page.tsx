@@ -84,6 +84,12 @@ export default function DashboardPage() {
     (a) => a.severity?.toLowerCase().includes("high") && a.status !== "RESOLVED"
   ).length;
 
+  const totalHigh = analytics?.high_risk || 0;
+  const totalMedium = analytics?.medium_risk || 0;
+  const totalLow = analytics?.low_risk || 0;
+  const totalAlerts = totalHigh + totalMedium + totalLow;
+  const totalAlertsDivisor = totalAlerts || 1;
+
   return (
     <DashboardLayout>
 
@@ -119,66 +125,62 @@ export default function DashboardPage() {
 </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
 
-  {/* Recent Alerts */}
-  <div className="bg-card border border-border-custom rounded-2xl p-6 shadow-premium transition-colors duration-300">
+  {/* Total Alerts */}
+  <div className="bg-card border border-border-custom rounded-2xl p-6 shadow-premium transition-colors duration-300 flex flex-col">
 
-    <h2 className="text-xl font-semibold text-text-primary mb-4 transition-colors duration-300">
-      Recent Alerts
-    </h2>
-
-   <div className="space-y-4">
-
-  {alerts.map((alert) => (
-
-    <div
-      key={alert.id}
-      className="p-4 bg-panel border border-border-custom rounded-xl transition-all duration-300"
-    >
-
-      <p className="text-red-600 dark:text-red-400 font-semibold transition-colors duration-300">
-        {alert.alert_message}
-      </p>
-
-<p
-  className={`text-sm mt-1 font-medium transition-colors duration-300 ${
-    alert.status === "RESOLVED"
-      ? "text-green-500"
-      : "text-red-500"
-  }`}
->
-  {alert.severity} • {alert.status}
-</p>
-
-<button
-  onClick={() =>
-    handleResolve(alert.id)
-  }
-  disabled={
-    alert.status === "RESOLVED"
-  }
-  className="
-    mt-3
-    px-3
-    py-1
-    rounded-lg
-    text-sm
-    bg-green-600
-    text-white
-    hover:bg-green-700
-    disabled:opacity-50
-    disabled:cursor-not-allowed
-  "
->
-  {alert.status === "RESOLVED"
-    ? "Resolved"
-    : "Resolve"}
-</button>
-
+    <div className="flex justify-between items-center mb-6">
+      <h2 className="text-xl font-semibold text-text-primary transition-colors duration-300">
+        Total Alerts
+      </h2>
+      <span className="bg-blue-500/10 text-blue-500 text-xs font-bold px-3 py-1 rounded-full">
+        {totalAlerts} Total
+      </span>
     </div>
 
-  ))}
+    <div className="space-y-6 flex-1 justify-center flex flex-col">
+      {/* High Risk */}
+      <div>
+        <div className="flex justify-between items-center mb-2">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></span>
+            <span className="text-sm font-medium text-text-primary">High Risk</span>
+          </div>
+          <span className="text-sm font-bold text-red-500">{totalHigh}</span>
+        </div>
+        <div className="w-full bg-gray-200 dark:bg-zinc-800 rounded-full h-2">
+          <div className="bg-red-500 h-2 rounded-full transition-all duration-1000" style={{ width: `${(totalHigh / totalAlertsDivisor) * 100}%` }}></div>
+        </div>
+      </div>
 
-</div> 
+      {/* Medium Risk */}
+      <div>
+        <div className="flex justify-between items-center mb-2">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></span>
+            <span className="text-sm font-medium text-text-primary">Medium Risk</span>
+          </div>
+          <span className="text-sm font-bold text-amber-500">{totalMedium}</span>
+        </div>
+        <div className="w-full bg-gray-200 dark:bg-zinc-800 rounded-full h-2">
+          <div className="bg-amber-500 h-2 rounded-full transition-all duration-1000" style={{ width: `${(totalMedium / totalAlertsDivisor) * 100}%` }}></div>
+        </div>
+      </div>
+
+      {/* Low Risk */}
+      <div>
+        <div className="flex justify-between items-center mb-2">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+            <span className="text-sm font-medium text-text-primary">Low Risk</span>
+          </div>
+          <span className="text-sm font-bold text-green-500">{totalLow}</span>
+        </div>
+        <div className="w-full bg-gray-200 dark:bg-zinc-800 rounded-full h-2">
+          <div className="bg-green-500 h-2 rounded-full transition-all duration-1000" style={{ width: `${(totalLow / totalAlertsDivisor) * 100}%` }}></div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
   {/* AI Summary */}
