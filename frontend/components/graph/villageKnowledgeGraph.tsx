@@ -29,6 +29,18 @@ type GraphEdgeResponse = {
   label: string;
 };
 
+type InsightData = {
+  village: string;
+  alerts: string[];
+  drivers: string[];
+  interventions: string[];
+  recommendations: string[];
+  forecast: string[];
+  status?: string;
+  confidence?: string;
+  intent?: string;
+};
+
 const NODE_WIDTH = 220;
 const NODE_HEIGHT = 80;
 
@@ -149,6 +161,132 @@ function buildLayout(
   return { nodes: positionedNodes, edges: mappedEdges };
 }
 
+// --- Phase 1: AI & Analytics Helpers ---
+
+const detectIntent = (query: string): string => {
+  const q = query.toLowerCase();
+  if (q.includes('alert')) return 'alert';
+  if (q.includes('forecast')) return 'forecast';
+  if (q.includes('intervention')) return 'intervention';
+  if (q.includes('recommend')) return 'recommendation';
+  return 'summarize';
+};
+
+const buildNarrativeFallback = (data: InsightData): string => {
+  const alertCount = data.alerts.length;
+  let narrative = "";
+
+  // Intent-specific responses
+  if (data.intent === 'alert') {
+    if (alertCount === 0) {
+      return `No active alerts for ${data.village}. The village is currently stable with no immediate concerns.`;
+    }
+    narrative += `${data.village} has ${alertCount} active alert${alertCount > 1 ? 's' : ''}. `;
+    data.alerts.forEach((alert, i) => {
+      narrative += `${i + 1}. ${alert}. `;
+    });
+    if (data.interventions.length > 0) {
+      narrative += `Recommended interventions: ${data.interventions.join(', ')}.`;
+    }
+    return narrative;
+  }
+
+  if (data.intent === 'forecast') {
+    if (data.forecast.length === 0) {
+      return `No forecast data available for ${data.village}.`;
+    }
+    narrative += `Forecast for ${data.village}: `;
+    data.forecast.forEach((f, i) => {
+      narrative += `${i + 1}. ${f}. `;
+    });
+    if (data.confidence) {
+      narrative += `Confidence level: ${data.confidence}%.`;
+    }
+    return narrative;
+  }
+
+  if (data.intent === 'intervention') {
+    if (data.interventions.length === 0 && data.recommendations.length === 0) {
+      return `No specific interventions recommended for ${data.village} at this time.`;
+    }
+    narrative += `Recommended interventions for ${data.village}:\n`;
+    // FIX 1: Removed unused 'i' parameter
+    [...data.interventions, ...data.recommendations].forEach((action) => {
+      narrative += `• ${action}\n`;
+    });
+    return narrative.trim();
+  }
+
+  // Default summary
+  if (data.status) narrative += `${data.village} is currently ${data.status.toUpperCase()}. `;
+  else narrative += `${data.village} has been analyzed. `;
+
+  if (alertCount > 0) {
+    narrative += `There ${alertCount === 1 ? "is" : "are"} ${alertCount} active alert${alertCount > 1 ? "s" : ""} `;
+    if (alertCount === 1) narrative += `indicating ${data.alerts[0].toLowerCase()}. `;
+    else narrative += `requiring attention. `;
+  }
+
+  if (data.forecast.length > 0) {
+    const forecastText = data.forecast[0].toLowerCase();
+    if (forecastText.includes("low risk")) narrative += "Forecast models indicate low risk of maternal health complications in the near term. ";
+    else if (forecastText.includes("high risk") || forecastText.includes("escalation")) narrative += "Forecast models predict elevated risk levels requiring immediate intervention. ";
+    else narrative += `Forecast indicates ${forecastText}. `;
+  }
+
+  if (data.drivers.length > 0) {
+    const hasPositiveDrivers = data.drivers.some(d => d.toLowerCase().includes("low") || d.toLowerCase().includes("no reported") || d.toLowerCase().includes("stable"));
+    if (hasPositiveDrivers) narrative += `Current indicators show ${data.drivers.join(", ").toLowerCase()}. `;
+    else narrative += `Key risk factors include ${data.drivers.join(", ").toLowerCase()}. `;
+  }
+
+  if (data.interventions.length > 0 || data.recommendations.length > 0) {
+    const actions = [...data.interventions, ...data.recommendations];
+    if (actions.length > 0) narrative += `Recommended actions include ${actions.join(", ").toLowerCase()}.`;
+  }
+
+  if (data.confidence) narrative += ` Confidence level: ${data.confidence}%.`;
+  return narrative;
+};
+
+const fetchCopilotResponse = async (data: InsightData): Promise<string> => {
+  const prompt = `You are a maternal health risk analyst. Analyze this village based on the user's intent: "${data.intent}".
+
+Village: ${data.village}
+Status: ${data.status || 'Unknown'}
+Alerts: ${data.alerts.join(', ') || 'None'}
+Drivers: ${data.drivers.join(', ') || 'None'}
+Forecast: ${data.forecast.join(', ') || 'None'}
+Interventions: ${data.interventions.join(', ') || 'None'}
+Recommendations: ${data.recommendations.join(', ') || 'None'}
+
+Give a concise, professional response under 150 words. Focus on:
+1. Risk summary
+2. Why the village is risky/not risky
+3. Recommended actions`;
+
+  try {
+    const res = await fetch('/api/copilot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...data, prompt }),
+    });
+    
+    if (!res.ok) {
+      console.warn('Copilot API returned error status:', res.status);
+      throw new Error(`API request failed with status ${res.status}`);
+    }
+    
+    const json = await res.json();
+    return json.response || json.message || json.text || json.content || JSON.stringify(json);
+  } catch {
+    // FIX 2: Removed unused 'error' parameter from catch block
+    console.log('Using fallback narrative generator (API unavailable)');
+    // Return fallback instead of throwing - ensures demo always works
+    return buildNarrativeFallback(data);
+  }
+};
+
 function GraphInner({
   copilotQuery,
 }: {
@@ -158,15 +296,9 @@ function GraphInner({
   const [rawEdges, setRawEdges] = useState<GraphEdgeResponse[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [highlightedNodeIds, setHighlightedNodeIds] = useState<string[]>([]);
-  const [copilotContext, setCopilotContext] = useState<{
-    village: string;
-    drivers: string[];
-    alerts: string[];
-    forecasts: string[];
-    interventions: string[];
-    recommendations: string[];
-    statuses: string[];
-  } | null>(null);
+  const [aiExplanation, setAiExplanation] = useState<string>("");
+  const [riskScore, setRiskScore] = useState(0);
+  const [riskLevel, setRiskLevel] = useState<'LOW' | 'MODERATE' | 'HIGH'>('LOW');
   const [loading, setLoading] = useState(true);
   const { fitView } = useReactFlow();
   
@@ -216,31 +348,64 @@ function GraphInner({
 
     const ids = [...new Set([mappedVillageNode.id, ...connectedIds])];
 
-    const getType = (n: Node) => String(n.data?.type ?? "village");
-    const getLabel = (n: Node) => String(n.data?.label ?? "");
+    // Collect and categorize connected nodes
+    const alerts: string[] = [];
+    const drivers: string[] = [];
+    const interventions: string[] = [];
+    const recommendations: string[] = [];
+    const forecast: string[] = [];
+    let status = "";
+    let confidence = "";
 
-    const connectedNodes = nodes.filter(n => ids.includes(n.id));
-    const context = {
-      village: getLabel(mappedVillageNode),
-      drivers: connectedNodes.filter(n => getType(n) === 'driver').map(getLabel),
-      alerts: connectedNodes.filter(n => getType(n) === 'alert').map(getLabel),
-      forecasts: connectedNodes.filter(n => {
-        const t = getType(n);
-        return t === 'forecast' || t.startsWith('forecast_');
-      }).map(getLabel),
-      interventions: connectedNodes.filter(n => getType(n) === 'intervention').map(getLabel),
-      recommendations: connectedNodes.filter(n => getType(n) === 'recommendation').map(getLabel),
-      statuses: connectedNodes.filter(n => getType(n) === 'status').map(getLabel),
-    };
+    rawNodes.forEach((node) => {
+      if (!ids.includes(node.id)) return;
+      switch (node.type) {
+        case "alert": alerts.push(node.label); break;
+        case "driver": drivers.push(node.label); break;
+        case "intervention": interventions.push(node.label); break;
+        case "recommendation": recommendations.push(node.label); break;
+        case "forecast": forecast.push(node.label); break;
+        case "status": status = node.label; break;
+        case "forecast_confidence": confidence = node.label; break;
+      }
+    });
 
-    setCopilotContext(context);
+    // Phase 1: Intent Detection & Risk Scoring
+    const intent = detectIntent(copilotQuery);
+    const calculatedScore = Math.min(100, 
+      (alerts.length * 25) + 
+      (drivers.length * 10) + 
+      (alerts.some(a => a.toLowerCase().includes('critical')) ? 30 : 0) +
+      (alerts.some(a => a.toLowerCase().includes('high')) ? 15 : 0)
+    );
+    const level = calculatedScore < 30 ? 'LOW' : calculatedScore < 70 ? 'MODERATE' : 'HIGH';
+
+    // Update UI immediately for instant feedback
     setHighlightedNodeIds(ids);
     setSelectedNode(mappedVillageNode);
+    setAiExplanation("Analyzing risk factors and generating insights...");
+    setRiskScore(calculatedScore);
+    setRiskLevel(level);
 
-    // FIX 2: Map the string IDs to objects with an 'id' property for fitView
+    // Phase 1: Call AI (with automatic fallback)
+    fetchCopilotResponse({
+      village: villageNode.label,
+      alerts,
+      drivers,
+      interventions,
+      recommendations,
+      forecast,
+      status,
+      confidence,
+      intent
+    }).then((response) => {
+      setAiExplanation(response);
+    });
+
+    // Zoom to focused nodes
     setTimeout(() => {
       fitView({
-        nodes: ids.map((id) => ({ id })), 
+        nodes: ids.map((id) => ({ id })),
         padding: 0.4,
         duration: 800,
       });
@@ -276,7 +441,7 @@ function GraphInner({
         proOptions={{ hideAttribution: true }}
         onNodeClick={(_, node) => {
           setSelectedNode(node);
-          setCopilotContext(null); 
+          setAiExplanation("");
         }}
       >
         <Background variant={BackgroundVariant.Dots} color="#1e293b" gap={24} size={1.5} />
@@ -293,24 +458,24 @@ function GraphInner({
           <div className="flex justify-between items-start gap-3 mb-4">
             <div className="space-y-1 flex-1">
               <h3 className="font-bold text-white text-lg flex items-center gap-2">
-                {copilotContext ? (
+                {aiExplanation ? (
                   <>
                     <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
-                    AI Risk Explanation
+                    AI Assessment
                   </>
                 ) : (
                   "Node Details"
                 )}
               </h3>
               <p className="text-slate-400 text-xs">
-                {copilotContext ? "Insights generated from knowledge graph" : "Selected from knowledge graph"}
+                {aiExplanation ? "Insights generated from knowledge graph" : "Selected from knowledge graph"}
               </p>
             </div>
             <button
               onClick={() => {
                 setSelectedNode(null);
                 setHighlightedNodeIds([]);
-                setCopilotContext(null);
+                setAiExplanation("");
               }}
               className="text-slate-500 hover:text-white transition-colors hover:bg-slate-800/50 w-8 h-8 rounded-lg flex items-center justify-center"
               title="Close"
@@ -321,111 +486,33 @@ function GraphInner({
 
           <div className="h-px bg-gradient-to-r from-slate-700 via-slate-700/50 to-transparent mb-4" />
 
-          {copilotContext ? (
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <p className="text-slate-400 text-[10px] uppercase tracking-widest font-semibold">Village</p>
-                <p className="text-white font-semibold text-base break-words leading-relaxed flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.8)]" />
-                  {copilotContext.village}
-                </p>
+          {aiExplanation ? (
+            <div className="space-y-4">
+              {/* Phase 1: Risk Score Badge */}
+              <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-800 flex items-center justify-between">
+                <div>
+                  <p className="text-slate-400 text-[10px] uppercase tracking-widest font-semibold mb-1">Risk Level</p>
+                  <p className={`text-2xl font-black tracking-tight ${
+                    riskLevel === 'LOW' ? 'text-emerald-400' : 
+                    riskLevel === 'MODERATE' ? 'text-amber-400' : 'text-red-400'
+                  }`}>
+                    {riskLevel} RISK
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-slate-400 text-[10px] uppercase tracking-widest font-semibold mb-1">Score</p>
+                  <p className="text-white text-2xl font-black tracking-tight">
+                    {riskScore}<span className="text-slate-500 text-sm font-medium">/100</span>
+                  </p>
+                </div>
               </div>
 
-              {copilotContext.drivers.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-slate-400 text-[10px] uppercase tracking-widest font-semibold flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
-                    Risk Drivers
-                  </p>
-                  <ul className="space-y-1.5">
-                    {copilotContext.drivers.map((d, i) => (
-                      <li key={i} className="text-slate-300 text-sm flex items-start gap-2">
-                        <span className="text-amber-400 mt-1.5 text-xs">▸</span> {d}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {copilotContext.alerts.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-slate-400 text-[10px] uppercase tracking-widest font-semibold flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-red-400 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                    Active Alerts
-                  </p>
-                  <ul className="space-y-1.5">
-                    {copilotContext.alerts.map((a, i) => (
-                      <li key={i} className="text-slate-300 text-sm flex items-start gap-2">
-                        <span className="text-red-400 mt-1.5 text-xs">▸</span> {a}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {copilotContext.forecasts.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-slate-400 text-[10px] uppercase tracking-widest font-semibold flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-orange-400 shadow-[0_0_8px_rgba(249,115,22,0.8)]" />
-                    Forecast
-                  </p>
-                  <ul className="space-y-1.5">
-                    {copilotContext.forecasts.map((f, i) => (
-                      <li key={i} className="text-slate-300 text-sm flex items-start gap-2">
-                        <span className="text-orange-400 mt-1.5 text-xs">▸</span> {f}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {copilotContext.interventions.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-slate-400 text-[10px] uppercase tracking-widest font-semibold flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]" />
-                    Interventions
-                  </p>
-                  <ul className="space-y-1.5">
-                    {copilotContext.interventions.map((int, i) => (
-                      <li key={i} className="text-slate-300 text-sm flex items-start gap-2">
-                        <span className="text-indigo-400 mt-1.5 text-xs">▸</span> {int}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {copilotContext.recommendations.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-slate-400 text-[10px] uppercase tracking-widest font-semibold flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-violet-400 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
-                    Recommendations
-                  </p>
-                  <ul className="space-y-1.5">
-                    {copilotContext.recommendations.map((r, i) => (
-                      <li key={i} className="text-slate-300 text-sm flex items-start gap-2">
-                        <span className="text-violet-400 mt-1.5 text-xs">▸</span> {r}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {copilotContext.statuses.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-slate-400 text-[10px] uppercase tracking-widest font-semibold flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                    Status
-                  </p>
-                  <ul className="space-y-1.5">
-                    {copilotContext.statuses.map((s, i) => (
-                      <li key={i} className="text-slate-300 text-sm flex items-start gap-2">
-                        <span className="text-emerald-400 mt-1.5 text-xs">▸</span> {s}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {/* AI Narrative */}
+              <div className="bg-slate-900/40 rounded-xl p-4 border border-slate-800">
+                <p className="text-slate-300 text-sm leading-7 whitespace-pre-line">
+                  {aiExplanation}
+                </p>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -454,7 +541,7 @@ function GraphInner({
           )}
 
           <div className="pt-4 mt-4 border-t border-slate-700/30 text-slate-500 text-xs">
-            {copilotContext ? "Ask another question or click a node" : "Click another node or press Esc to deselect"}
+            {aiExplanation ? "Ask another question or click a node" : "Click another node or press Esc to deselect"}
           </div>
         </div>
       )}
