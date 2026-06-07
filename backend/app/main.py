@@ -152,7 +152,8 @@ app.include_router(
 )
 app.include_router(
     alert_router,
-    prefix="/api"
+    prefix="/api",
+    tags=["Alerts"]
 )
 @app.get("/")
 def root():

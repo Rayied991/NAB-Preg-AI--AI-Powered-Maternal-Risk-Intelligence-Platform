@@ -13,7 +13,7 @@ from backend.app.services.ocr_report_storage import (
 from backend.app.services.village_analytics_storage import (
     update_village_analytics
 )
-from backend.app.core.alert_storage import create_alert
+from backend.app.core.patient_alert_storage import create_alert
 import os
 import requests
 from dotenv import load_dotenv

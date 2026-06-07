@@ -20,10 +20,10 @@ def forecast_agent(state):
     if current_status == "WATCHLIST":
         future_status = "HOTSPOT" if randint(0, 100) > 60 else "WATCHLIST"
     elif current_status == "STABLE":
-        future_status = "WATCHLIST" if randint(0, 100) > 70 else "STABLE"
+        future_status = "WATCHLIST" if randint(0, 100) > 60 else "STABLE"
     elif current_status == "HOTSPOT":
         future_status = "HOTSPOT"
-
+# if randint(0, 100) > 60 else "STABLE"
     state["forecast"] = {
         "current_status": current_status,
         "forecast_status": future_status,

@@ -1,3 +1,4 @@
+
 from fastapi import APIRouter
 import requests
 import os
@@ -12,8 +13,8 @@ SUPABASE_KEY = os.getenv(
     "NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY"
 )
 
-@router.get("/alerts")
-async def get_alerts():
+@router.get("/ai-alerts")
+async def get_ai_alerts():
 
     headers = {
         "apikey": SUPABASE_KEY,
@@ -22,7 +23,9 @@ async def get_alerts():
     }
 
     response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/ai_alerts?select=*",
+        f"{SUPABASE_URL}/rest/v1/ai_alerts"
+        "?select=*"
+        "&order=created_at.desc",
         headers=headers,
     )
 
