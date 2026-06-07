@@ -51,6 +51,9 @@ from backend.app.api.routes.ai_interventions import (
 from backend.app.api.routes import rag
 from backend.app.api.routes.ocr import router as ocr_router
 from backend.app.api.chat_history import router as chat_router
+from backend.app.api.alerts import (
+    router as alert_router
+) 
 
 app = FastAPI(
     title="NAB Preg AI API"
@@ -147,7 +150,10 @@ app.include_router(
     village_relationships.router,
     prefix="/api"
 )
-
+app.include_router(
+    alert_router,
+    prefix="/api"
+)
 @app.get("/")
 def root():
     return {

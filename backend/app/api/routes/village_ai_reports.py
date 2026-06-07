@@ -23,6 +23,10 @@ from backend.app.langgraph.agents.intervention_agent import (
     intervention_agent,
 )
 
+from backend.app.langgraph.agents.alert_agent import (
+    alert_agent,
+)
+
 router = APIRouter()
 
 SUPABASE_URL = os.getenv(
@@ -53,9 +57,11 @@ async def get_village_ai_reports():
 
     for village in villages:
 
+        village_name = village["village_name"]
+
         # Clear old graph relationships
         clear_village_relationships(
-            village["village_name"]
+            village_name
         )
 
         # Run LangGraph
@@ -74,48 +80,47 @@ async def get_village_ai_reports():
             summary_text
         )
 
-        # Build state
+        # Build state for agents
         state = {
             "village_data": village,
             "summary_json": summary,
         }
 
-        # Run Forecast Agent
-        state = forecast_agent(
-            state
-        )
+        # Forecast Agent
+        state = forecast_agent(state)
 
-        # Run Intervention Agent
-        intervention_agent(
-            state
-        )
+        # Intervention Agent
+        intervention_agent(state)
+
+        # Alert Agent
+        alert_agent(state)
 
         forecast = state["forecast"]
 
         # STATUS
         save_relationship(
-            village["village_name"],
+            village_name,
             "STATUS",
             summary["status"],
         )
 
         # FORECAST TEXT
         save_relationship(
-            village["village_name"],
+            village_name,
             "FORECAST",
             summary["forecast"],
         )
 
         # FORECAST STATUS
         save_relationship(
-            village["village_name"],
+            village_name,
             "FORECAST_STATUS",
             forecast["forecast_status"],
         )
 
         # FORECAST CONFIDENCE
         save_relationship(
-            village["village_name"],
+            village_name,
             "FORECAST_CONFIDENCE",
             str(
                 forecast["confidence"]
@@ -124,7 +129,7 @@ async def get_village_ai_reports():
 
         # FORECAST DAYS
         save_relationship(
-            village["village_name"],
+            village_name,
             "FORECAST_DAYS",
             str(
                 forecast["forecast_days"]
@@ -135,7 +140,7 @@ async def get_village_ai_reports():
         for driver in summary["drivers"]:
 
             save_relationship(
-                village["village_name"],
+                village_name,
                 "DRIVER",
                 driver,
             )
@@ -146,20 +151,20 @@ async def get_village_ai_reports():
         ]:
 
             save_relationship(
-                village["village_name"],
+                village_name,
                 "RECOMMENDATION",
                 recommendation,
             )
 
         # Refresh AI Report
         clear_village_ai_report(
-            village["village_name"]
+            village_name
         )
 
         save_village_ai_report({
 
             "village_name":
-                village["village_name"],
+                village_name,
 
             "status":
                 summary["status"],
@@ -169,6 +174,15 @@ async def get_village_ai_reports():
 
             "forecast":
                 summary["forecast"],
+
+            "forecast_status":
+                forecast["forecast_status"],
+
+            "forecast_confidence":
+                forecast["confidence"],
+
+            "forecast_days":
+                forecast["forecast_days"],
 
             "key_drivers":
                 json.dumps(
@@ -187,7 +201,7 @@ async def get_village_ai_reports():
         reports.append({
 
             "village":
-                village["village_name"],
+                village_name,
 
             "status":
                 summary["status"],
