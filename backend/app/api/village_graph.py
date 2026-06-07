@@ -7,6 +7,7 @@ router = APIRouter()
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY")
 
+
 @router.get("/village-graph")
 async def get_village_graph():
     headers = {
@@ -19,26 +20,26 @@ async def get_village_graph():
         f"{SUPABASE_URL}/rest/v1/village_relationships?select=*",
         headers=headers,
     )
-    relationships = response.json()
-    
+    relationships = response.json() if response.ok else []
+
     # Fetch AI interventions
     intervention_response = requests.get(
         f"{SUPABASE_URL}/rest/v1/ai_interventions?select=*",
         headers=headers,
     )
-    interventions = intervention_response.json()
+    interventions = intervention_response.json() if intervention_response.ok else []
 
     nodes = []
     edges = []
     node_set = set()
 
-    # Build nodes and edges from village relationships
+    # Build nodes and edges from relationships
     for rel in relationships:
         village = rel["village_name"]
         target = rel["relationship_value"]
         rel_type = rel["relationship_type"]
 
-        # Add village node
+        # Village node
         if village not in node_set:
             nodes.append({
                 "id": village,
@@ -47,7 +48,7 @@ async def get_village_graph():
             })
             node_set.add(village)
 
-        # Add relationship node
+        # Relationship node
         if target not in node_set:
             nodes.append({
                 "id": target,
@@ -56,7 +57,6 @@ async def get_village_graph():
             })
             node_set.add(target)
 
-        # Add edge
         edges.append({
             "id": f"{village}-{rel_type}-{target}",
             "source": village,
@@ -64,24 +64,27 @@ async def get_village_graph():
             "label": rel_type
         })
 
-    # Add nodes and edges for interventions
+    # Build nodes and edges for interventions
     for intervention in interventions:
-        village = intervention["village_name"]
-        target = intervention["message"]
+        village = intervention.get("village_name")
+        message = intervention.get("message")
 
-        # Skip if already added
-        if target not in node_set:
+        if not village or not message:
+            continue
+
+        # Intervention node
+        if message not in node_set:
             nodes.append({
-                "id": target,
-                "label": target,
+                "id": message,
+                "label": message,
                 "type": "intervention"
             })
-            node_set.add(target)
+            node_set.add(message)
 
         edges.append({
-            "id": f"{village}-INTERVENTION-{target}",
+            "id": f"{village}-INTERVENTION-{message}",
             "source": village,
-            "target": target,
+            "target": message,
             "label": "INTERVENTION"
         })
 
