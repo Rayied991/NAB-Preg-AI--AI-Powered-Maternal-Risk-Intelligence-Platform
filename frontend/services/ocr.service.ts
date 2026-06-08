@@ -6,6 +6,7 @@
  */
 
 import Tesseract from 'tesseract.js';
+import { z } from 'zod';
 
 export interface OCRExtractedData {
     hemoglobin: string | null;
@@ -14,6 +15,14 @@ export interface OCRExtractedData {
     heart_rate: string | null;
     raw_text: string;
 }
+
+const ocrDataSchema = z.object({
+    hemoglobin: z.string().nullable(),
+    blood_pressure: z.string().nullable(),
+    blood_sugar: z.string().nullable(),
+    heart_rate: z.string().nullable(),
+    raw_text: z.string().nullable().transform(val => val || ""),
+});
 
 /**
  * Converts an Image File to a Base64 string
@@ -253,8 +262,9 @@ export async function performOCR(file: File): Promise<OCRExtractedData> {
 
             const data = await response.json();
 
-            // The Edge function should return the structured JSON data
-            return data as OCRExtractedData;
+            // Validate and return the structured JSON data via Zod
+            const validatedData = ocrDataSchema.parse(data);
+            return validatedData as OCRExtractedData;
         } catch (mistralError) {
             console.warn('Mistral Edge Function Error. Falling back to local OCR.', mistralError);
             return await performTesseractFallback(base64Images);

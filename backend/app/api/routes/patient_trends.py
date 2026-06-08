@@ -16,8 +16,14 @@ SUPABASE_KEY = os.getenv(
 )
 
 
+import re
+
 def safe_float(value: str):
     try:
+        if isinstance(value, str):
+            match = re.search(r"[-+]?\d*\.\d+|\d+", str(value))
+            if match:
+                return float(match.group())
         return float(value)
     except:
         return None

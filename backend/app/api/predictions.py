@@ -29,10 +29,17 @@ SUPABASE_KEY = os.getenv(
 )
 router = APIRouter()
 
+class ParsedOCRJson(BaseModel):
+    hemoglobin: str | None = None
+    blood_pressure: str | None = None
+    blood_sugar: str | None = None
+    heart_rate: str | None = None
+    raw_text: str | None = None
+
 class OCRReportRequest(BaseModel):
     patient_id: str
     extracted_text: str
-    parsed_json: dict
+    parsed_json: ParsedOCRJson
     
 class PredictionRequest(BaseModel):
     patient_id: str
@@ -117,7 +124,7 @@ async def save_report(
     save_ocr_report(
         payload.patient_id,
         payload.extracted_text,
-        payload.parsed_json,
+        payload.parsed_json.dict(),
     )
 
     return {

@@ -8,6 +8,38 @@ from backend.app.core.supabase import supabase
 
 router = APIRouter()
 
+def sanitize_ocr_field(field_name: str, value: any) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, str) and value.strip().lower() in ["null", "none", "", "n/a", "unknown"]:
+        return None
+    
+    # If the AI hallucinates an object/list instead of a string value, we try to convert it or log it
+    if isinstance(value, dict):
+        if field_name == "blood_pressure":
+            sys = value.get("systolic", value.get("sys"))
+            dia = value.get("diastolic", value.get("dia"))
+            if sys is not None and dia is not None:
+                return f"{sys}/{dia}"
+            if "value" in value:
+                return str(value["value"]).strip()
+        
+        print(f"WARNING: Mistral returned unparseable format for specific field '{field_name}'. Expected string/number, got {type(value).__name__}.")
+        return None
+
+    if isinstance(value, list):
+        print(f"WARNING: Mistral returned unparseable format for specific field '{field_name}'. Expected string/number, got {type(value).__name__}.")
+        return None
+        
+    return str(value).strip()
+
+class OCRResultData(BaseModel):
+    hemoglobin: str | None = None
+    blood_pressure: str | None = None
+    blood_sugar: str | None = None
+    heart_rate: str | None = None
+    raw_text: str | None = None
+
 def call_mistral_api_direct(api_key: str, images: list[str]) -> dict:
     url = "https://api.mistral.ai/v1/chat/completions"
     headers = {
@@ -44,7 +76,24 @@ def call_mistral_api_direct(api_key: str, images: list[str]) -> dict:
     response.raise_for_status()
     
     result = response.json()
-    return json.loads(result["choices"][0]["message"]["content"])
+    try:
+        raw_data = json.loads(result["choices"][0]["message"]["content"])
+        if not isinstance(raw_data, dict):
+            raw_data = {}
+    except Exception as e:
+        print(f"WARNING: Failed to parse Mistral JSON output entirely: {e}")
+        raw_data = {}
+
+    sanitized_data = {
+        "hemoglobin": sanitize_ocr_field("hemoglobin", raw_data.get("hemoglobin")),
+        "blood_pressure": sanitize_ocr_field("blood_pressure", raw_data.get("blood_pressure")),
+        "blood_sugar": sanitize_ocr_field("blood_sugar", raw_data.get("blood_sugar")),
+        "heart_rate": sanitize_ocr_field("heart_rate", raw_data.get("heart_rate")),
+        "raw_text": sanitize_ocr_field("raw_text", raw_data.get("raw_text")),
+    }
+    
+    validated_data = OCRResultData(**sanitized_data)
+    return validated_data.dict()
 
 class MistralOCRRequest(BaseModel):
     images: List[str]
