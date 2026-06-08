@@ -77,16 +77,16 @@ export default function GraphPage() {
       {/* Main grid */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 flex-1">
         {/* Knowledge Graph panel */}
-        <div className="xl:col-span-3 bg-gradient-to-br from-slate-900/20 to-slate-950/40 border border-slate-800/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm flex flex-col">
+        <div className="xl:col-span-3 bg-white dark:bg-transparent dark:bg-gradient-to-br dark:from-slate-900/20 dark:to-slate-950/40 border border-slate-200 dark:border-slate-800/50 rounded-2xl overflow-hidden shadow-sm dark:shadow-2xl backdrop-blur-sm flex flex-col transition-colors duration-300">
           {/* Graph Header */}
-          <div className="px-6 py-4 border-b border-slate-800/40 flex items-center justify-between bg-gradient-to-r from-slate-900/60 to-transparent">
+          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800/40 flex items-center justify-between bg-white/50 dark:bg-transparent dark:bg-gradient-to-r dark:from-slate-900/60 dark:to-transparent">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="absolute inset-0 bg-sky-500/20 rounded-lg blur" />
                 <div className="w-3 h-3 rounded-lg bg-sky-400 shadow-[0_0_12px_rgba(56,189,248,0.8)]" />
               </div>
               <div>
-                <span className="text-sm font-semibold text-white">Knowledge Graph</span>
+                <span className="text-sm font-semibold text-slate-800 dark:text-white">Knowledge Graph</span>
                 <p className="text-[11px] text-slate-500 mt-0.5">Interactive relationship explorer</p>
               </div>
             </div>
