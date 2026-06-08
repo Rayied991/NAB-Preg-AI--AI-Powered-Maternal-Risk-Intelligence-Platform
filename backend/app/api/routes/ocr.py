@@ -104,7 +104,8 @@ async def invoke_mistral_ocr(request: MistralOCRRequest):
     fallback_keys = [
         os.getenv("MISTRAL_API_KEY"),
         os.getenv("MISTRAL_NABPREG_KEY"),
-        os.getenv("MISTRAL2_API_KEY")
+        os.getenv("MISTRAL2_API_KEY"),
+        os.getenv("MISTRAL3_API_KEY")
     ]
     
     last_error = None

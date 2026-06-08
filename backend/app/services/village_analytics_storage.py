@@ -31,17 +31,9 @@ def get_patient_village(patient_id):
         return None
 
     return data[0]["village"]
-def update_village_analytics(
-    patient_id,
-    overall_risk
-):
-
-    village = get_patient_village(
-        patient_id
-    )
-
+def ensure_village_exists(village: str):
     if not village:
-        return
+        return None
 
     headers = {
         "apikey": SUPABASE_KEY,
@@ -58,7 +50,6 @@ def update_village_analytics(
     rows = response.json()
 
     if not rows:
-
         create_payload = {
             "village_name": village,
             "high_risk_cases": 0,
@@ -79,10 +70,28 @@ def update_village_analytics(
             f"?village_name=eq.{village}",
             headers=headers,
         )
+        rows = response.json()
+        
+    return rows[0] if rows else None
 
-    rows = response.json()
+def update_village_analytics(
+    patient_id,
+    overall_risk
+):
 
-    row = rows[0]
+    village = get_patient_village(
+        patient_id
+    )
+
+    row = ensure_village_exists(village)
+    if not row:
+        return
+
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json",
+    }
     
     high_risk = row["high_risk_cases"]
     medium_risk = row["medium_risk_cases"]

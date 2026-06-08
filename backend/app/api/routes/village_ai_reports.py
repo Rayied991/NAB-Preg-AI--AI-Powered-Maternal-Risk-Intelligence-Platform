@@ -27,29 +27,35 @@ SUPABASE_KEY = os.getenv("NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY")
 @router.get("/village-ai-reports")
 async def get_village_ai_reports():
     
-    # ── PRIORITY 1: CHECK CACHE FIRST ──
-    cached_reports = get_all_village_ai_reports()
-    if cached_reports:
-        print("✅ Returning cached AI reports (Instant load)")
-        return cached_reports
-
-    # ── IF NO CACHE, GENERATE REPORTS ──
-    print("⚠️ Cache miss. Generating new AI reports...")
-    
     headers = {
         "apikey": SUPABASE_KEY,
         "Authorization": f"Bearer {SUPABASE_KEY}",
     }
-    print("Checking AI report cache...")
+
+    # Fetch all villages currently in analytics tracking
     response = requests.get(
         f"{SUPABASE_URL}/rest/v1/village_analytics?select=*",
         headers=headers,
     )
+    villages = response.json() if response.ok else []
 
-    villages = response.json()
-    reports = []
+    # Check cache
+    cached_reports = get_all_village_ai_reports() or []
+    cached_village_names = {r.get("village", r.get("village_name")) for r in cached_reports}
+    
+    # Identify which villages don't have an AI report yet
+    missing_villages = [v for v in villages if v["village_name"] not in cached_village_names]
 
-    for village in villages:
+    if not missing_villages and cached_reports:
+        print("✅ Returning cached AI reports (Instant load)")
+        return cached_reports
+
+    print(f"⚠️ Cache miss for {len(missing_villages)} villages. Generating new AI reports...")
+    
+    # We will return the existing cached reports + the new ones
+    reports = list(cached_reports)
+
+    for village in missing_villages:
         village_name = village["village_name"]
 
         # Clear old graph relationships

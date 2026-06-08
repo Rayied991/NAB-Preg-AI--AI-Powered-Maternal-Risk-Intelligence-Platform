@@ -4,7 +4,8 @@ import os
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from backend.app.services.village_analytics_storage import (
-    get_patient_village
+    get_patient_village,
+    ensure_village_exists
 )
 from backend.app.services.geocoder import(
     get_coordinates
@@ -106,6 +107,9 @@ async def create_patient(
         json=patient_data
     )
 
+    # Initialize village in analytics tracking
+    ensure_village_exists(payload.village)
+
     return response.json()    
 
 @router.patch("/patients/{patient_id}")
@@ -140,12 +144,17 @@ async def update_patient(
                     # Clear coordinates so it doesn't show in the old location
                     update_data["latitude"] = None
                     update_data["longitude"] = None
+                    
+                # Initialize new village in analytics tracking
+                ensure_village_exists(update_data["village"])
         else:
             # Fallback if we couldn't fetch current
             coords = get_coordinates(update_data["village"])
             if coords:
                 update_data["latitude"] = coords["latitude"]
                 update_data["longitude"] = coords["longitude"]
+                
+            ensure_village_exists(update_data["village"])
 
     response = requests.patch(
         f"{SUPABASE_URL}/rest/v1/patients?id=eq.{patient_id}",
