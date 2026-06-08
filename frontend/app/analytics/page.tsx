@@ -33,9 +33,9 @@ export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<any>(null);
   const [alerts, setAlerts] = useState<any[]>([]);
   const [hotspots, setHotspots] =
-  useState<any[]>([]);
+    useState<any[]>([]);
   const [aiReports, setAiReports] =
-  useState<any[]>([]);
+    useState<any[]>([]);
   useEffect(() => {
     const loadAnalytics = async () => {
       try {
@@ -54,79 +54,78 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
 
-  const loadReports = async () => {
+    const loadReports = async () => {
 
-    try {
+      try {
 
-      const data =
-        await fetchVillageAIReports();
+        const data =
+          await fetchVillageAIReports();
 
-      console.log(
-        "AI REPORTS",
-        data
-      );
+        console.log(
+          "AI REPORTS",
+          data
+        );
 
-      const normalized = data.map(
-  (report: any) => ({
-    village:
-      report.village || "Unknown",
+        const normalized = data.map((report: any) => {
+        let parsedDrivers = report.drivers || report.key_drivers || "";
+        if (typeof parsedDrivers === 'string' && parsedDrivers.startsWith('[')) {
+          try { parsedDrivers = JSON.parse(parsedDrivers); } catch(e) {}
+        }
+        
+        let parsedRecs = report.recommendation || report.recommendations || "";
+        if (typeof parsedRecs === 'string' && parsedRecs.startsWith('[')) {
+          try { parsedRecs = JSON.parse(parsedRecs); } catch(e) {}
+        }
 
-    status:
-      report.status || "STABLE",
+        return {
+          village: report.village || report.village_name || "Unknown",
+          status: report.status || "STABLE",
+          confidence: report.confidence || 0,
+          forecast: report.forecast || "",
+          drivers: parsedDrivers,
+          recommendation: parsedRecs,
+        };
+      });
 
-    confidence:
-      report.confidence || 0,
+        setAiReports(normalized);
 
-    forecast:
-      report.forecast || "",
+      } catch (error) {
 
-    drivers:
-      report.drivers || "",
+        console.error(error);
 
-    recommendation:
-      report.recommendation || "",
-  })
-);
+      }
+    };
 
-setAiReports(normalized);
+    loadReports();
 
-    } catch (error) {
-
-      console.error(error);
-
-    }
-  };
-
-  loadReports();
-
-}, []);
+  }, []);
 
   useEffect(() => {
 
-  const loadHotspots = async () => {
+    const loadHotspots = async () => {
 
-    try {
+      try {
 
-      const data =
-        await fetchVillageHotspots();
+        const data =
+          await fetchVillageHotspots();
 
-      console.log(
-        "HOTSPOTS",
-        data
-      );
+        console.log(
+          "HOTSPOTS",
+          data
+        );
 
-      setHotspots(data);
+        setHotspots(data);
 
-    } catch (error) {
+      } catch (error) {
 
-      console.error(error);
+        console.error(error);
 
-    }
-  };
+      }
+    };
 
-  loadHotspots();
+    loadHotspots();
 
-}, []);
+  }, []);
 
   useEffect(() => {
     const loadVillageAnalytics = async () => {
@@ -167,7 +166,7 @@ setAiReports(normalized);
       </div>
 
       {/* ── Top Charts Row ── */}
-       <div className="grid grid-cols-1 gap-5">
+      <div className="grid grid-cols-1 gap-5">
 
         {/* Risk Pie Chart */}
         <div className="bg-white dark:bg-[#131720] border border-gray-200 dark:border-[#1e2535] rounded-2xl p-6 shadow-sm transition-colors duration-300">
@@ -239,92 +238,92 @@ setAiReports(normalized);
             Village Risk Heatmap
           </p>
 
-{/* Hotspots */}
+          {/* Hotspots */}
 
-<div className="mt-6 bg-white dark:bg-[#131720]
+          <div className="mt-6 bg-white dark:bg-[#131720]
 border border-gray-200 dark:border-[#1e2535]
 rounded-2xl p-6 shadow-sm">
 
-  <h2 className="text-lg font-semibold mb-4">
-    AI Village Hotspots
-  </h2>
+            <h2 className="text-lg font-semibold mb-4">
+              AI Village Hotspots
+            </h2>
 
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-    {hotspots.map((item) => (
+              {hotspots.map((item) => (
 
-      <VillageHotspotCard
-        key={item.village}
-        village={item.village}
-        status={item.status}
-        high_risk_cases={item.high_risk_cases}
-        medium_risk_cases={item.medium_risk_cases}
-      />
+                <VillageHotspotCard
+                  key={item.village}
+                  village={item.village}
+                  status={item.status}
+                  high_risk_cases={item.high_risk_cases}
+                  medium_risk_cases={item.medium_risk_cases}
+                />
 
-    ))}
+              ))}
 
-  </div>
+            </div>
 
-</div>
+          </div>
 
-<div
-  className="
+          <div
+            className="
   mt-6
   bg-white dark:bg-[#131720]
   border border-gray-200 dark:border-[#1e2535]
   rounded-2xl
   p-6"
->
+          >
 
-  <h2
-    className="
+            <h2
+              className="
     text-lg
     font-semibold
     mb-4"
-  >
-    AI Village Intelligence
-  </h2>
+            >
+              AI Village Intelligence
+            </h2>
 
-  <div
-    className="
+            <div
+              className="
     grid
     grid-cols-1
     md:grid-cols-2
     gap-4"
-  >
+            >
 
-    {aiReports.map((report,index) => (
+              {aiReports.map((report, index) => (
 
-      <VillageAIReportCard
-  key={`${report.village}-${index}`}
-  village={report.village}
-  status={report.status}
-  confidence={report.confidence}
-  forecast={report.forecast}
-  drivers={report.drivers}
-  recommendation={report.recommendation}
-/>
+                <VillageAIReportCard
+                  key={`${report.village}-${index}`}
+                  village={report.village}
+                  status={report.status}
+                  confidence={report.confidence}
+                  forecast={report.forecast}
+                  drivers={report.drivers}
+                  recommendation={report.recommendation}
+                />
 
-    ))}
+              ))}
 
-  </div>
+            </div>
 
-</div>
-{/* Heatmap */}
+          </div>
+          {/* Heatmap */}
 
-<div className="mt-6 bg-white dark:bg-[#131720]
+          <div className="mt-6 bg-white dark:bg-[#131720]
 border border-gray-200 dark:border-[#1e2535]
 rounded-2xl p-6 shadow-sm">
 
-  <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] mb-4">
-    Village Risk Heatmap
-  </p>
+            <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] mb-4">
+              Village Risk Heatmap
+            </p>
 
-  <VillageHeatmap />
+            <VillageHeatmap />
 
-</div>
+          </div>
 
-</div>
+        </div>
       </div>
 
     </DashboardLayout>

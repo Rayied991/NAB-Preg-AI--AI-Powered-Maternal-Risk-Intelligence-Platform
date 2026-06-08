@@ -5,25 +5,7 @@ import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
-const MapContainer = dynamic(
-  () => import("react-leaflet").then(m => m.MapContainer),
-  { ssr: false }
-);
-
-const TileLayer = dynamic(
-  () => import("react-leaflet").then(m => m.TileLayer),
-  { ssr: false }
-);
-
-const CircleMarker = dynamic(
-  () => import("react-leaflet").then(m => m.CircleMarker),
-  { ssr: false }
-);
-
-const Popup = dynamic(
-  () => import("react-leaflet").then(m => m.Popup),
-  { ssr: false }
-);
+import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 
 import { fetchHeatmap } from "@/services/heatmap.service";
 
