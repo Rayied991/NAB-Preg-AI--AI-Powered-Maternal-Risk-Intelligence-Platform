@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-import requests
 import os
+import requests
 
 router = APIRouter()
 
@@ -8,65 +8,85 @@ SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY")
 
 @router.get("/village-graph")
-async def get_village_graph():
+def get_village_graph():
     headers = {
         "apikey": SUPABASE_KEY,
         "Authorization": f"Bearer {SUPABASE_KEY}",
     }
 
-    # Fetch village relationships
-    response = requests.get(
+    # 1. Fetch Relationships
+    rel_response = requests.get(
         f"{SUPABASE_URL}/rest/v1/village_relationships?select=*",
         headers=headers,
     )
-    relationships = response.json()
+    relationships = rel_response.json() if rel_response.ok else []
 
-    # Fetch AI interventions
-    intervention_response = requests.get(
+    # 2. Fetch Interventions
+    int_response = requests.get(
         f"{SUPABASE_URL}/rest/v1/ai_interventions?select=*",
         headers=headers,
     )
-    interventions = intervention_response.json()
+    interventions = int_response.json() if int_response.ok else []
 
-    # Fetch AI alerts
+    # 3. Fetch Alerts
     alert_response = requests.get(
         f"{SUPABASE_URL}/rest/v1/ai_alerts?select=*",
         headers=headers,
     )
-    alerts = alert_response.json()
+    alerts = alert_response.json() if alert_response.ok else []
 
     nodes = []
     edges = []
     node_set = set()
 
-    # Build nodes and edges from village relationships
+    # ── Process Relationships (FIXED) ──
     for rel in relationships:
         village = rel["village_name"]
-        target = rel["relationship_value"]
-        rel_type = rel["relationship_type"]
+        rel_type = rel.get("relationship_type", "UNKNOWN")
+        
+        # FIX 1: Use the correct column name from Supabase
+        target = rel.get("relationship_value", "Unknown")
 
         if village not in node_set:
             nodes.append({"id": village, "label": village, "type": "village"})
             node_set.add(village)
 
+        # FIX 2: Use 'target' directly as the node ID for a cleaner graph
         if target not in node_set:
-            nodes.append({"id": target, "label": target, "type": rel_type.lower()})
+            nodes.append({
+                "id": target,
+                "label": target,
+                "type": rel_type.lower()
+            })
             node_set.add(target)
 
         edges.append({
             "id": f"{village}-{rel_type}-{target}",
             "source": village,
             "target": target,
-            "label": rel_type,
+            "label": rel_type
         })
 
-    # Add nodes and edges for interventions
+    # ── Process Interventions ──
     for intervention in interventions:
         village = intervention["village_name"]
         target = intervention["message"]
 
+        # Ensure village node exists
+        if village not in node_set:
+            nodes.append({
+                "id": village,
+                "label": village,
+                "type": "village"
+            })
+            node_set.add(village)
+
         if target not in node_set:
-            nodes.append({"id": target, "label": target, "type": "intervention"})
+            nodes.append({
+                "id": target,
+                "label": target,
+                "type": "intervention"
+            })
             node_set.add(target)
 
         edges.append({
@@ -76,26 +96,45 @@ async def get_village_graph():
             "label": "INTERVENTION",
         })
 
-    # Add nodes and edges for alerts
+    # ── Process Alerts ──
     for alert in alerts:
         village = alert["village_name"]
-        alert_id = f"alert__{alert['id']}"
-        target_label = f"{alert['severity']}: {alert['message']}"
+        alert_id = alert.get("id") or alert.get("alert_id") or f"alert__{village}_{hash(alert.get('message', ''))}"
+        message = alert.get("message", "Unknown Alert")
+        severity = alert.get("severity", "MEDIUM")
 
-        if alert_id not in node_set:          # ← inside the for loop
+        # Ensure village node exists
+        if village not in node_set:
+            nodes.append({
+                "id": village,
+                "label": village,
+                "type": "village"
+            })
+            node_set.add(village)
+
+        if alert_id not in node_set:
             nodes.append({
                 "id": alert_id,
-                "label": target_label,
+                "label": message,
                 "type": "alert",
-                "severity": alert["severity"],
+                "severity": severity
             })
             node_set.add(alert_id)
 
-        edges.append({                        # ← inside the for loop
+        edges.append({
             "id": f"{village}-ALERT-{alert_id}",
             "source": village,
             "target": alert_id,
             "label": "ALERT",
         })
+
+    # ── Debug Logging ──
+    print("\n📊 VILLAGE NODES IN GRAPH:")
+    village_count = 0
+    for n in nodes:
+        if n.get("type") == "village":
+            print(f"  ✅ {n['label']}")
+            village_count += 1
+    print(f"Total village nodes: {village_count}\n")
 
     return {"nodes": nodes, "edges": edges}
