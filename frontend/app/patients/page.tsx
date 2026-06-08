@@ -25,6 +25,21 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { z } from "zod";
+
+const patientSchema = z.object({
+  patient_code: z.string().min(1, "Patient code is required"),
+  full_name: z.string().min(2, "Full name must be at least 2 characters"),
+  age: z.number().min(10, "Age must be at least 10").max(60, "Age must be at most 60"),
+  trimester: z.number().min(1, "Trimester must be 1, 2, or 3").max(3, "Trimester must be 1, 2, or 3"),
+  pregnancy_week: z.number().min(1, "Pregnancy week must be between 1 and 42").max(42, "Pregnancy week must be between 1 and 42"),
+  village: z.string().min(1, "Village is required"),
+  blood_group: z.string().regex(/^(A|B|AB|O)[+-]$/i, "Invalid blood group (e.g., A+, O-)"),
+  contact_number: z.string().regex(/^\+?[0-9\s-]{10,}$/, "Must be a valid phone number (at least 10 digits)"),
+  emergency_contact: z.string().regex(/^\+?[0-9\s-]{10,}$/, "Must be a valid phone number (at least 10 digits)").optional().or(z.literal("")),
+  height_cm: z.number().min(100, "Height is required for AI prediction (min 100cm)").max(250, "Height must be realistic (max 250cm)"),
+});
+
 // ── Helpers declared outside page component ───────────────────────────────────
 
 function RiskBadge({ risk }: { risk: string }) {
@@ -151,6 +166,7 @@ export default function PatientsPage() {
     useState<string>("");
   const [modalMode, setModalMode] = useState<"CREATE" | "EDIT">("CREATE");
   const [editingPatientId, setEditingPatientId] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const [loadingSummary, setLoadingSummary] =
     useState(false);
@@ -190,6 +206,7 @@ export default function PatientsPage() {
     });
     setModalMode("CREATE");
     setEditingPatientId(null);
+    setFormErrors({});
   };
 
   const handleEditClick = () => {
@@ -253,16 +270,19 @@ export default function PatientsPage() {
 
   const handleSavePatient =
     async () => {
-      if (
-        !form.patient_code ||
-        !form.full_name ||
-        !form.village
-      ) {
-        alert(
-          "Please fill all required fields"
-        );
+      const result = patientSchema.safeParse(form);
+      if (!result.success) {
+        const flatErrors = result.error.flatten().fieldErrors;
+        const fieldErrors: Record<string, string> = {};
+        for (const key in flatErrors) {
+          if (flatErrors[key] && flatErrors[key]!.length > 0) {
+            fieldErrors[key] = flatErrors[key]![0];
+          }
+        }
+        setFormErrors(fieldErrors);
         return;
       }
+      setFormErrors({});
 
       setCreating(true);
       try {
@@ -819,130 +839,110 @@ export default function PatientsPage() {
 
             <div className="space-y-3">
 
-              <input
-                value={form.patient_code}
-                placeholder="Patient Code"
-                className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border border-gray-200 dark:border-transparent focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    patient_code: e.target.value,
-                  })
-                }
-              />
+              <div>
+                <input
+                  value={form.patient_code}
+                  placeholder="Patient Code"
+                  className={`w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border ${formErrors.patient_code ? "border-red-500" : "border-gray-200 dark:border-transparent"} focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                  onChange={(e) => setForm({ ...form, patient_code: e.target.value })}
+                />
+                {formErrors.patient_code && <p className="text-red-500 text-xs mt-1 ml-1">{formErrors.patient_code}</p>}
+              </div>
 
-              <input
-                value={form.full_name}
-                placeholder="Full Name"
-                className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border border-gray-200 dark:border-transparent focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    full_name: e.target.value,
-                  })
-                }
-              />
-              <input
-                value={form.age}
-                type="number"
-                placeholder="Age"
-                className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border border-gray-200 dark:border-transparent focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    age: Number(e.target.value),
-                  })
-                }
-              />
+              <div>
+                <input
+                  value={form.full_name}
+                  placeholder="Full Name"
+                  className={`w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border ${formErrors.full_name ? "border-red-500" : "border-gray-200 dark:border-transparent"} focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                  onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                />
+                {formErrors.full_name && <p className="text-red-500 text-xs mt-1 ml-1">{formErrors.full_name}</p>}
+              </div>
 
-              <input
-                type="number"
-                value={form.trimester}
-                placeholder="Trimester"
-                className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border border-gray-200 dark:border-transparent focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    trimester: Number(e.target.value),
-                  })
-                }
-              />
+              <div>
+                <input
+                  value={form.age || ""}
+                  type="number"
+                  placeholder="Age"
+                  className={`w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border ${formErrors.age ? "border-red-500" : "border-gray-200 dark:border-transparent"} focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                  onChange={(e) => setForm({ ...form, age: Number(e.target.value) })}
+                />
+                {formErrors.age && <p className="text-red-500 text-xs mt-1 ml-1">{formErrors.age}</p>}
+              </div>
 
-              <input
-                type="number"
-                value={form.pregnancy_week}
-                placeholder="Pregnancy Week"
-                className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border border-gray-200 dark:border-transparent focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    pregnancy_week: Number(e.target.value),
-                  })
-                }
-              />
+              <div>
+                <input
+                  type="number"
+                  value={form.trimester || ""}
+                  placeholder="Trimester"
+                  className={`w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border ${formErrors.trimester ? "border-red-500" : "border-gray-200 dark:border-transparent"} focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                  onChange={(e) => setForm({ ...form, trimester: Number(e.target.value) })}
+                />
+                {formErrors.trimester && <p className="text-red-500 text-xs mt-1 ml-1">{formErrors.trimester}</p>}
+              </div>
 
-              <input
-                value={form.village}
-                placeholder="Village"
-                disabled={modalMode === "EDIT"}
-                className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border border-gray-200 dark:border-transparent focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 disabled:opacity-60 disabled:cursor-not-allowed"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    village: e.target.value,
-                  })
-                }
-              />
+              <div>
+                <input
+                  type="number"
+                  value={form.pregnancy_week || ""}
+                  placeholder="Pregnancy Week"
+                  className={`w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border ${formErrors.pregnancy_week ? "border-red-500" : "border-gray-200 dark:border-transparent"} focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                  onChange={(e) => setForm({ ...form, pregnancy_week: Number(e.target.value) })}
+                />
+                {formErrors.pregnancy_week && <p className="text-red-500 text-xs mt-1 ml-1">{formErrors.pregnancy_week}</p>}
+              </div>
 
-              <input
-                value={form.blood_group}
-                placeholder="Blood Group"
-                className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border border-gray-200 dark:border-transparent focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    blood_group: e.target.value,
-                  })
-                }
-              />
+              <div>
+                <input
+                  value={form.village}
+                  placeholder="Village"
+                  disabled={modalMode === "EDIT"}
+                  className={`w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border ${formErrors.village ? "border-red-500" : "border-gray-200 dark:border-transparent"} focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 disabled:opacity-60 disabled:cursor-not-allowed`}
+                  onChange={(e) => setForm({ ...form, village: e.target.value })}
+                />
+                {formErrors.village && <p className="text-red-500 text-xs mt-1 ml-1">{formErrors.village}</p>}
+              </div>
 
-              <input
-                value={form.contact_number}
-                placeholder="Phone Number"
-                className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border border-gray-200 dark:border-transparent focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    contact_number:
-                      e.target.value,
-                  })
-                }
-              />
+              <div>
+                <input
+                  value={form.blood_group}
+                  placeholder="Blood Group"
+                  className={`w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border ${formErrors.blood_group ? "border-red-500" : "border-gray-200 dark:border-transparent"} focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                  onChange={(e) => setForm({ ...form, blood_group: e.target.value })}
+                />
+                {formErrors.blood_group && <p className="text-red-500 text-xs mt-1 ml-1">{formErrors.blood_group}</p>}
+              </div>
 
-              <input
-                value={form.emergency_contact}
-                placeholder="Emergency Contact"
-                className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border border-gray-200 dark:border-transparent focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    emergency_contact: e.target.value,
-                  })
-                }
-              />
+              <div>
+                <input
+                  value={form.contact_number}
+                  placeholder="Phone Number"
+                  className={`w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border ${formErrors.contact_number ? "border-red-500" : "border-gray-200 dark:border-transparent"} focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                  onChange={(e) => setForm({ ...form, contact_number: e.target.value })}
+                />
+                {formErrors.contact_number && <p className="text-red-500 text-xs mt-1 ml-1">{formErrors.contact_number}</p>}
+              </div>
 
-              <input
-                type="number"
-                value={form.height_cm}
-                placeholder="Height (cm)"
-                className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border border-gray-200 dark:border-transparent focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    height_cm: Number(e.target.value),
-                  })
-                }
-              />
+              <div>
+                <input
+                  value={form.emergency_contact}
+                  placeholder="Emergency Contact"
+                  className={`w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border ${formErrors.emergency_contact ? "border-red-500" : "border-gray-200 dark:border-transparent"} focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                  onChange={(e) => setForm({ ...form, emergency_contact: e.target.value })}
+                />
+                {formErrors.emergency_contact && <p className="text-red-500 text-xs mt-1 ml-1">{formErrors.emergency_contact}</p>}
+              </div>
+
+              <div>
+                <input
+                  type="number"
+                  value={form.height_cm || ""}
+                  placeholder="Height (cm)"
+                  className={`w-full p-3 rounded-lg bg-gray-50 dark:bg-[#0d1118] text-gray-900 dark:text-white border ${formErrors.height_cm ? "border-red-500" : "border-gray-200 dark:border-transparent"} focus:border-blue-500 dark:focus:border-[#1a4fa8] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                  onChange={(e) => setForm({ ...form, height_cm: Number(e.target.value) })}
+                />
+                {formErrors.height_cm && <p className="text-red-500 text-xs mt-1 ml-1">{formErrors.height_cm}</p>}
+              </div>
 
             </div>
 
