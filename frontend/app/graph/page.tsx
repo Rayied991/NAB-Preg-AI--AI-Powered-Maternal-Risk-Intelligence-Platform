@@ -176,7 +176,7 @@ export default function GraphPage() {
           </div>
 
           {/* Forecast */}
-          <div className="flex-1 bg-gradient-to-br from-slate-900/20 to-slate-950/40 border border-slate-800/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
+          <div className="flex-1 bg-white dark:bg-transparent dark:bg-gradient-to-br dark:from-slate-900/20 dark:to-slate-950/40 border border-slate-200 dark:border-slate-800/50 rounded-2xl overflow-hidden shadow-sm dark:shadow-2xl backdrop-blur-sm transition-colors duration-300">
             <ForecastCard />
           </div>
         </div>
