@@ -33,17 +33,17 @@ export default function GraphPage() {
       }}
     >
       {/* Header */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 bg-gradient-to-r from-slate-900/40 to-transparent border border-slate-800/40 rounded-2xl p-6 backdrop-blur-sm">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 bg-white dark:bg-transparent dark:bg-gradient-to-r dark:from-slate-900/40 dark:to-transparent border border-slate-200 dark:border-slate-800/40 rounded-2xl p-6 backdrop-blur-sm transition-colors duration-300">
         <div className="flex items-start gap-4">
           <div className="w-1 h-12 bg-gradient-to-b from-sky-400 to-sky-600 rounded-full mt-1 shrink-0" />
           <div>
             <p className="text-[10px] uppercase tracking-[0.25em] text-sky-400 font-semibold mb-1">
               Analytics · Intelligence Graph
             </p>
-            <h1 className="text-3xl font-black text-white tracking-tight leading-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
               Village Knowledge Map
             </h1>
-            <p className="text-slate-400 text-sm mt-2 max-w-2xl">
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 max-w-2xl">
               Explore relationships between risk drivers, interventions, forecasts and AI-powered insights
             </p>
           </div>
@@ -54,25 +54,25 @@ export default function GraphPage() {
           {LEGEND.map(({ label, color }) => (
             <div
               key={label}
-              className="flex items-center gap-2 bg-slate-800/40 border border-slate-700/60 rounded-full px-3.5 py-2 hover:bg-slate-800/60 hover:border-slate-600/60 transition-all cursor-help backdrop-blur-sm"
+              className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 rounded-full px-3.5 py-2 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:border-slate-300 dark:hover:border-slate-600/60 transition-all cursor-help backdrop-blur-sm shadow-sm dark:shadow-none"
               title={label}
             >
               <div
-                className="w-2 h-2 rounded-full shrink-0 ring-2 ring-offset-2 ring-offset-slate-950 transition-all"
+                className="w-2 h-2 rounded-full shrink-0 ring-2 ring-offset-2 ring-offset-slate-50 dark:ring-offset-slate-950 transition-all"
                 style={{
                   background: color,
                   boxShadow: `0 0 12px ${color}66`,
                   border: `2px solid ${color}`,
                 }}
               />
-              <span className="text-slate-300 text-xs font-medium">{label}</span>
+              <span className="text-slate-700 dark:text-slate-300 text-xs font-medium">{label}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Divider */}
-      <div className="h-px bg-gradient-to-r from-transparent via-slate-700/40 to-transparent" />
+      <div className="h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-700/40 to-transparent" />
 
       {/* Main grid */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 flex-1">
