@@ -3,7 +3,8 @@
 import { askAssistant } from "@/services/rag.service";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type Message = {
@@ -202,7 +203,15 @@ export default function AssistantPage() {
                     : "bg-white dark:bg-[#131720] border border-[#e2e8f0] dark:border-[#1e2535] text-slate-800 dark:text-[#c8d0e0] rounded-tl-sm"
                   }`}
               >
-                <p>{msg.text}</p>
+                <div className={`prose prose-sm max-w-none break-words ${
+                  msg.role === "user"
+                    ? "prose-p:text-[#d8e8ff] prose-headings:text-white prose-strong:text-white prose-li:text-[#d8e8ff] prose-a:text-white"
+                    : "prose-p:text-slate-800 dark:prose-p:text-[#c8d0e0] prose-headings:text-slate-900 dark:prose-headings:text-white prose-strong:text-slate-900 dark:prose-strong:text-white prose-li:text-slate-800 dark:prose-li:text-[#c8d0e0] prose-a:text-[#1a4fa8] dark:prose-a:text-[#4a7fa8] prose-td:border-slate-300 dark:prose-td:border-slate-700 prose-th:border-slate-300 dark:prose-th:border-slate-700"
+                }`}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {msg.text}
+                  </ReactMarkdown>
+                </div>
 
                 {msg.role === "assistant" &&
                   msg.sources &&
