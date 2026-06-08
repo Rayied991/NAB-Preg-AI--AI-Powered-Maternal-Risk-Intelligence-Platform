@@ -42,6 +42,10 @@
   --text-muted: #64748b;        /* Slate 500 for captions and helper text */
   
   --shadow-custom: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  
+  --minimap-mask: rgba(248, 250, 252, 0.6);
+  --scrollbar-thumb: #cbd5e1;   /* Slate 300 for light mode */
+  --scrollbar-hover: #94a3b8;   /* Slate 400 for light mode hover */
 }
 
 .dark {
@@ -61,6 +65,10 @@
   --text-muted: #a1a1aa;        /* Zinc 400 for secondary descriptions */
   
   --shadow-custom: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  
+  --minimap-mask: rgba(15, 23, 42, 0.6);
+  --scrollbar-thumb: #334155;   /* Slate 700 for dark mode */
+  --scrollbar-hover: #475569;   /* Slate 600 for dark mode hover */
 }
 
 @theme {
@@ -93,4 +101,23 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   /* Smoothly transition colors when user toggles the switcher */
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Custom Adaptive Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-hover);
 }

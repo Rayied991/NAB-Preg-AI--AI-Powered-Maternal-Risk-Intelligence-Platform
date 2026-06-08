@@ -76,7 +76,7 @@ export default function AlertList() {
       </div>
 
       {/* Body */}
-      <div className="p-3 max-h-72 overflow-y-auto flex flex-col gap-1.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-700">
+      <div className="p-3 max-h-72 overflow-y-auto flex flex-col gap-1.5">
         {loading ? (
           <>
             <SkeletonRow />

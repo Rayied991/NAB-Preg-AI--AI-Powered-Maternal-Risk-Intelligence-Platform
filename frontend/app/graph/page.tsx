@@ -23,7 +23,7 @@ export default function GraphPage() {
 
   return (
     <div
-      className="min-h-screen bg-slate-950 p-6 flex flex-col gap-6"
+      className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6 flex flex-col gap-6 transition-colors duration-300"
       style={{
         backgroundImage:
           "radial-gradient(ellipse 80% 50% at 50% -10%, rgba(56,189,248,0.06) 0%, transparent 70%), " +

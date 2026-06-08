@@ -805,11 +805,11 @@ function GraphInner({ copilotQuery }: { copilotQuery?: string }) {
         }}
       >
         <Background variant={BackgroundVariant.Dots} color="currentColor" className="text-slate-300 dark:text-slate-800" gap={24} size={1.5} />
-        <Controls style={{ background: "rgba(15, 23, 42, 0.8)", border: "1px solid rgba(51, 65, 85, 0.4)", borderRadius: 12, backdropFilter: "blur(8px)" }} />
+        <Controls className="!bg-white/80 dark:!bg-slate-900/80 !border !border-slate-200 dark:!border-slate-700/50 backdrop-blur-md !rounded-xl shadow-sm transition-colors" />
         <MiniMap
           nodeColor={(n) => TYPE_STYLES[String(n.data?.type ?? "village")].border}
-          style={{ background: "rgba(15, 23, 42, 0.8)", border: "1px solid rgba(51, 65, 85, 0.4)", borderRadius: 12, backdropFilter: "blur(8px)" }}
-          maskColor="rgba(15, 23, 42, 0.6)"
+          className="!bg-white/80 dark:!bg-slate-900/80 !border !border-slate-200 dark:!border-slate-700/50 backdrop-blur-md !rounded-xl shadow-sm transition-colors"
+          maskColor="var(--minimap-mask)"
         />
       </ReactFlow>
 
