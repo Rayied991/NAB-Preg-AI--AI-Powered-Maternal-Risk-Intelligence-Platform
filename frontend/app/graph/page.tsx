@@ -9,13 +9,13 @@ import VillageKnowledgeGraph from "@/components/graph/villageKnowledgeGraph";
 import { useState } from "react";
 
 const LEGEND = [
-  { label: "Village",        color: "#3b82f6" },
-  { label: "Status",         color: "#10b981" },
-  { label: "Risk Driver",    color: "#f59e0b" },
+  { label: "Village", color: "#3b82f6" },
+  { label: "Status", color: "#10b981" },
+  { label: "Risk Driver", color: "#f59e0b" },
   { label: "Recommendation", color: "#8b5cf6" },
-  { label: "Forecast",       color: "#f97316" },
-  { label: "Intervention",   color: "#818cf8" },
-  { label: "Alert",          color: "#ef4444" },
+  { label: "Forecast", color: "#f97316" },
+  { label: "Intervention", color: "#818cf8" },
+  { label: "Alert", color: "#ef4444" },
 ];
 
 export default function GraphPage() {
@@ -96,7 +96,7 @@ export default function GraphPage() {
               ))}
             </div>
           </div>
-          
+
           {/* Graph Container */}
           <div className="flex-1 w-full overflow-hidden [&>div]:!h-full">
             <VillageKnowledgeGraph copilotQuery={copilotQuery} />
@@ -106,7 +106,7 @@ export default function GraphPage() {
         {/* Right sidebar */}
         <div className="xl:col-span-1 flex flex-col gap-6">
           {/* Top Risk Villages */}
-          <div className="bg-gradient-to-br from-slate-900/20 to-slate-950/40 border border-slate-800/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
+          <div className="bg-white dark:bg-transparent dark:bg-gradient-to-br dark:from-slate-900/20 dark:to-slate-950/40 border border-slate-200 dark:border-slate-800/50 rounded-2xl overflow-hidden shadow-sm dark:shadow-2xl backdrop-blur-sm transition-colors duration-300">
             <TopRiskVillages />
           </div>
 
