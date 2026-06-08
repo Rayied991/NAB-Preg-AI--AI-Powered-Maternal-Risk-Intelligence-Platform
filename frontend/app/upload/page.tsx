@@ -78,11 +78,6 @@ const [selectedPatient, setSelectedPatient] =
 
     try {
       const result = await handleFileUpload(file);
-      await saveOCRReport(
-        selectedPatient,
-        result.ocrData.raw_text || "",
-        result.ocrData
-      );
       // Safe parsing helpers to handle LLM returning numbers, strings, or nested objects
       const extractNum = (obj: any): number | null => {
         if (!obj || typeof obj !== 'object') return null;
@@ -221,6 +216,29 @@ const [selectedPatient, setSelectedPatient] =
 
       setOcrData(safeOcrData);
       console.log("SAFE OCR DATA GENERATED:", safeOcrData);
+
+      // Validate that all required fields were extracted
+      const missingFields = [];
+      if (!safeOcrData.hemoglobin) missingFields.push("Hemoglobin");
+      if (!safeOcrData.blood_pressure) missingFields.push("Blood Pressure");
+      if (!safeOcrData.blood_sugar) missingFields.push("Blood Sugar");
+      if (!safeOcrData.heart_rate) missingFields.push("Heart Rate");
+
+      if (missingFields.length > 0) {
+        setError(`OCR could not extract: ${missingFields.join(", ")}. Please upload a clearer report.`);
+        setOcrLoading(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        return;
+      }
+
+      // Only save to the database if all fields are valid and present
+      await saveOCRReport(
+        selectedPatient,
+        result.ocrData.raw_text || "",
+        result.ocrData
+      );
 
       const payload = {
         patient_id: selectedPatient,
