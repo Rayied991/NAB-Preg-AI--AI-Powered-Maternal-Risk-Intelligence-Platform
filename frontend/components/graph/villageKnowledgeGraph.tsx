@@ -279,9 +279,9 @@ const calculateRiskScore = (
   return Math.min(100, score);
 };
 
-// FIX 3: Adjusted risk thresholds for better demo consistency
+// FIX: Synced thresholds to perfectly match TopRiskVillages.tsx
 const getRiskLevel = (score: number): 'LOW' | 'MODERATE' | 'HIGH' => {
-  return score < 20 ? 'LOW' : score < 50 ? 'MODERATE' : 'HIGH';
+  return score < 30 ? 'LOW' : score < 70 ? 'MODERATE' : 'HIGH';
 };
 
 const buildNarrativeFallback = (data: InsightData): string => {
