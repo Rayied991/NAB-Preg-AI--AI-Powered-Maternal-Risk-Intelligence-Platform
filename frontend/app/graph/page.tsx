@@ -142,14 +142,14 @@ export default function GraphPage() {
           </div>
 
           {/* Alerts */}
-          <div className="bg-gradient-to-br from-slate-900/20 to-slate-950/40 border border-slate-800/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
-            <div className="px-6 py-4 border-b border-slate-800/40 flex items-center gap-3 bg-gradient-to-r from-red-900/30 to-transparent">
+          <div className="bg-white dark:bg-transparent dark:bg-gradient-to-br dark:from-slate-900/20 dark:to-slate-950/40 border border-slate-200 dark:border-slate-800/50 rounded-2xl overflow-hidden shadow-sm dark:shadow-2xl backdrop-blur-sm transition-colors duration-300">
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800/40 flex items-center gap-3 bg-red-50 dark:bg-transparent dark:bg-gradient-to-r dark:from-red-900/30 dark:to-transparent">
               <div className="relative">
                 <div className="absolute inset-0 bg-red-500/20 rounded-lg blur" />
                 <div className="w-3 h-3 rounded-lg bg-red-400 shadow-[0_0_12px_rgba(248,113,113,0.8)]" />
               </div>
               <div>
-                <span className="text-sm font-semibold text-white">Active Alerts</span>
+                <span className="text-sm font-semibold text-slate-800 dark:text-white">Active Alerts</span>
                 <p className="text-[11px] text-slate-500 mt-0.5">Critical & high priority</p>
               </div>
             </div>
