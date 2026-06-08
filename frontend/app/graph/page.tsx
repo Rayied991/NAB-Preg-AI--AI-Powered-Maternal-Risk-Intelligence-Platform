@@ -3,8 +3,8 @@
 import AlertList from "@/components/cards/AlertList";
 import ForecastCard from "@/components/cards/ForecastCard";
 import InterventionList from "@/components/cards/InterventionList";
+import TopRiskVillages from "@/components/cards/TopRiskVillages";
 import Copilot from "@/components/copilot/Copilot";
-// FIX 1: Reverted to lowercase 'v' to match the actual file name on disk
 import VillageKnowledgeGraph from "@/components/graph/villageKnowledgeGraph";
 import { useState } from "react";
 
@@ -105,6 +105,42 @@ export default function GraphPage() {
 
         {/* Right sidebar */}
         <div className="xl:col-span-1 flex flex-col gap-6">
+          {/* Top Risk Villages */}
+          <div className="bg-gradient-to-br from-slate-900/20 to-slate-950/40 border border-slate-800/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
+            <TopRiskVillages />
+          </div>
+
+          {/* FIX 2: Suggested Prompt Chips */}
+          <div className="bg-gradient-to-br from-slate-900/20 to-slate-950/40 border border-slate-800/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="relative">
+                <div className="absolute inset-0 bg-sky-500/20 rounded-lg blur" />
+                <div className="w-3 h-3 rounded-lg bg-sky-400 shadow-[0_0_12px_rgba(56,189,248,0.8)]" />
+              </div>
+              <div>
+                <span className="text-sm font-semibold text-white">Try Asking</span>
+                <p className="text-[11px] text-slate-500 mt-0.5">AI Copilot suggestions</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {[
+                "Which village requires immediate intervention?",
+                "Why is Pabna risky?",
+                "Compare Pabna and New York",
+                "Show alerts for New York",
+                "What if we increase ANC visits in Pabna?"
+              ].map((query, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCopilotQuery(query)}
+                  className="w-full text-left text-xs text-slate-300 bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-2 transition-all flex items-center gap-2"
+                >
+                  <span className="text-sky-400">▸</span> {query}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Alerts */}
           <div className="bg-gradient-to-br from-slate-900/20 to-slate-950/40 border border-slate-800/50 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
             <div className="px-6 py-4 border-b border-slate-800/40 flex items-center gap-3 bg-gradient-to-r from-red-900/30 to-transparent">
