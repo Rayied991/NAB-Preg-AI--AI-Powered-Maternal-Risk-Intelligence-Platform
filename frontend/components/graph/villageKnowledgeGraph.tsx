@@ -777,16 +777,16 @@ function GraphInner({ copilotQuery }: { copilotQuery?: string }) {
   return (
     <div className="relative w-full h-full">
       {loading && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-gradient-to-b from-slate-950/90 to-slate-950/70 backdrop-blur-sm rounded-2xl">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/90 dark:bg-transparent dark:bg-gradient-to-b dark:from-slate-950/90 dark:to-slate-950/70 backdrop-blur-sm rounded-2xl transition-colors duration-300">
           <div className="flex flex-col items-center gap-6">
             <div className="relative w-16 h-16">
-              <div className="absolute inset-0 rounded-full border-2 border-slate-800" />
+              <div className="absolute inset-0 rounded-full border-2 border-slate-200 dark:border-slate-800" />
               <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-sky-400 border-r-sky-400/50 animate-spin" />
               <div className="absolute inset-2 rounded-full border border-sky-500/30 animate-pulse" />
             </div>
             <div className="text-center space-y-1">
-              <p className="text-white font-semibold text-sm">Building Knowledge Graph</p>
-              <p className="text-slate-400 text-xs">Analyzing relationships and patterns…</p>
+              <p className="text-slate-800 dark:text-white font-semibold text-sm">Building Knowledge Graph</p>
+              <p className="text-slate-500 dark:text-slate-400 text-xs">Analyzing relationships and patterns…</p>
             </div>
           </div>
         </div>
@@ -804,20 +804,20 @@ function GraphInner({ copilotQuery }: { copilotQuery?: string }) {
           setComparisonVillages([]);
         }}
       >
-        <Background variant={BackgroundVariant.Dots} color="#1e293b" gap={24} size={1.5} />
-        <Controls style={{ background: "rgba(15, 23, 42, 0.8)", border: "1px solid rgba(51, 65, 85, 0.4)", borderRadius: 12, backdropFilter: "blur(8px)" }} />
+        <Background variant={BackgroundVariant.Dots} color="currentColor" className="text-slate-300 dark:text-slate-800" gap={24} size={1.5} />
+        <Controls className="!bg-white/80 dark:!bg-slate-900/80 !border !border-slate-200 dark:!border-slate-700/50 backdrop-blur-md !rounded-xl shadow-sm transition-colors" />
         <MiniMap
           nodeColor={(n) => TYPE_STYLES[String(n.data?.type ?? "village")].border}
-          style={{ background: "rgba(15, 23, 42, 0.8)", border: "1px solid rgba(51, 65, 85, 0.4)", borderRadius: 12, backdropFilter: "blur(8px)" }}
-          maskColor="rgba(15, 23, 42, 0.6)"
+          className="!bg-white/80 dark:!bg-slate-900/80 !border !border-slate-200 dark:!border-slate-700/50 backdrop-blur-md !rounded-xl shadow-sm transition-colors"
+          maskColor="var(--minimap-mask)"
         />
       </ReactFlow>
 
       {selectedNode && (
-        <div className="absolute top-4 right-4 w-96 bg-gradient-to-br from-slate-900/95 to-slate-950/95 border border-slate-700/50 rounded-2xl p-5 shadow-2xl z-20 backdrop-blur-md animate-in fade-in slide-in-from-right-4 max-h-[calc(100vh-160px)] overflow-y-auto">
+        <div className="absolute top-4 right-4 w-96 bg-white/95 dark:bg-transparent dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-950/95 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 shadow-lg dark:shadow-2xl z-20 backdrop-blur-md animate-in fade-in slide-in-from-right-4 max-h-[calc(100vh-160px)] overflow-y-auto transition-colors duration-300">
           <div className="flex justify-between items-start gap-3 mb-4">
             <div className="space-y-1 flex-1">
-              <h3 className="font-bold text-white text-lg flex items-center gap-2">
+              <h3 className="font-bold text-slate-800 dark:text-white text-lg flex items-center gap-2">
                 {aiExplanation ? (
                   <>
                     <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
@@ -827,7 +827,7 @@ function GraphInner({ copilotQuery }: { copilotQuery?: string }) {
                   "Node Details"
                 )}
               </h3>
-              <p className="text-slate-400 text-xs">
+              <p className="text-slate-600 dark:text-slate-400 text-xs">
                 {aiExplanation ? "Insights generated from knowledge graph" : "Selected from knowledge graph"}
               </p>
             </div>
@@ -838,21 +838,21 @@ function GraphInner({ copilotQuery }: { copilotQuery?: string }) {
                 setAiExplanation("");
                 setComparisonVillages([]);
               }}
-              className="text-slate-500 hover:text-white transition-colors hover:bg-slate-800/50 w-8 h-8 rounded-lg flex items-center justify-center"
+              className="text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/50 w-8 h-8 rounded-lg flex items-center justify-center"
               title="Close"
             >
               ✕
             </button>
           </div>
 
-          <div className="h-px bg-gradient-to-r from-slate-700 via-slate-700/50 to-transparent mb-4" />
+          <div className="h-px bg-gradient-to-r from-slate-200 dark:from-slate-700 via-slate-200/50 dark:via-slate-700/50 to-transparent mb-4" />
 
           {aiExplanation ? (
             <div className="space-y-4">
               {comparisonVillages.length === 0 && (
-                <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-800 flex items-center justify-between">
+                <div className="bg-slate-50 dark:bg-slate-900/60 rounded-xl p-4 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                   <div>
-                    <p className="text-slate-400 text-[10px] uppercase tracking-widest font-semibold mb-1">Risk Level</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest font-semibold mb-1">Risk Level</p>
                     <p className={`text-2xl font-black tracking-tight ${
                       riskLevel === 'LOW' ? 'text-emerald-400' : 
                       riskLevel === 'MODERATE' ? 'text-amber-400' : 'text-red-400'
@@ -861,16 +861,16 @@ function GraphInner({ copilotQuery }: { copilotQuery?: string }) {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-slate-400 text-[10px] uppercase tracking-widest font-semibold mb-1">Score</p>
-                    <p className="text-white text-2xl font-black tracking-tight">
+                    <p className="text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest font-semibold mb-1">Score</p>
+                    <p className="text-slate-800 dark:text-white text-2xl font-black tracking-tight">
                       {riskScore}<span className="text-slate-500 text-sm font-medium">/100</span>
                     </p>
                   </div>
                 </div>
               )}
 
-              <div className="bg-slate-900/40 rounded-xl p-4 border border-slate-800">
-                <p className="text-slate-300 text-sm leading-7 whitespace-pre-line">
+              <div className="bg-slate-50 dark:bg-slate-900/40 rounded-xl p-4 border border-slate-200 dark:border-slate-800">
+                <p className="text-slate-700 dark:text-slate-300 text-sm leading-7 whitespace-pre-line">
                   {aiExplanation}
                 </p>
               </div>
@@ -878,13 +878,13 @@ function GraphInner({ copilotQuery }: { copilotQuery?: string }) {
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
-                <p className="text-slate-400 text-[10px] uppercase tracking-widest font-semibold">Name</p>
-                <p className="text-white font-semibold text-base break-words leading-relaxed">
+                <p className="text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest font-semibold">Name</p>
+                <p className="text-slate-800 dark:text-white font-semibold text-base break-words leading-relaxed">
                   {String(selectedNode.data.label)}
                 </p>
               </div>
               <div className="space-y-2">
-                <p className="text-slate-400 text-[10px] uppercase tracking-widest font-semibold">Category</p>
+                <p className="text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest font-semibold">Category</p>
                 <div className="flex items-center gap-2">
                   <span
                     className="w-3 h-3 rounded-full shadow-lg"
@@ -893,7 +893,7 @@ function GraphInner({ copilotQuery }: { copilotQuery?: string }) {
                       boxShadow: `0 0 12px ${TYPE_STYLES[String(selectedNode.data.type ?? "village")].border}66`,
                     }}
                   />
-                  <p className="text-white font-medium capitalize">
+                  <p className="text-slate-800 dark:text-white font-medium capitalize">
                     {String(selectedNode.data.type)}
                   </p>
                 </div>
@@ -901,7 +901,7 @@ function GraphInner({ copilotQuery }: { copilotQuery?: string }) {
             </div>
           )}
 
-          <div className="pt-4 mt-4 border-t border-slate-700/30 text-slate-500 text-xs">
+          <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-700/30 text-slate-500 text-xs">
             {aiExplanation ? "Ask another question or click a node" : "Click another node or press Esc to deselect"}
           </div>
         </div>
@@ -918,7 +918,7 @@ export default function VillageKnowledgeGraph({ copilotQuery }: Props) {
   return (
     <div
       style={{ height: "calc(100vh - 120px)", minHeight: 500 }}
-      className="w-full rounded-xl overflow-hidden border border-slate-800 bg-slate-950 shadow-2xl"
+      className="w-full rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 shadow-sm dark:shadow-2xl transition-colors duration-300"
     >
       <ReactFlowProvider>
         <GraphInner copilotQuery={copilotQuery} />

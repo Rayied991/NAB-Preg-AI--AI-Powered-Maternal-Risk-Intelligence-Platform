@@ -27,11 +27,11 @@ export default function Copilot({ onQuery }: CopilotProps) {
     <div className="fixed bottom-6 right-6 z-40">
       {/* Floating Panel */}
       {isOpen && (
-        <div className="absolute bottom-16 right-0 w-96 bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-700/50 rounded-2xl p-5 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-4">
+        <div className="absolute bottom-16 right-0 w-96 bg-white dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 shadow-xl dark:shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 transition-colors duration-300">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-white font-bold text-sm">✨ Graph Navigator</h3>
-              <p className="text-slate-400 text-xs mt-1">Ask about villages, alerts, or patterns</p>
+              <h3 className="text-slate-800 dark:text-white font-bold text-sm">✨ Graph Navigator</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Ask about villages, alerts, or patterns</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -42,7 +42,7 @@ export default function Copilot({ onQuery }: CopilotProps) {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="e.g., Find village X..."
-                className="w-full bg-slate-800/50 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none border border-slate-600/50 focus:border-sky-500/50 transition-colors backdrop-blur-sm"
+                className="w-full bg-slate-50 dark:bg-slate-800/50 text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 rounded-lg px-4 py-2.5 text-sm focus:outline-none border border-slate-200 dark:border-slate-600/50 focus:border-sky-500/50 transition-colors backdrop-blur-sm"
               />
             </div>
             <button

@@ -108,10 +108,10 @@ export default function TopRiskVillages() {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-3">
-          <div className="h-4 bg-slate-800 rounded w-1/2"></div>
-          <div className="h-8 bg-slate-800 rounded"></div>
-          <div className="h-8 bg-slate-800 rounded"></div>
-          <div className="h-8 bg-slate-800 rounded"></div>
+          <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/2"></div>
+          <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded"></div>
+          <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded"></div>
+          <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded"></div>
         </div>
       </div>
     );
@@ -125,7 +125,7 @@ export default function TopRiskVillages() {
           <div className="w-3 h-3 rounded-lg bg-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.8)]" />
         </div>
         <div>
-          <span className="text-sm font-semibold text-white">Top Risk Villages</span>
+          <span className="text-sm font-semibold text-slate-800 dark:text-white">Top Risk Villages</span>
           <p className="text-[11px] text-slate-500 mt-0.5">Highest priority monitoring</p>
         </div>
       </div>
@@ -134,17 +134,17 @@ export default function TopRiskVillages() {
         {villages.map((village, idx) => (
           <div
             key={village.name}
-            className="flex items-center justify-between p-3 bg-slate-900/40 rounded-lg border border-slate-800/50 hover:border-slate-700/50 transition-all"
+            className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/40 rounded-lg border border-slate-200 dark:border-slate-800/50 hover:border-slate-300 dark:hover:border-slate-700/50 transition-all"
           >
             <div className="flex items-center gap-3">
               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                 idx === 0 ? 'bg-red-500/20 text-red-400' :
                 idx === 1 ? 'bg-amber-500/20 text-amber-400' :
-                'bg-slate-700/50 text-slate-400'
+                'bg-slate-200 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
               }`}>
                 {idx + 1}
               </div>
-              <span className="text-white text-sm font-medium">{village.name}</span>
+              <span className="text-slate-800 dark:text-white text-sm font-medium">{village.name}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className={`text-xs font-bold ${
