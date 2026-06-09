@@ -30,7 +30,8 @@ const clinicalRiskLabel = (score: number) => {
 
 export default function HistoryPage() {
 const [predictions, setPredictions] = useState([]);
-const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("All");
 
 useEffect(() => {
   const loadData = async () => {
@@ -47,7 +48,11 @@ useEffect(() => {
   loadData();
 }, []);
 
-
+  // Filter predictions based on selected risk level
+  const filteredPredictions = predictions.filter((p: any) => {
+    if (activeTab === "All") return true;
+    return p.overall_risk === activeTab.toUpperCase();
+  });
 
   return (
     <DashboardLayout>
@@ -71,15 +76,31 @@ useEffect(() => {
 
           {/* Section label */}
           <div className="px-6 py-4 border-b border-gray-200 dark:border-[#1e2535] flex items-center justify-between">
-            <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-              </svg>
-              All Records
-            </p>
-            <span className="px-2.5 py-0.5 rounded-full bg-white dark:bg-[#0f1f32] border border-blue-200 dark:border-[#1e3350] text-blue-600 dark:text-[#4a6fa0] text-[11px] font-bold font-mono shadow-sm transition-colors duration-300">
-              {predictions.length}
-            </span>
+            <div className="flex items-center justify-between w-full">
+              {/* Left label */}
+              <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] flex items-center gap-2">
+                History
+                <span className="px-2.5 py-0.5 rounded-full bg-white dark:bg-[#0f1f32] border border-blue-200 dark:border-[#1e3350] text-blue-600 dark:text-[#4a6fa0] text-[11px] font-bold font-mono shadow-sm transition-colors duration-300">
+                  {predictions.length}
+                </span>
+              </p>
+              {/* Tab Switcher */}
+              <div className="flex bg-gray-100 dark:bg-[#0d1118] p-1 rounded-xl">
+                {["All", "High", "Medium", "Low"].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === tab
+                        ? "bg-white dark:bg-[#1e2535] text-text-primary shadow-sm"
+                        : "text-text-muted hover:text-text-primary"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Loading */}
@@ -123,7 +144,7 @@ useEffect(() => {
                 </thead>
 
                 <tbody>
-                  {predictions.map((prediction: any, index: number) => {
+                  {filteredPredictions.map((prediction: any, index: number) => {
                     const config = riskConfig(prediction.overall_risk);
                     const clinical = clinicalRiskLabel(prediction.clinical_score);
                     return (
