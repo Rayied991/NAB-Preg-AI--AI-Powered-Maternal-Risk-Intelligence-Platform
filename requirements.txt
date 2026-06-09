@@ -21,6 +21,8 @@ supabase
 requests
 reportlab
 langdetect
+apscheduler
+
 # =========================
 # RAG / LANGCHAIN
 # =========================

@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+import logging
+
 from backend.app.api.predictions import (
     router as prediction_router
 )
@@ -53,10 +56,41 @@ from backend.app.api.routes.ocr import router as ocr_router
 from backend.app.api.chat_history import router as chat_router
 from backend.app.api.alerts import (
     router as alert_router
-) 
+)
+
+# Import the auto-intervention generator
+from backend.app.services.auto_intervention_generator import start_scheduler
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Startup and shutdown events
+    """
+    # STARTUP
+    logger.info("🚀 Starting NAB Preg AI Backend...")
+    
+    # Start auto-generation scheduler
+    try:
+        start_scheduler()
+        logger.info("✅ Auto-intervention generator started")
+    except Exception as e:
+        logger.error(f"❌ Failed to start auto-generator: {e}")
+    
+    yield
+    
+    # SHUTDOWN
+    logger.info("🛑 Shutting down backend...")
 
 app = FastAPI(
-    title="NAB Preg AI API"
+    title="NAB Preg AI API",
+    lifespan=lifespan
 )
 
 app.add_middleware(
@@ -155,8 +189,10 @@ app.include_router(
     prefix="/api",
     tags=["Alerts"]
 )
+
 @app.get("/")
 def root():
     return {
-        "message": "NAB Preg AI Backend Running"
+        "message": "NAB Preg AI Backend Running",
+        "auto_generation": "enabled"
     }
