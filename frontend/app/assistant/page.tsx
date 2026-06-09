@@ -3,9 +3,8 @@
 import { askAssistant } from "@/services/rag.service";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-// ── Types ─────────────────────────────────────────────────────────────────────
+
+// ── Types ────────────────────────────────────────────────────────────────────
 
 type Message = {
   id: string;
@@ -13,6 +12,22 @@ type Message = {
   text: string;
   ts: Date;
   sources?: string[];
+};
+
+// ── Helper: Strip Markdown Formatting ────────────────────────────────────────
+
+const stripMarkdown = (text: string): string => {
+  return text
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/^[\-\*]\s+/gm, "• ")
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/`(.+?)`/g, "$1")
+    .replace(/\[(.+?)\]\(.+?\)/g, "$1")
+    .replace(/^---+$/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 };
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -24,12 +39,10 @@ export default function AssistantPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-scroll to latest message
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  // Auto-resize textarea
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setQuestion(e.target.value);
     e.target.style.height = "auto";
@@ -56,10 +69,12 @@ export default function AssistantPage() {
     setLoading(true);
     try {
       const result = await askAssistant(q);
+      const cleanText = stripMarkdown(result.answer);
+      
       const assistantMsg: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        text: result.answer,
+        text: cleanText,
         sources: result.sources,
         ts: new Date(),
       };
@@ -96,7 +111,6 @@ export default function AssistantPage() {
       {/* ── Header ── */}
       <div className="shrink-0 px-6 py-5 border-b border-[#e2e8f0] dark:border-[#1a2235] flex items-center justify-between bg-white dark:bg-[#0b0f1a] transition-colors duration-300">
         <div className="flex items-center gap-3">
-          {/* Back button */}
           <Link
             href="/dashboard"
             className="w-8 h-8 rounded-xl bg-[#e6f0fa] dark:bg-[#0f1f32] border border-[#cce0f5] dark:border-[#1e3350] hover:border-[#b3d1f0] dark:hover:border-[#2a4a70] hover:bg-[#d9ebf9] dark:hover:bg-[#112340] flex items-center justify-center transition-all duration-200 group"
@@ -107,7 +121,6 @@ export default function AssistantPage() {
             </svg>
           </Link>
 
-          {/* Pulse dot */}
           <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3b82f6] opacity-60" />
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#3b82f6]" />
@@ -155,7 +168,6 @@ export default function AssistantPage() {
               </p>
             </div>
 
-            {/* Suggested prompts */}
             <div className="flex flex-wrap justify-center gap-2 max-w-md">
               {[
                 "What are signs of pre-eclampsia?",
@@ -203,36 +215,42 @@ export default function AssistantPage() {
                     : "bg-white dark:bg-[#131720] border border-[#e2e8f0] dark:border-[#1e2535] text-slate-800 dark:text-[#c8d0e0] rounded-tl-sm"
                   }`}
               >
-                <div className={`prose prose-sm max-w-none break-words ${
+                <div className={`text-[13px] leading-relaxed whitespace-pre-wrap ${
                   msg.role === "user"
-                    ? "prose-p:text-[#d8e8ff] prose-headings:text-white prose-strong:text-white prose-li:text-[#d8e8ff] prose-a:text-white"
-                    : "prose-p:text-slate-800 dark:prose-p:text-[#c8d0e0] prose-headings:text-slate-900 dark:prose-headings:text-white prose-strong:text-slate-900 dark:prose-strong:text-white prose-li:text-slate-800 dark:prose-li:text-[#c8d0e0] prose-a:text-[#1a4fa8] dark:prose-a:text-[#4a7fa8] prose-td:border-slate-300 dark:prose-td:border-slate-700 prose-th:border-slate-300 dark:prose-th:border-slate-700"
+                    ? "text-[#d8e8ff]"
+                    : "text-slate-800 dark:text-[#c8d0e0]"
                 }`}>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {msg.text}
-                  </ReactMarkdown>
+                  {msg.text}
                 </div>
 
-                {msg.role === "assistant" &&
-                  msg.sources &&
-                  msg.sources.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-[#f1f5f9] dark:border-[#2a3345]">
-                      <p className="text-[11px] text-[#4a7fa8] mb-1">
-                        Sources
-                      </p>
+                {/* ── Polished Sources Section ── */}
+                {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-[#f1f5f9] dark:border-[#2a3345]">
+                    <p className="text-[10px] font-semibold text-[#4a7fa8] mb-1.5 uppercase tracking-wide">
+                      Clinical Guidelines Used
+                    </p>
 
-                      {msg.sources.map(
-                        (source, index) => (
-                          <p
-                            key={index}
-                            className="text-[11px] text-[#64748b] dark:text-[#7a8aa5]"
-                          >
-                            {source.split("/").pop()}
-                          </p>
-                        )
-                      )}
-                    </div>
-                  )}
+                    {/* FIX: Added ?. to slice to satisfy TypeScript */}
+                    {msg.sources?.slice(0, 3).map((source, index) => (
+                      <div key={index} className="flex items-center gap-2 text-[11px] text-[#64748b] dark:text-[#7a8aa5] mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-70">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                          <polyline points="14 2 14 8 20 8"></polyline>
+                          <line x1="16" y1="13" x2="8" y2="13"></line>
+                          <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                       <span className="truncate">{(source.split("/").pop() ?? source).replace(".pdf", "")}</span>
+                      </div>
+                    ))}
+                    
+                    {/* FIX: Added ?. to length checks to satisfy TypeScript */}
+                    {msg.sources && msg.sources?.length > 3 && (
+                      <p className="text-[11px] text-slate-400 mt-1 italic">
+                        +{(msg.sources?.length || 0) - 3} more guidelines referenced
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
               <span className="text-[11px] text-slate-400 dark:text-[#2d3a50] px-1">{fmt(msg.ts)}</span>
             </div>
@@ -256,7 +274,7 @@ export default function AssistantPage() {
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Input bar ── */}
+      {/* ─ Input bar ── */}
       <div className="shrink-0 px-4 pb-5 pt-3 border-t border-[#e2e8f0] dark:border-[#1a2235] bg-[#f4f7fb] dark:bg-[#0b0f1a] transition-colors duration-300">
         <div className="max-w-3xl mx-auto flex items-end gap-3 bg-white dark:bg-[#131720] border border-[#cbd5e1] dark:border-[#1e2535] rounded-2xl px-4 py-3 focus-within:border-[#4a7fa8] dark:focus-within:border-[#2a4a70] transition-colors duration-200 shadow-sm dark:shadow-none">
           <textarea
