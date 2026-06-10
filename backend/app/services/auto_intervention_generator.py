@@ -12,10 +12,10 @@ logger = logging.getLogger(__name__)
 
 def check_and_generate_interventions():
     """
-    Check if interventions need to be generated and generate them automatically
+    Check if village AI reports (and consequently interventions) need to be generated.
     """
     try:
-        logger.info("🔄 [AUTO] Checking if intervention generation is needed...")
+        logger.info("🔄 [AUTO] Checking if report generation is needed...")
         
         headers = {
             "apikey": SUPABASE_KEY,
@@ -38,7 +38,9 @@ def check_and_generate_interventions():
         if len(reports) == 0:
             logger.info("⚠️ [AUTO] No AI reports found. Triggering generation...")
             
-            # Call the village-ai-reports endpoint to generate everything
+            # Call the village-ai-reports endpoint to generate everything.
+            # This endpoint automatically runs the LangGraph pipeline, 
+            # which includes the intervention_agent.
             gen_response = requests.get(
                 "http://localhost:8000/api/village-ai-reports",
                 timeout=120  # 2 minute timeout for generation

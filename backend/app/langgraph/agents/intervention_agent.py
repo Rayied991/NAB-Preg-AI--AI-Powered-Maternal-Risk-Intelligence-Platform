@@ -5,7 +5,8 @@ logger = logging.getLogger(__name__)
 
 def intervention_agent(state):
     """
-    Auto-create interventions for villages based on risk status
+    Auto-create interventions for villages based on risk status.
+    Includes deduplication to prevent duplicate interventions.
     """
     logger.info("🎯 INTERVENTION AGENT RUNNING")
     
@@ -28,48 +29,48 @@ def intervention_agent(state):
     if status == "HOTSPOT":
         logger.info(f"🚨 {village_name} is HOTSPOT - creating urgent interventions")
         
-        # Create alert
+        # Create alert (with deduplication)
         save_intervention({
             "village_name": village_name,
             "intervention_type": "URGENT",
             "message": f"🚨 {village_name} identified as HIGH RISK HOTSPOT - Immediate action required"
-        })
+        }, skip_duplicates=True)
         
-        # Save recommended interventions
+        # Save recommended interventions (with deduplication)
         for recommendation in summary.get("recommendations", []):
             save_intervention({
                 "village_name": village_name,
                 "intervention_type": "RECOMMENDATION",
                 "message": recommendation
-            })
+            }, skip_duplicates=True)
     
     elif status == "WATCHLIST":
         logger.info(f"⚠️ {village_name} is WATCHLIST - creating preventive interventions")
         
-        # Create monitoring intervention
+        # Create monitoring intervention (with deduplication)
         save_intervention({
             "village_name": village_name,
             "intervention_type": "MONITORING",
             "message": f"⚠️ {village_name} under enhanced surveillance - Increased monitoring required"
-        })
+        }, skip_duplicates=True)
         
-        # Save preventive recommendations
+        # Save preventive recommendations (with deduplication)
         for recommendation in summary.get("recommendations", []):
             save_intervention({
                 "village_name": village_name,
                 "intervention_type": "PREVENTIVE",
                 "message": recommendation
-            })
+            }, skip_duplicates=True)
     
     elif status == "STABLE":
         logger.info(f"✅ {village_name} is STABLE - creating routine interventions")
         
-        # Create routine check intervention
+        # Create routine check intervention (with deduplication)
         save_intervention({
             "village_name": village_name,
             "intervention_type": "ROUTINE",
             "message": f"✅ {village_name} stable - Continue routine maternal health monitoring"
-        })
+        }, skip_duplicates=True)
     
     else:
         logger.warning(f"❓ {village_name} has unknown status: {status}")
