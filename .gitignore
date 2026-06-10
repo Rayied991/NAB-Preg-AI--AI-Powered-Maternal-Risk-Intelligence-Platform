@@ -77,7 +77,7 @@ backend/__pycache__/
 .ipynb_checkpoints/
 
 # UV
-.python-version
+# .python-version
 
 # =========================================================
 # DATABASE
