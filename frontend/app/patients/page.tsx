@@ -272,13 +272,13 @@ export default function PatientsPage() {
     async () => {
       const result = patientSchema.safeParse(form);
       if (!result.success) {
-        const flatErrors = result.error.flatten().fieldErrors;
-        const fieldErrors: Record<string, string> = {};
-        for (const key in flatErrors) {
-          if (flatErrors[key] && flatErrors[key]!.length > 0) {
-            fieldErrors[key] = flatErrors[key]![0];
-          }
-        }
+        const flatErrors = result.error.flatten().fieldErrors as Record<string, string[] | undefined>;
+const fieldErrors: Record<string, string> = {};
+for (const key in flatErrors) {
+  if (flatErrors[key] && flatErrors[key]!.length > 0) {
+    fieldErrors[key] = flatErrors[key]![0];
+  }
+}
         setFormErrors(fieldErrors);
         return;
       }
