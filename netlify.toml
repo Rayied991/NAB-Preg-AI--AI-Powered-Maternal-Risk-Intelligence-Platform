@@ -1,7 +1,0 @@
-[build]
-  command = "cd frontend && npm install && npm run build"
-  publish = "frontend/.next"
-
-[build.environment]
-  NETLIFY_USE_YARN = "false"
-
