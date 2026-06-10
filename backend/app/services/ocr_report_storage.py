@@ -1,9 +1,21 @@
 import os
 import requests
+import uuid
 from datetime import datetime
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+env_path = (
+    Path(__file__)
+    .resolve()
+    .parents[2]
+    / ".env"
+)
+
+if env_path.exists():
+    load_dotenv(env_path)
+else:
+    load_dotenv()
 
 SUPABASE_URL = os.getenv(
     "NEXT_PUBLIC_SUPABASE_URL"
@@ -27,8 +39,8 @@ def save_ocr_report(
     }
 
     payload = {
+        "id": str(uuid.uuid4()),
         "patient_id": patient_id,
-        "report_url": None,
         "extracted_text": extracted_text,
         "parsed_json": parsed_json,
         "uploaded_at": datetime.utcnow().isoformat(),
@@ -42,5 +54,7 @@ def save_ocr_report(
 
     print("OCR STATUS:", response.status_code)
     print("OCR BODY:", response.text)
+    
+    response.raise_for_status()
 
     return response
