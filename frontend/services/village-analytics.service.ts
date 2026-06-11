@@ -1,6 +1,8 @@
+import { API_URL } from "@/lib/config";
+
 export async function fetchVillageAnalytics() {
   const response = await fetch(
-    "http://127.0.0.1:8000/api/village-analytics"
+    `${API_URL}/api/village-analytics`
   );
 
   if (!response.ok) {

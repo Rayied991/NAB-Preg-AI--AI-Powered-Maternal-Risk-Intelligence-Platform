@@ -1,3 +1,4 @@
+import { API_URL } from "@/lib/config";
 export async function createPatient(
   patient: {
   patient_code: string;
@@ -13,7 +14,7 @@ export async function createPatient(
 }
 ) {
   const response = await fetch(
-    "http://127.0.0.1:8000/api/patients",
+    `${API_URL}/api/patients`,
     {
       method: "POST",
       headers: {

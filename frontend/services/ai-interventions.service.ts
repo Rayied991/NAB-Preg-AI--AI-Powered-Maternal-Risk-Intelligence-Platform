@@ -1,4 +1,5 @@
+import { API_URL } from "@/lib/config";
 export async function fetchAIInterventions() {
-  const response = await fetch("http://localhost:8000/api/ai-interventions");
+  const response = await fetch(`${API_URL}/api/ai-interventions`);
   return response.json();
 }

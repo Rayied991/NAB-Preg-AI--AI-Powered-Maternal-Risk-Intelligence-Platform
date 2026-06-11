@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import RiskProgressionCard from "@/components/cards/RiskProgressionCard";
 import RiskTrendChart from "@/components/charts/RiskTrendChart";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { API_URL } from "@/lib/config";
 import { getCopilotSummary } from "@/services/copilot.service";
 import {
   createPatient,
@@ -659,7 +659,7 @@ for (const key in flatErrors) {
               <button
                 onClick={() =>
                   window.open(
-                    `http://127.0.0.1:8000/api/report/${history.patient.id}`
+                    `${API_URL}/api/report/${history.patient.id}`
                   )
                 }
                 className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors duration-200"

@@ -1,8 +1,10 @@
+import { API_URL } from "@/lib/config";
+
 export async function getRiskTrend(
   patientId: string
 ) {
   const response = await fetch(
-    `http://127.0.0.1:8000/api/patient-risk-trend/${patientId}`
+    `${API_URL}/api/patient-risk-trend/${patientId}`
   );
 
   if (!response.ok) {

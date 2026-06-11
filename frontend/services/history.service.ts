@@ -1,6 +1,7 @@
+import { API_URL } from "@/lib/config";
 export async function fetchPredictions() {
   const response = await fetch(
-    "http://127.0.0.1:8000/api/predictions"
+    `${API_URL}/api/predictions`
   );
 
   if (!response.ok) {

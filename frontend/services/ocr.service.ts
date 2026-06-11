@@ -6,9 +6,9 @@
  * Includes a robust fallback to local Tesseract.js if the cloud AI fails.
  */
 
+import { API_URL } from "@/lib/config";
 import Tesseract from 'tesseract.js';
 import { z } from 'zod';
-
 export interface OCRExtractedData {
     hemoglobin: string | null;
     blood_pressure: string | null;
@@ -249,7 +249,7 @@ export async function performOCR(file: File): Promise<OCRExtractedData> {
 
         // 2. Call FastAPI Backend to Proxy Mistral Edge Function
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/ocr/mistral', {
+            const response = await fetch(`${API_URL}/api/ocr/mistral`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

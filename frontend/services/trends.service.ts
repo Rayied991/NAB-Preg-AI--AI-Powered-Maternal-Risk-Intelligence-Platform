@@ -1,7 +1,9 @@
+import { API_URL } from "@/lib/config";
+
 export async function getPatientTrends(patientId: string) {
   try {
     const response = await fetch(
-      `http://127.0.0.1:8000/api/patient-trends/${patientId}`
+      `${API_URL}/api/patient-trends/${patientId}`
     );
 
     if (!response.ok) {
