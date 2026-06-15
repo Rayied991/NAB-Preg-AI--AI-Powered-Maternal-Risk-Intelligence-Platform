@@ -8,6 +8,11 @@ import logging
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY")
 
+BACKEND_BASE_URL = os.getenv(
+    "BACKEND_BASE_URL",
+    "http://localhost:8000"
+)
+
 logger = logging.getLogger(__name__)
 
 def check_and_generate_interventions():
@@ -42,7 +47,7 @@ def check_and_generate_interventions():
             # This endpoint automatically runs the LangGraph pipeline, 
             # which includes the intervention_agent.
             gen_response = requests.get(
-                "http://localhost:8000/api/village-ai-reports",
+                f"{BACKEND_BASE_URL}/api/village-ai-reports",
                 timeout=120  # 2 minute timeout for generation
             )
             

@@ -1,3 +1,12 @@
+---
+title: nabpregai
+emoji: 🤰
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+---
 # 🤰 NAB Preg AI — AI-Powered Maternal Risk Intelligence Platform
 
 <div align="center">
@@ -6,13 +15,13 @@
 ![XGBoost](https://img.shields.io/badge/ML-XGBoost%20MultiOutput-green)
 ![RAG](https://img.shields.io/badge/RAG-LangChain%20%2B%20pgvector-orange)
 ![LangGraph](https://img.shields.io/badge/Agents-LangGraph%20Multi--Agent-purple)
-![Status](https://img.shields.io/badge/Status-Production%20Ready-success)
+![Status](https://img.shields.io/badge/Status-Hackathon%20Prototype-blue)
 
 **An Infrastructure-Adaptive Intelligence Layer for Last-Mile Maternal Healthcare**
 
 *Predicting maternal health risks before they become emergencies.*
 
-[Live Demo](#-getting-started) • [Architecture](#-architecture) • [AI Engine](#-ai-engine-technical-specifications) • [Impact](#-real-world-impact) • [Roadmap](#-future-roadmap)
+[Live Demo](https://nab-preg-ai-ai-powered-maternal-ris.vercel.app) • [Architecture](#-architecture) • [AI Engine](#-ai-engine-technical-specifications) • [Impact](#-real-world-impact) • [Roadmap](#-future-roadmap)
 
 </div>
 
@@ -32,12 +41,12 @@ The platform consolidates clinical risk classification, nutritional diagnostics,
 
 ### 🚀 Our Solution
 An AI-powered platform that:
-- ✅ Predicts maternal risk in **4 milliseconds** using XGBoost with Clinical Boundary Anchors
-- ✅ Extracts medical data from handwritten prescriptions using **Mistral Vision + Tesseract.js fallback**
+- ✅ Predicts maternal risk in near real-time
+- ✅ Extracts medical data from uploaded prescriptions using a **hybrid OCR pipeline with AI-assisted structured extraction**
 - ✅ Provides **clinical decision support** via RAG-powered assistant (WHO/UNICEF guidelines)
 - ✅ Generates **automated village interventions** using LangGraph multi-agent orchestration
 - ✅ Visualizes **geographic risk patterns** with interactive knowledge graphs
-- ✅ Operates **24/7 autonomously** with zero manual intervention
+- ✅ Operates **autonomously** via APScheduler (startup + periodic refresh) with zero manual intervention
 
 ---
 
@@ -50,26 +59,33 @@ An AI-powered platform that:
 - **Confidence Scoring**: Quantified certainty for every prediction
 
 ### 📄 Advanced OCR Pipeline
-- **Dual-Engine Architecture**: Mistral Vision (pixtral-12b) for cloud OCR + Tesseract.js for offline fallback
+- **Hybrid OCR Architecture**: OCR Space for cloud-based extraction + AI-assisted structured parsing
 - **Multi-Format Support**: PDF, JPG, PNG
 - **Intelligent Extraction**: Hemoglobin, Blood Pressure, Blood Sugar, Heart Rate
 - **Unit Normalization**: Automatic conversion (mg/dL ↔ mmol/L, g/dL ↔ g/L)
 - **Zod Validation**: Type-safe structured output
 
 ### 🤖 RAG Clinical Assistant
-- **Vector Search**: 1,430 chunks from WHO/UNICEF guidelines via pgvector
+- **Vector Search**: ~1,370 embeddings from WHO/UNICEF guidelines via pgvector
 - **Multilingual Support**: English, Hindi, Bengali
 - **Clinical Vignette Handling**: Structured diagnosis for complex scenarios
-- **Token Optimization**: 50% cost reduction through intelligent truncation
+- **Token Optimization**: Intelligent truncation to reduce inference cost
 - **Fallback Safety Net**: Hardcoded clinical answers for critical questions
 - **Source Attribution**: Shows which guidelines were used
 
 ### 🕸️ LangGraph Multi-Agent Orchestration
-- **6 Specialized Agents**: Risk, Nutrition, Forecast, Intervention, Alert, Summary
+- **6 Specialized Agents**: risk_agent, nutrition_agent, forecast_agent, summary_agent, intervention_agent, alert_agent
+  - **4 LangGraph Execution Agents**: risk, nutrition, forecast, summary — wired as sequential graph nodes
+  - **2 Post-Processing Automation Agents**: intervention and alert — triggered after graph execution
 - **Sequential Workflow**: State-managed pipeline for village intelligence
 - **Probabilistic Forecasting**: 7-day horizon with confidence scoring
 - **Automated Interventions**: Status-based recommendations (URGENT/MONITORING/ROUTINE)
 - **Smart Alert Deduplication**: Prevents duplicate notifications
+
+> **Alert Trigger Logic:** The alert agent automatically inserts records into `ai_alerts` when:
+> - Current status = HOTSPOT → CRITICAL alert
+> - Forecast status = HOTSPOT → HIGH alert
+> - Forecast status = WATCHLIST and confidence ≥ 80% → MEDIUM alert
 
 ### 📊 Knowledge Graph & Analytics
 - **Interactive ReactFlow Visualization**: Village relationships with dagre layout
@@ -80,7 +96,7 @@ An AI-powered platform that:
 
 ### ⚡ Autonomous Automation
 - **APScheduler**: Background task execution on startup + every 6 hours
-- **Smart Caching**: 99% faster loads (30s → 200ms) via UPSERT operations
+- **Smart Caching**: UPSERT-based village AI report caching for fast subsequent loads
 - **Self-Healing Architecture**: Automatically rebuilds intelligence if data is lost
 - **Zero Manual Intervention**: Fully autonomous operation
 
@@ -97,29 +113,30 @@ An AI-powered platform that:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    FRONTEND (Next.js 14)                         │
+│                    FRONTEND (Next.js 14)                        │
 │  Dashboard | Analytics | Knowledge Graph | Clinical Assistant   │
 └─────────────────────┬───────────────────────────────────────────┘
                       │ REST API + WebSocket
                       ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                  BACKEND (FastAPI + Python 3.12)                 │
+│                  BACKEND (FastAPI + Python 3.11+)               │
 ├─────────────────────────────────────────────────────────────────┤
-│  API Layer (18 endpoints)                                        │
+│  API Layer (Prediction, OCR, RAG, Analytics APIs)               │
 │  ├─ /predict → ML predictions (XGBoost)                         │
 │  ├─ /ask → RAG Clinical Assistant                               │
 │  ├─ /village-ai-reports → LangGraph orchestration               │
 │  └─ /village-graph → Knowledge graph data                       │
-│                                                                  │
+│                                                                 │
 │  LangGraph Multi-Agent System (6 agents)                        │
-│  ├─ risk_agent → nutrition_agent → forecast_agent               │
-│  └─ summary_agent → intervention_agent → alert_agent            │
-│                                                                  │
+│  ├─ [Graph Nodes] risk_agent → nutrition_agent → forecast_agent │
+│  ├─ [Graph Nodes] → summary_agent                               │
+│  └─ [Post-Processing] intervention_agent → alert_agent          │
+│                                                                 │
 │  RAG System (LangChain + pgvector)                              │
 │  ├─ chain.py → Intelligent prompting + fallbacks                │
-│  └─ retriever.py → Vector search (k=8 chunks)                   │
-│                                                                  │
-│  Automation (APScheduler)                                        │
+│  └─ retriever.py → Semantic Vector search (k=15 chunks)         │
+│                                                                 │
+│  Automation (APScheduler)                                       │
 │  └─ Auto-generation on startup + every 6 hours                  │
 └─────────────────────┬───────────────────────────────────────────┘
                       │
@@ -128,8 +145,9 @@ An AI-powered platform that:
 │           SUPABASE (PostgreSQL + pgvector + Realtime)            │
 │  • 11 tables: patients, predictions, alerts, ocr_reports        │
 │  • village_analytics, village_ai_reports (cache)                │
-│  • healthcare_embeddings (1,430 vectors)                        │
+│  • healthcare_embeddings (~1,370 vectors)                       │
 │  • ai_interventions, ai_alerts, village_relationships           │
+│  • clinical_chats                                               │
 └─────────────────────┬───────────────────────────────────────────┘
                       │
                       ▼
@@ -147,15 +165,15 @@ An AI-powered platform that:
 ## 🔄 AI Pipeline
 
 ```
-Handwritten Prescription Image
+Prescription / Medical Document (Image or PDF)
           ↓
-OCR Extraction (Mistral Vision / Tesseract.js)
+OCR Extraction (OCR Space + AI-assisted structured parsing)
           ↓
 Unit Guard (mg/dL ↔ mmol/L normalization)
           ↓
 Structured Clinical Data (JSON)
           ↓
-XGBoost Unified Matrix Pass (4ms)
+XGBoost Unified Matrix Pass (near real-time inference)
           ↓
 Clinical Rule Engine (Boundary Anchors)
           ↓
@@ -181,19 +199,18 @@ Real-Time Dashboard Updates
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
 | **Frontend** | Next.js 14, TypeScript, Tailwind CSS v4, ReactFlow, Leaflet, Recharts | UI/UX, visualization |
-| **Backend** | FastAPI, Python 3.12, APScheduler, LangChain, LangGraph | API, automation, agents |
+| **Backend** | FastAPI, Python 3.11+, APScheduler, LangChain, LangGraph | API, automation, agents |
 | **ML Engine** | XGBoost, scikit-learn, pandas | Predictive modeling |
-| **LLM** | Mistral Small Latest, Mistral Vision (pixtral-12b-2409) | Text generation + OCR |
+| **LLM** | Mistral Small Latest | Text generation |
+| **OCR** | OCR Space + AI-assisted structured extraction | Document parsing |
 | **RAG** | LangChain, pgvector | Knowledge retrieval |
 | **Database** | Supabase (PostgreSQL + pgvector + Realtime) | Storage, vectors, realtime |
 | **Embeddings** | sentence-transformers/all-MiniLM-L6-v2 | Text → vectors (384 dim) |
 | **Geocoding** | Nominatim OpenStreetMap | Village coordinates |
-| **PDF** | ReportLab, pdfjs-dist | Clinical reports + OCR |
 | **Language Detection** | langdetect | Multilingual support (EN/HI/BN) |
 | **Maps** | Leaflet, react-leaflet | Geographic visualization |
 | **Charts** | Recharts | Data visualization |
 | **Graph** | ReactFlow, dagre | Knowledge graph visualization |
-| **OCR Fallback** | Tesseract.js | Local OCR when cloud fails |
 | **Validation** | Zod | Type-safe OCR data |
 
 ---
@@ -213,6 +230,16 @@ graph TD
     C[Obesity & Lifestyle Dataset] --> D
     D --> E[MultiOutput XGBoost Classifier]
 ```
+
+### 📂 Datasets Used
+
+| Dataset | Source | Purpose |
+|---------|--------|---------|
+| **Bangladesh Maternal Registry** (`Book2.xlsx`) | Local field registry | Core demographic and pregnancy vitals backbone |
+| **Kaggle Anemia Dataset** (`anemia.csv`) | Kaggle | Hemoglobin thresholds and anemia risk classification |
+| **Obesity & Lifestyle Dataset** (`ObesityDataSet_raw_and_data_sinthetic.csv`) | Kaggle | Nutrition, dietary habits, and lifestyle indicators |
+| **WHO Maternal Health Guidelines** (PDFs) | World Health Organization | RAG clinical knowledge base |
+| **UNICEF Nutrition Counseling Guidelines** (PDFs) | UNICEF | Nutrition recommendations knowledge base |
 
 #### Ingestion Components & Datasets
 
@@ -262,7 +289,6 @@ The preprocessing pipeline sanitizes heterogeneous user inputs into an exact **8
   ```python
   def parse_height_to_meters(height_str):
       try:
-          # Match feet and inches (e.g., "5.2" or "5'2")
           parts = str(height_str).strip().split('.')
           if len(parts) == 2:
               feet = float(parts[0])
@@ -270,12 +296,9 @@ The preprocessing pipeline sanitizes heterogeneous user inputs into an exact **8
           else:
               feet = float(parts[0])
               inches = 0.0
-          
-          # Convert to meters (1 foot = 0.3048m, 1 inch = 0.0254m)
           return (feet * 0.3048) + (inches * 0.0254)
       except Exception:
-          # Fallback value if parsing fails
-          return 1.60 
+          return 1.60
 
   df['height_m'] = df['height'].apply(parse_height_to_meters)
   df['bmi'] = df['weight'] / (df['height_m'] ** 2)
@@ -367,27 +390,26 @@ The machine learning pipeline is fully integrated with our **Supabase** database
 ```mermaid
 sequenceDiagram
     participant P as Patients Table (Supabase)
-    participant H as Health Records Table (Supabase)
+    participant C as Client / API Request
     participant E as ML Inference Engine
     participant O as Predictions & Alerts Tables (Supabase)
 
-    P->>H: Retrieve persistent height_cm
-    H->>E: Submit weights, meals_per_day, veg_freq, Vitals
+    P->>C: Retrieve persistent height_cm
+    C->>E: Submit vitals: age, BP, blood_sugar, hemoglobin, BMI, meals_per_day, veg_freq
     Note over E: Compute BMI dynamically<br/>Run MultiOutput Classifier
-    E->>O: Log results: predictions, recommendations, alerts
+    E->>O: Log results: predictions, alerts, village_analytics
 ```
 
 * **Persistent Attributes:**
   The `patients` table stores `height_cm` persistently.
 * **Dynamic Calculations & Inputs:**
-  When a midwife or patient uploads new metrics (e.g., weight, systolic BP, diastolic BP) to the `health_records` table, the backend calculates the BMI dynamically:
+  When a midwife or patient submits new vitals, the backend calculates BMI dynamically:
   **BMI = weight / (height_cm / 100)²**
-  The BMI, along with `meals_per_day` and `veg_freq`, is written directly into `health_records`.
 * **Output Matrix Mapping:**
-  Following model inference, the predictions map back to the database tables:
-  * **Target 1 (Risk)** → Saved to the `predictions` table under `overall_risk`.
-  * **Target 2 (Nutrition)** → Saved to the `nutrition_recommendations` table.
-  * **Target 3 (Anomaly)** → Triggers a row in the `alerts` table if an anomaly status of `1` is predicted.
+  Following model inference, the predictions map back to the database:
+  * **Target 1 (Risk)** → Saved to the `predictions` table under `overall_risk`
+  * **Target 2 (Nutrition)** → Saved as a recommendation field in `predictions`
+  * **Target 3 (Anomaly)** → Triggers a row in the `alerts` table if anomaly status = `1`
 
 ---
 
@@ -416,7 +438,7 @@ NAB-Preg-AI/
 │   │   │   ├── alerts.py              # Alert management
 │   │   │   ├── chat_history.py        # Chat history
 │   │   │   ├── village_graph.py       # Knowledge graph API
-│   │   │   └── routes/                # 18 API route modules
+│   │   │   └── routes/                # API route modules
 │   │   ├── core/
 │   │   │   ├── supabase.py            # Supabase client
 │   │   │   └── patient_alert_storage.py
@@ -457,9 +479,11 @@ NAB-Preg-AI/
 │   │   ├── layout/                    # DashboardLayout, Navbar, Sidebar
 │   │   ├── maps/                      # villageHeatmap (Leaflet)
 │   │   └── ui/                        # Button, Input
-│   ├── services/                      # 25 API client services
+│   ├── services/                      # API client services
 │   ├── hooks/                         # useRealtimeInterventions
 │   └── types/                         # TypeScript interfaces
+│
+├── infra/                             # Deployment configuration
 │
 ├── docs/                              # Documentation
 │   ├── AI_ENGINE.md                   # ML pipeline details
@@ -480,7 +504,7 @@ NAB-Preg-AI/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Python 3.12+**
+- **Python 3.11+**
 - **Node.js 18+**
 - **Supabase Account** (Free tier works)
 - **Mistral AI API Key** (Free tier available)
@@ -544,9 +568,12 @@ npm run dev
 ```
 
 ### 6. Access Application
-- **Frontend**: http://localhost:3000
+- **Frontend (Live)**: https://nab-preg-ai-ai-powered-maternal-ris.vercel.app
+- **Local Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8000
 - **API Docs**: http://localhost:8000/docs
+
+> **Deployment:** Frontend is deployed on Vercel. Backend is deployable via Render or Docker. Supabase serves as the managed PostgreSQL + pgvector backend.
 
 ---
 
@@ -555,15 +582,15 @@ npm run dev
 ### Immediate Impact (0-6 Months)
 
 **Clinical Outcomes:**
-- ⏱️ **Triage Latency Reduction**: From 3-5 days (manual paper processing) → **4 milliseconds** (automated)
-- 🎯 **Early Detection Rate**: 95% accuracy in identifying high-risk pregnancies using WHO clinical thresholds
+- ⏱️ **Triage Latency Reduction**: From 3-5 days (manual paper processing) to near real-time (automated ML inference)
+- 🎯 **Early Detection Rate**: Early detection of anemia, hypertension, and nutritional deficiencies
 - 🚨 **Alert Response Time**: Instant notification to healthcare workers for critical cases (BP ≥160/110, Hemoglobin <7 g/dL)
-- 🛡️ **Bias Elimination**: Clinical Boundary Anchors reduce false negatives by 40% for severe complications
+- 🛡️ **Bias Elimination**: Clinical Boundary Anchors reduce false negatives for severe complications
 
 **Operational Efficiency:**
-- ⚡ **Healthcare Worker Time Savings**: 2-3 hours per day eliminated from manual data entry and risk calculation
-- 💰 **Cost per Prediction**: $0.0001 (vs. $0.05-0.10 for LLM-based alternatives)
-- 🔄 **System Uptime**: 99.9% availability with offline fallback capabilities
+- ⚡ **Healthcare Worker Time Savings**: Manual data entry and risk calculation significantly reduced
+- 💰 **Cost per Prediction**: Fraction of LLM-based alternatives (XGBoost inference vs. API call)
+- 🔄 **System Uptime**: High availability with offline fallback capabilities
 
 **Patient Coverage:**
 - 👥 **Pilot Target**: 500 pregnant women across 10 villages in rural Bangladesh
@@ -573,17 +600,16 @@ npm run dev
 ### Long-Term Impact (1-3 Years)
 
 **Maternal Health Outcomes:**
-- 📉 **Maternal Mortality Reduction**: Target 30% reduction in preventable maternal deaths in pilot regions
-- 🏥 **Complication Prevention**: Early intervention reduces severe pre-eclampsia cases by 25%
-- 🩸 **Anemia Management**: 50% improvement in timely iron supplementation for anemic mothers
+- 📉 **Maternal Mortality Reduction**: Target reduction in preventable maternal deaths in pilot regions
+- 🏥 **Complication Prevention**: Early intervention reduces severe pre-eclampsia cases
+- 🩸 **Anemia Management**: Improved timely iron supplementation for anemic mothers
 
 **Healthcare System Transformation:**
-- 📊 **Resource Optimization**: Redirect 40% of emergency hospitalizations to preventive care
-- 💵 **Cost Savings**: $2.5M annually saved per 100,000 pregnancies through early intervention
-- 👩‍⚕️ **Healthcare Worker Empowerment**: 500+ field workers equipped with AI-powered decision support
+- 📊 **Resource Optimization**: Redirect emergency hospitalizations to preventive care
+- 👩‍⚕️ **Healthcare Worker Empowerment**: Field workers equipped with AI-powered decision support
 
 **Community Impact:**
-- 📚 **Health Literacy**: Multilingual clinical assistant educates 10,000+ families on maternal health
+- 📚 **Health Literacy**: Multilingual clinical assistant educates families on maternal health
 - 🗺️ **Geographic Equity**: Village-level analytics ensure resource allocation to underserved areas
 - 📈 **Data-Driven Policy**: Government health departments gain real-time epidemiological insights
 
@@ -687,7 +713,6 @@ npm run dev
 
 **Metrics:**
 - 1 million pregnant women monitored
-- 1 million maternal deaths prevented globally
 - $50M annual revenue
 
 ### The Vision
@@ -711,15 +736,15 @@ npm run dev
 - ✅ **Self-Healing System**: Automatically rebuilds intelligence if data is lost
 
 ### Business Model + Global Readiness (20%)
-- ✅ **Zero-Marginal-Cost**: XGBoost runs in 4ms, <40MB RAM
+- ✅ **Zero-Marginal-Cost Inference**: XGBoost runs in under 40MB RAM with sub-second response
 - ✅ **B2G/NGO Adoption**: Pitched to BRAC, Ministry of Health
 - ✅ **Cross-Border Portability**: Deterministic outputs enable instant language switching
-- ✅ **Sustainable Economics**: $0.0001 per prediction vs. $0.05-0.10 for LLMs
+- ✅ **Sustainable Economics**: Tree-based inference dramatically cheaper than LLM-per-request alternatives
 
 ### Real-World Impact + Ethical AI (20%)
 - ✅ **Bias Mitigation**: Clinical Boundary Anchors eliminate historical bias
 - ✅ **Responsible Data Safeguards**: UUID anonymization, encrypted storage
-- ✅ **Measurable KPIs**: 4ms triage, 95% accuracy, 30% mortality reduction target
+- ✅ **Measurable KPIs**: Early detection of anemia, hypertension, and nutritional deficiencies
 - ✅ **Human-in-the-Loop**: AI recommends, humans decide
 
 ### Scalability + NRB Collaboration (10%)
@@ -740,7 +765,7 @@ npm run dev
 
 - **[AI Engine Details](docs/AI_ENGINE.md)** - Complete ML pipeline documentation
 - **[Architecture](docs/ARCHITECTURE.md)** - System architecture and data flow
-- **[API Documentation](docs/API.md)** - All 18 REST endpoints
+- **[API Documentation](docs/API.md)** - All REST endpoints
 - **[Database Schema](docs/DATABASE.md)** - 11 tables with relationships
 - **[Setup Guide](docs/SETUP.md)** - Step-by-step installation
 - **[Demo Script](docs/DEMO.md)** - 3-minute hackathon presentation
@@ -776,7 +801,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **World Health Organization (WHO)** - Maternal health guidelines
 - **UNICEF** - Nutrition guidance and counseling
-- **Mistral AI** - LLM and Vision AI capabilities
+- **Mistral AI** - LLM capabilities
 - **Supabase** - Database and real-time infrastructure
 - **LangChain & LangGraph** - AI orchestration frameworks
 - **OpenStreetMap** - Geocoding services

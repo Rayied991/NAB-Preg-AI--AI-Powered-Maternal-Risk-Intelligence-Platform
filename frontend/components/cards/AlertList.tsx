@@ -1,7 +1,7 @@
 "use client";
 
+import { API_URL } from "@/lib/config";
 import { useEffect, useState } from "react";
-
 export type Alert = {
   id: string;
   village_name: string;
@@ -54,7 +54,7 @@ export default function AlertList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/ai-alerts")
+    fetch(`${API_URL}/api/ai-alerts`)
       .then((res) => res.json())
       .then((data) => setAlerts(data))
       .finally(() => setLoading(false));

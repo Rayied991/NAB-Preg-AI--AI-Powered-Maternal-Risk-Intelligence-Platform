@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { API_URL } from "@/lib/config";
 export async function fetchPatients() {
 
   const response = await fetch(
-    "http://127.0.0.1:8000/api/patients"
+    `${API_URL}/api/patients`
   );
 
   if (!response.ok) {
@@ -15,7 +16,7 @@ export async function fetchPatients() {
 }
 
 export async function updatePatient(patientId: string, data: any) {
-  const response = await fetch(`http://127.0.0.1:8000/api/patients/${patientId}`, {
+  const response = await fetch(`${API_URL}/api/patients/${patientId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

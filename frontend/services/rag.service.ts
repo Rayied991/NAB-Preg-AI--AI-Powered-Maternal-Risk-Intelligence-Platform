@@ -1,8 +1,10 @@
+import { API_URL } from "@/lib/config";
+
 export async function askAssistant(
   question: string
 ) {
   const response = await fetch(
-    "http://127.0.0.1:8000/api/ask",
+    `${API_URL}/api/ask`,
     {
       method: "POST",
       headers: {

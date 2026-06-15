@@ -1,4 +1,5 @@
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+import { API_URL } from "@/lib/config";
+const API_BASE_URL = `${API_URL}/api`;
 
 interface PredictionRequest {
   age: number;

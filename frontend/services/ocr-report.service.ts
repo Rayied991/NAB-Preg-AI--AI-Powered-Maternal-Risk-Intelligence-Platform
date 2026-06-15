@@ -1,3 +1,4 @@
+import { API_URL } from "@/lib/config";
 export async function saveOCRReport(
     patientId: string,
   extractedText: string,
@@ -5,7 +6,7 @@ export async function saveOCRReport(
 ) {
 
   const response = await fetch(
-    "http://127.0.0.1:8000/api/ocr-report",
+    `${API_URL}/api/ocr-report`,
     {
       method: "POST",
       headers: {

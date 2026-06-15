@@ -2,10 +2,10 @@
 
 
 import "leaflet/dist/leaflet.css";
-import dynamic from "next/dynamic";
+// import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
-import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import { CircleMarker, MapContainer, Popup, TileLayer } from "react-leaflet";
 
 import { fetchHeatmap } from "@/services/heatmap.service";
 
