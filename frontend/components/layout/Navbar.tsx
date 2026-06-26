@@ -10,16 +10,30 @@
  *    - Main header swapped from zinc-950 to theme-aware `bg-panel` (white in light mode, zinc-950 in dark mode)
  *    - Search input wrapper adapted to `bg-input-bg` with a subtle `border-border-custom` for high light mode contrast.
  *    - Icon and text labels mapped to `text-text-primary`, `text-text-secondary`, and `text-text-muted`.
+ * 4. Added responsive hamburger menu for mobile devices.
  */
 
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Menu } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 
-export default function Navbar() {
+interface NavbarProps {
+  onMenuClick?: () => void;
+}
+
+export default function Navbar({ onMenuClick }: NavbarProps) {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="w-full h-20 border-b border-border-custom bg-panel px-6 flex items-center justify-end transition-colors duration-300">
+    <header className="w-full h-20 border-b border-border-custom bg-panel px-4 md:px-6 flex items-center justify-between md:justify-end transition-colors duration-300">
+
+      {/* Mobile Menu Button */}
+      <button 
+        onClick={onMenuClick}
+        className="md:hidden p-2 text-text-secondary hover:text-text-primary rounded-lg hover:bg-item-hover transition-colors"
+        aria-label="Open sidebar"
+      >
+        <Menu size={24} />
+      </button>
 
       {/* Right Section */}
       <div className="flex items-center gap-5">

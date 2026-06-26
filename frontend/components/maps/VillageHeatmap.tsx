@@ -35,17 +35,19 @@ export default function VillageHeatmap() {
 
   loadData();
 }, []);
-
   return (
-    <div className="h-150 w-full rounded-2xl overflow-hidden">
-      <MapContainer
-        center={[23.685, 90.3563]}
-        zoom={7}
-        style={{ height: "100%", width: "100%" }}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+    <div className="flex flex-col h-full w-full">
+      <div className="h-96 md:h-[600px] w-full rounded-2xl overflow-hidden shadow-sm relative z-0">
+        <MapContainer
+          center={[23.685, 90.3563]}
+          zoom={7}
+          style={{ height: "100%", width: "100%", zIndex: 0 }}
+          scrollWheelZoom={false}
+          touchZoom={true}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
 
        {data
   .filter(
@@ -114,25 +116,23 @@ export default function VillageHeatmap() {
     );
   })}
       </MapContainer>
+      </div>
+      <div className="flex flex-wrap gap-4 sm:gap-6 mt-4 text-sm justify-center">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded-full bg-red-500" />
+          High Risk
+        </div>
 
-      <div className="flex gap-6 mt-4 text-sm">
-  <div className="flex items-center gap-2">
-    <div className="w-4 h-4 rounded-full bg-red-500" />
-    High Risk
-  </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded-full bg-yellow-500" />
+          Medium Risk
+        </div>
 
-  <div className="flex items-center gap-2">
-    <div className="w-4 h-4 rounded-full bg-yellow-500" />
-    Medium Risk
-  </div>
-
-  <div className="flex items-center gap-2">
-    <div className="w-4 h-4 rounded-full bg-green-500" />
-    Low Risk
-  </div>
-</div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded-full bg-green-500" />
+          Low Risk
+        </div>
+      </div>
     </div>
-
-    
   );
 }

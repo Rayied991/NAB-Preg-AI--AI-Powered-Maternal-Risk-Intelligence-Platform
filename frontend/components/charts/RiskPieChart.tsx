@@ -76,7 +76,7 @@ export default function RiskPieChart({ highRisk, mediumRisk, lowRisk }: RiskPieC
       {error && (
         <div className="text-red-500 text-sm mb-4">{error}</div>
       )}
-      <div className="w-full h-87.5">
+      <div className="w-full h-64 sm:h-80">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-[#5a6478]">Loading...</p>
@@ -88,7 +88,7 @@ export default function RiskPieChart({ highRisk, mediumRisk, lowRisk }: RiskPieC
                 data={data}
                 cx="50%"
                 cy="50%"
-                outerRadius={120}
+                outerRadius="80%"
                 dataKey="value"
                 label
               >
@@ -98,12 +98,12 @@ export default function RiskPieChart({ highRisk, mediumRisk, lowRisk }: RiskPieC
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#131720",
-                  borderColor: "#1e2535",
+                  backgroundColor: "var(--bg-card)",
+                  borderColor: "var(--border-color)",
                   borderRadius: "12px",
-                  color: "#f0f2f6",
+                  color: "var(--text-main)",
                 }}
-                itemStyle={{ color: "#f0f2f6" }}
+                itemStyle={{ color: "var(--text-main)" }}
               />
             </PieChart>
           </ResponsiveContainer>

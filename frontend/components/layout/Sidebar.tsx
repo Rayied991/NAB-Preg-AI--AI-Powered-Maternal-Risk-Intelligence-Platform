@@ -10,6 +10,7 @@
  * - Navigation links now transition dynamically:
  *   - Active links: `bg-item-active text-text-primary`
  *   - Inactive links: `text-text-secondary hover:bg-item-hover hover:text-text-primary`
+ * Added mobile responsiveness: acts as a fixed drawer on screens < 768px.
  */
 
 import {
@@ -24,7 +25,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
 
 const menuItems = [
   {
@@ -69,50 +69,70 @@ const menuItems = [
   }
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     const pathname = usePathname();
   return (
-    <aside className="w-64 min-h-screen bg-panel border-r border-border-custom p-6 transition-colors duration-300">
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300" 
+          onClick={onClose} 
+        />
+      )}
 
-      {/* Logo */}
-      <div className="mb-10">
-        <h1 className="text-2xl font-bold text-text-primary transition-colors duration-300">
-          NAB Preg AI
-        </h1>
+      {/* Sidebar */}
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-64 min-h-screen bg-panel border-r border-border-custom p-6 transition-transform duration-300 ease-in-out
+        md:relative md:translate-x-0
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        {/* Logo */}
+        <div className="mb-10 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-text-primary transition-colors duration-300">
+              NAB Preg AI
+            </h1>
+            <p className="text-sm text-text-muted mt-1 transition-colors duration-300">
+              Maternal Risk Platform
+            </p>
+          </div>
+        </div>
 
-        <p className="text-sm text-text-muted mt-1 transition-colors duration-300">
-          Maternal Risk Platform
-        </p>
-      </div>
+        {/* Navigation */}
+        <nav className="space-y-3">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
 
-      {/* Navigation */}
-      <nav className="space-y-3">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+               className={`
+                  flex items-center gap-3
+                  p-3 rounded-xl
+                  transition-all
+                  duration-300
+                  ${
+                      pathname === item.href
+                      ? "bg-item-active text-text-primary font-semibold shadow-sm"
+                      : "text-text-secondary hover:bg-item-hover hover:text-text-primary"
+                  }
+                  `}
+              >
+                <Icon size={20} className="transition-colors duration-300" />
 
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-             className={`
-                flex items-center gap-3
-                p-3 rounded-xl
-                transition-all
-                duration-300
-                ${
-                    pathname === item.href
-                    ? "bg-item-active text-text-primary font-semibold shadow-sm"
-                    : "text-text-secondary hover:bg-item-hover hover:text-text-primary"
-                }
-                `}
-            >
-              <Icon size={20} className="transition-colors duration-300" />
-
-              <span className="transition-colors duration-300">{item.name}</span>
-            </Link>
-          );
-        })}
-      </nav>
-    </aside>
+                <span className="transition-colors duration-300">{item.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </aside>
+    </>
   );
 }

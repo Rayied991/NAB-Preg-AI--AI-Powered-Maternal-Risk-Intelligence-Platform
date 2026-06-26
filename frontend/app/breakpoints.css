@@ -1,0 +1,23 @@
+/* breakpoints.css */
+/* Mobile‑first breakpoints */
+@media (min-width: 480px) {
+  :root {
+    --bp-sm: 480px;
+  }
+}
+@media (min-width: 768px) {
+  :root {
+    --bp-md: 768px;
+  }
+}
+@media (min-width: 1024px) {
+  :root {
+    --bp-lg: 1024px;
+  }
+}
+/* Utility classes */
+@layer utilities {
+  .sm\:flex { @media (min-width: 480px) { display: flex; } }
+  .md\:flex { @media (min-width: 768px) { display: flex; } }
+  .lg\:flex { @media (min-width: 1024px) { display: flex; } }
+}

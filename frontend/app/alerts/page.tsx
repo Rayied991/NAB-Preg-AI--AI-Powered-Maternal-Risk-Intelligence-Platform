@@ -106,9 +106,9 @@ export default function AlertsPage() {
       </div>
 
       {/* ── Alerts Section ── */}
-      <div className="bg-white dark:bg-[#131720] border border-gray-200 dark:border-[#1e2535] rounded-2xl p-6 shadow-sm transition-colors duration-300">
+      <div className="bg-white dark:bg-[#131720] border border-gray-200 dark:border-[#1e2535] rounded-2xl p-4 md:p-6 shadow-sm transition-colors duration-300">
 
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
           <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -120,12 +120,12 @@ export default function AlertsPage() {
             </span>
           </p>
 
-          <div className="flex bg-gray-100 dark:bg-[#0d1118] p-1 rounded-xl">
+          <div className="flex flex-wrap bg-gray-100 dark:bg-[#0d1118] p-1 rounded-xl w-full md:w-auto">
             {["All", "High", "Medium", "Low"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`flex-1 md:flex-none px-2 sm:px-4 py-1.5 rounded-lg text-[12px] sm:text-sm font-medium transition-all duration-200 ${
                   activeTab === tab
                     ? "bg-white dark:bg-[#1e2535] text-text-primary shadow-sm"
                     : "text-text-muted hover:text-text-primary"
@@ -145,10 +145,10 @@ export default function AlertsPage() {
                 key={alert.id}
                 className={`bg-gray-50 dark:bg-[#0d1118] border rounded-xl p-4 transition-all duration-200 ${config.ring}`}
               >
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 
                   {/* Left — avatar + info */}
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-3 w-full sm:w-auto">
 
                     {/* Avatar */}
                     <div className="relative shrink-0">
