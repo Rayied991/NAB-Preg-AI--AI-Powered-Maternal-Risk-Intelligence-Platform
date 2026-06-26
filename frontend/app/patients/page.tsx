@@ -655,21 +655,21 @@ for (const key in flatErrors) {
               } />
             </div>
 
-            <div className="px-6 pb-4 flex gap-3">
+            <div className="px-4 sm:px-6 pb-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 onClick={() =>
                   window.open(
                     `${API_URL}/api/report/${history.patient.id}`
                   )
                 }
-                className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors duration-200"
+                className="w-full sm:w-auto px-3 sm:px-4 py-2 text-[13px] sm:text-sm rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors duration-200"
               >
                 Download Clinical Report
               </button>
 
               <button
                 onClick={handleEditClick}
-                className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200"
+                className="w-full sm:w-auto px-3 sm:px-4 py-2 text-[13px] sm:text-sm bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200"
               >
                 Edit Patient
               </button>
@@ -680,7 +680,7 @@ for (const key in flatErrors) {
                     history.patient.id
                   )
                 }
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg transition-colors duration-200"
+                className="w-full sm:w-auto px-3 sm:px-4 py-2 text-[13px] sm:text-sm bg-blue-600 text-white rounded-lg transition-colors duration-200"
               >
                 {loadingSummary
                   ? "AI Analyzing Patient..."
@@ -764,12 +764,12 @@ for (const key in flatErrors) {
           >
             <div className="divide-y divide-gray-100 dark:divide-[#1a2235] transition-colors duration-300">
               {history.predictions.map((pred: any) => (
-                <div key={pred.id} className="px-6 py-4 flex flex-wrap items-center gap-6">
-                  <div className="min-w-27.5">
+                <div key={pred.id} className="px-4 sm:px-6 py-4 grid grid-cols-2 sm:flex sm:flex-wrap items-start sm:items-center gap-4 sm:gap-6">
+                  <div className="min-w-[110px]">
                     <p className="text-[11px] text-gray-500 dark:text-[#3a4a68] mb-1.5 transition-colors duration-300">Overall risk</p>
                     <RiskBadge risk={pred.overall_risk} />
                   </div>
-                  <div className="min-w-27.5">
+                  <div className="min-w-[110px]">
                     <p className="text-[11px] text-gray-500 dark:text-[#3a4a68] mb-1 transition-colors duration-300">Confidence</p>
                     <p className="text-[15px] font-semibold text-gray-900 dark:text-[#c8d0e0] transition-colors duration-300">
                       {pred.confidence_score != null ? `${pred.confidence_score}%` : "—"}
@@ -780,11 +780,11 @@ for (const key in flatErrors) {
                       </div>
                     )}
                   </div>
-                  <div className="min-w-27.5">
+                  <div className="min-w-[110px]">
                     <p className="text-[11px] text-gray-500 dark:text-[#3a4a68] mb-1 transition-colors duration-300">Clinical score</p>
                     <p className="text-[15px] font-semibold text-gray-900 dark:text-[#c8d0e0] transition-colors duration-300">{pred.clinical_score ?? "—"}</p>
                   </div>
-                  <div className="min-w-35 ml-auto">
+                  <div className="col-span-2 sm:col-span-1 min-w-[140px] sm:ml-auto">
                     <p className="text-[11px] text-gray-500 dark:text-[#3a4a68] mb-1 transition-colors duration-300">Predicted at</p>
                     <p className="text-[12px] text-gray-400 dark:text-[#5a6478] transition-colors duration-300">{new Date(pred.predicted_at).toLocaleString()}</p>
                   </div>
