@@ -27,7 +27,7 @@ export default function Copilot({ onQuery }: CopilotProps) {
     <div className="fixed bottom-6 right-6 z-40">
       {/* Floating Panel */}
       {isOpen && (
-        <div className="absolute bottom-16 right-0 w-96 bg-white dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 shadow-xl dark:shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 transition-colors duration-300">
+        <div className="absolute bottom-16 right-0 w-[calc(100vw-3rem)] sm:w-96 max-w-[384px] bg-white dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-4 sm:p-5 shadow-xl dark:shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 transition-colors duration-300">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-slate-800 dark:text-white font-bold text-sm">✨ Graph Navigator</h3>

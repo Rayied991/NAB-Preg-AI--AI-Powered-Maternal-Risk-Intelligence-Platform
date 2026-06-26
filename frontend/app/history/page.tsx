@@ -76,7 +76,7 @@ useEffect(() => {
 
           {/* Section label */}
           <div className="px-6 py-4 border-b border-gray-200 dark:border-[#1e2535] flex items-center justify-between">
-            <div className="flex items-center justify-between w-full">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4">
               {/* Left label */}
               <p className="text-[11px] font-semibold tracking-widest uppercase text-[#4a7fa8] flex items-center gap-2">
                 History
@@ -85,12 +85,12 @@ useEffect(() => {
                 </span>
               </p>
               {/* Tab Switcher */}
-              <div className="flex bg-gray-100 dark:bg-[#0d1118] p-1 rounded-xl">
+              <div className="flex flex-wrap bg-gray-100 dark:bg-[#0d1118] p-1 rounded-xl w-full sm:w-auto">
                 {["All", "High", "Medium", "Low"].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`flex-1 sm:flex-none px-2 sm:px-4 py-1.5 rounded-lg text-[12px] sm:text-sm font-medium transition-all duration-200 ${
                       activeTab === tab
                         ? "bg-white dark:bg-[#1e2535] text-text-primary shadow-sm"
                         : "text-text-muted hover:text-text-primary"

@@ -814,7 +814,7 @@ function GraphInner({ copilotQuery }: { copilotQuery?: string }) {
       </ReactFlow>
 
       {selectedNode && (
-        <div className="absolute top-4 right-4 w-96 bg-white/95 dark:bg-transparent dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-950/95 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 shadow-lg dark:shadow-2xl z-20 backdrop-blur-md animate-in fade-in slide-in-from-right-4 max-h-[calc(100vh-160px)] overflow-y-auto transition-colors duration-300">
+        <div className="absolute top-4 left-4 right-4 sm:left-auto sm:right-4 w-[calc(100%-2rem)] sm:w-96 max-w-[384px] bg-white/95 dark:bg-transparent dark:bg-gradient-to-br dark:from-slate-900/95 dark:to-slate-950/95 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-4 sm:p-5 shadow-lg dark:shadow-2xl z-20 backdrop-blur-md animate-in fade-in slide-in-from-right-4 max-h-[calc(100vh-160px)] overflow-y-auto transition-colors duration-300">
           <div className="flex justify-between items-start gap-3 mb-4">
             <div className="space-y-1 flex-1">
               <h3 className="font-bold text-slate-800 dark:text-white text-lg flex items-center gap-2">
